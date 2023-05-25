@@ -35,3 +35,5 @@ price_spotter-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Environment
+.env
