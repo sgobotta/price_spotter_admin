@@ -134,12 +134,15 @@ defmodule PriceSpotter.Marketplaces do
          %Ecto.Changeset{valid?: true} = cs <- Product.from_entry!(entry) do
       case upsert_product(cs) do
         {:ok, {:updated, p}} ->
+          Logger.debug("Updated product product=#{inspect(p)}")
           # Trace updated product
           {:ok, p}
 
         {:ok, {:created, p}} ->
+          Logger.debug("Created product product=#{inspect(p)}")
           # Trace new added product
           {:ok, p}
+
       end
 
     else
@@ -168,7 +171,7 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, %Product{} = p} = create_product(cs.changes)
         {:ok, {:created, p}}
 
-      _repo, %{product: product} = _multi ->
+      _repo, %{product: %Product{} = product} = _multi ->
         {:ok, %Product{} = p} = update_product(product, cs.changes)
         {:ok, {:updated, p}}
     end)
