@@ -51,18 +51,6 @@ defmodule Redis.Client do
   def fetch_reverse_range(stream_name, count),
     do: fetch_stream(stream_name, [count: count, command: :desc])
 
-  defp _fetch_reverse_range(stream_name, "*") do
-    Redix.command(:redix, ["XREVRANGE", stream_name, "+", "-"])
-  end
-
-  defp _fetch_reverse_range(stream_name, count) when is_integer(count) do
-    Redix.command(:redix, ["XREVRANGE", stream_name, "+", "-", "COUNT", Integer.to_string(count)])
-  end
-
-  defp _fetch_reverse_range(stream_name, count) when is_binary(count) do
-    Redix.command(:redix, ["XREVRANGE", stream_name, "+", "-", "COUNT", count])
-  end
-
   @spec parse_command_opt(keyword) :: binary
   defp parse_command_opt(opts) do
     case Keyword.get(opts, :asc, false) == :asc do
@@ -103,7 +91,7 @@ defmodule Redis.Client do
       {:error, :stream_parse_error}
   end
 
-  def parse_stream_entry([_entry_id, entry_values] = entry),
+  def parse_stream_entry([_entry_id, _entry_values] = entry),
     do: Redis.Stream.Entry.from_raw_entry(entry)
 
   @spec parse_stream_entries([any()]) :: [map()]
