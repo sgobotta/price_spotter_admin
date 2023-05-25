@@ -1,47 +1,55 @@
-<.header>
-  Listing Products
-  <:actions>
-    <.link patch={~p"/admin/marketplaces/products/new"}>
-      <.button>New Product</.button>
-    </.link>
-  </:actions>
-</.header>
+<div class="lg:mx-64">
+  <.header>
+    Listing Products
+    <:actions>
+      <.link patch={~p"/admin/marketplaces/products/new"}>
+        <.button>New Product</.button>
+      </.link>
+    </:actions>
+  </.header>
 
-<.table
-  id="products"
-  rows={@streams.products}
-  row_click={fn {_id, product} -> JS.navigate(~p"/admin/marketplaces/products/#{product}") end}
->
-  <:col :let={{_id, product}} label="Supplier"><%= product.supplier_name %></:col>
-  <:col :let={{_id, product}} label="Category"><%= product.category %></:col>
-  <:col :let={{_id, product}} label="Img url"><%= product.img_url %></:col>
-  <:col :let={{_id, product}} label="Internal"><%= product.internal_id %></:col>
-  <:col :let={{_id, product}} label="Name"><%= product.name %></:col>
-  <:col :let={{_id, product}} label="Price"><%= product.price %></:col>
-  <:col :let={{_id, product}} label="Supplier url"><%= product.supplier_url %></:col>
-  <:action :let={{_id, product}}>
-    <div class="sr-only">
-      <.link navigate={~p"/admin/marketplaces/products/#{product}"}>Show</.link>
-    </div>
-    <.link patch={~p"/admin/marketplaces/products/#{product}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, product}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+  <.table
+    id="products"
+    rows={@streams.products}
+    row_click={fn {_id, product} -> JS.navigate(~p"/admin/marketplaces/products/#{product}") end}
+  >
+    <:col :let={{_id, product}} label="Supplier">
+      <img src={product.img_url} width="512" />
+    </:col>
+    <:col :let={{_id, product}} label="Name"><%= product.name %></:col>
+    <:col :let={{_id, product}} label="Price"><%= product.price %></:col>
+    <:col :let={{_id, product}} label="Supplier"><%= product.supplier_name %></:col>
+    <:col :let={{_id, product}} label="Category"><%= product.category %></:col>
+    <:col :let={{_id, product}} label="Internal"><%= product.internal_id %></:col>
+    <:col :let={{_id, product}} label="Supplier url">
+      <a href={product.supplier_url} target="_blank" class="hover:text-sky-500">
+        <.icon name="hero-link-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+      </a>
+    </:col>
+    <:action :let={{_id, product}}>
+      <div class="sr-only">
+        <.link navigate={~p"/admin/marketplaces/products/#{product}"}>Show</.link>
+      </div>
+      <.link patch={~p"/admin/marketplaces/products/#{product}/edit"}>Edit</.link>
+    </:action>
+    <:action :let={{id, product}}>
+      <.link
+        phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{id}")}
+        data-confirm="Are you sure?"
+      >
+        Delete
+      </.link>
+    </:action>
+  </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="product-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/products")}>
-  <.live_component
-    module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
-    id={@product.id || :new}
-    title={@page_title}
-    action={@live_action}
-    product={@product}
-    patch={~p"/admin/marketplaces/products"}
-  />
-</.modal>
+  <.modal :if={@live_action in [:new, :edit]} id="product-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/products")}>
+    <.live_component
+      module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
+      id={@product.id || :new}
+      title={@page_title}
+      action={@live_action}
+      product={@product}
+      patch={~p"/admin/marketplaces/products"}
+    />
+  </.modal>
+</div>

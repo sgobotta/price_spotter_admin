@@ -6,7 +6,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :products, Marketplaces.list_products())}
+    {:ok, stream(socket, :products, Marketplaces.list_products() |> Enum.take(10))}
   end
 
   @impl true

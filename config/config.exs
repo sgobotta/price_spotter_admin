@@ -8,7 +8,8 @@
 import Config
 
 config :price_spotter,
-  ecto_repos: [PriceSpotter.Repo]
+  ecto_repos: [PriceSpotter.Repo],
+  generators: [binary_id: true]
 
 # Configures the endpoint
 config :price_spotter, PriceSpotterWeb.Endpoint,

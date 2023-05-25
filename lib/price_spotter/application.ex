@@ -17,9 +17,11 @@ defmodule PriceSpotter.Application do
       # Start Finch
       {Finch, name: PriceSpotter.Finch},
       # Start the Endpoint (http/https)
-      PriceSpotterWeb.Endpoint
+      PriceSpotterWeb.Endpoint,
       # Start a worker by calling: PriceSpotter.Worker.start_link(arg)
       # {PriceSpotter.Worker, arg}
+      {PriceSpotter.Marketplaces.ProductProducer, []},
+      {Redix, host: "localhost", name: :redix, password: "123456"}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
