@@ -11,6 +11,12 @@ config :price_spotter,
   ecto_repos: [PriceSpotter.Repo],
   generators: [binary_id: true]
 
+config :flop, repo: PriceSpotter.Repo
+
+config :flop_phoenix,
+  pagination: [opts: {PriceSpotterWeb.CoreComponents, :pagination_opts}],
+  table: [opts: {PriceSpotterWeb.CoreComponents, :table_opts}]
+
 # Configures the endpoint
 config :price_spotter, PriceSpotterWeb.Endpoint,
   url: [host: "localhost"],

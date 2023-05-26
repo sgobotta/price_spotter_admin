@@ -51,7 +51,8 @@ defmodule PriceSpotter.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:decimal, "~> 2.0"},
-      {:off_broadway_redis_stream, "~> 0.5.0"}
+      {:off_broadway_redis_stream, "~> 0.5.0"},
+      {:flop_phoenix, "~> 0.18.2"}
     ]
   end
 
