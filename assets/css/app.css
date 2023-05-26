@@ -3,3 +3,39 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+nav.pagination {
+  @apply my-4;
+}
+
+.pagination-list {
+  @apply flex flex-row;
+}
+
+.pagination-list li {
+  @apply px-2;
+}
+
+div.table-container {
+  @apply border-1 border-zinc-400 rounded-sm;
+}
+
+table.table {
+  @apply w-full;
+}
+
+table.table thead {
+  @apply border-b-1 border-zinc-400 text-lg h-14 bg-zinc-100 text-zinc-500;
+}
+
+table.table tbody tr:nth-child(odd) {
+  @apply bg-zinc-50;
+}
+
+table.table tbody tr td {
+  @apply p-1;
+}
+
+table.table tbody tr:nth-child(even) {
+  @apply bg-zinc-100 px-2;
+}
