@@ -6,12 +6,24 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :products, Marketplaces.list_products() |> Enum.take(10))}
+    # {:ok, stream(socket, :products, Marketplaces.list_products() |> Enum.take(10))}
+    {:ok, assign(socket, %{products: nil, meta: nil})}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    case Marketplaces.list_products(params) do
+      {:ok, {products, meta}} ->
+        # IO.inspect(meta, label: "Pagination Meta")
+        {:noreply,
+          socket
+          |> assign(%{products: products, meta: meta})
+          |> assign(:total, meta.total_count)
+          |> apply_action(socket.assigns.live_action, params)}
+
+      _error ->
+        {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
+    end
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -33,8 +45,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   @impl true
-  def handle_info({PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, product}}, socket) do
-    {:noreply, stream_insert(socket, :products, product)}
+  def handle_info({PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}}, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   @impl true
@@ -42,6 +54,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     product = Marketplaces.get_product!(id)
     {:ok, _} = Marketplaces.delete_product(product)
 
-    {:noreply, stream_delete(socket, :products, product)}
+    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
 end

@@ -1,13 +1,75 @@
-<div class="lg:mx-64">
-  <.header>
-    Listing Products
-    <:actions>
-      <.link patch={~p"/admin/marketplaces/products/new"}>
-        <.button>New Product</.button>
-      </.link>
-    </:actions>
-  </.header>
+<div class="xl:mx-32">
+  <div class="m-4">
+    <.header>
+      Listing Products
+      <:actions>
+        <.link patch={~p"/admin/marketplaces/products/new"}>
+          <.button>New Product</.button>
+        </.link>
+      </:actions>
+    </.header>
+  </div>
 
+  <%= if @products && @meta do %>
+    <Flop.Phoenix.table
+      items={@products}
+      meta={@meta}
+      path={~p"/admin/marketplaces/products"}
+    >
+      <:col :let={product} label="Name" field={:name} col_style="width: 45%;">
+        <div class=""><%= product.name %></div>
+      </:col>
+      <:col :let={product} label="Price" field={:price} col_style="width: 10%; text-align: center">
+        <div class="text-center">
+          $<%= product.price %>
+        </div>
+      </:col>
+      <:col :let={product} label="Supplier" field={:supplier_name} col_style="width: 15%;"><%= product.supplier_name %></:col>
+      <:col :let={product} label="Category" field={:category} col_style="width: 20%;"><%= product.category %></:col>
+      <:col :let={product} label="Last update" field={:price_updated_at} col_style="width: 20%;">
+        <%= TimeAgo.time_ago(product.price_updated_at) %>
+      </:col>
+      <:action :let={product}>
+        <div>
+          <a href={product.supplier_url} target="_blank" class="hover:text-sky-500">
+            <.icon name="hero-link-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+          </a>
+        </div>
+      </:action>
+      <:action :let={product}>
+        <div class="sr-only">
+          <.link navigate={~p"/admin/marketplaces/products/#{product}"}>Show</.link>
+        </div>
+        <.link patch={~p"/admin/marketplaces/products/#{product}/edit"} class="hover:text-teal-500">
+          <.icon name="hero-pencil-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+        </.link>
+      </:action>
+      <:action :let={product}>
+        <.link
+          phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{product.id}")}
+          data-confirm="Are you sure?"
+          class="hover:text-rose-500"
+        >
+          <.icon name="hero-trash-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+        </.link>
+      </:action>
+      <:foot>
+        <tr class="h-10"><td>Total: <span class="total"><%= @total %></span></td></tr>
+      </:foot>
+    </Flop.Phoenix.table>
+
+    <div class="flex justify-center w-full">
+      <Flop.Phoenix.pagination
+          meta={@meta}
+          path={~p"/admin/marketplaces/products"}
+          opts={[
+            next_link_content: "Siguiente",
+            previous_link_content: "Anterior"
+          ]}
+        />
+    </div>
+  <% end %>
+<%!-- 
   <.table
     id="products"
     rows={@streams.products}
@@ -40,7 +102,7 @@
         Delete
       </.link>
     </:action>
-  </.table>
+  </.table> --%>
 
   <.modal :if={@live_action in [:new, :edit]} id="product-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/products")}>
     <.live_component

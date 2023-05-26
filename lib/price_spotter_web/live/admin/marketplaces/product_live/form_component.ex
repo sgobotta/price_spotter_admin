@@ -21,7 +21,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
       >
         <.input field={@form[:category]} type="text" label="Category" />
         <.input field={@form[:img_url]} type="text" label="Img url" />
-        <.input field={@form[:internal_id]} type="text" label="Internal" />
+        <.input disabled={true} field={@form[:internal_id]} type="text" label="Internal" />
         <.input field={@form[:supplier_name]} type="text" label="Supplier name" />
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:price]} type="number" label="Price" step="any" />

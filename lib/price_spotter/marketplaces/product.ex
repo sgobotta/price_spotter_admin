@@ -2,6 +2,12 @@ defmodule PriceSpotter.Marketplaces.Product do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {
+    Flop.Schema,
+    filterable: [:name, :category, :internal_id, :supplier_name, :price],
+    sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at]
+  }
+
   @type t :: %__MODULE__{}
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -15,6 +21,7 @@ defmodule PriceSpotter.Marketplaces.Product do
     field :price, :decimal
     field :supplier_name, :string
     field :supplier_url, :string
+    field :price_updated_at, :naive_datetime
 
     timestamps()
   end
@@ -22,7 +29,7 @@ defmodule PriceSpotter.Marketplaces.Product do
   @doc false
   def changeset(product, attrs) do
     product
-    |> cast(attrs, [:category, :img_url, :internal_id, :supplier_name, :meta, :name, :price, :supplier_url])
+    |> cast(attrs, [:category, :img_url, :internal_id, :supplier_name, :meta, :name, :price, :supplier_url, :price_updated_at])
     |> validate_required([:category, :img_url, :internal_id, :supplier_name, :name, :price, :supplier_url])
     |> unique_constraint(:internal_id)
   end
@@ -31,7 +38,19 @@ defmodule PriceSpotter.Marketplaces.Product do
   def from_entry!(%Redis.Stream.Entry{values: product}) do
     changeset(%__MODULE__{}, Map.merge(product, %{
       "supplier_name" => product["supplier"],
-      "meta" => Jason.decode!(product["meta"])
+      "meta" => Jason.decode!(product["meta"]),
+      "price" => sanitize_price(product["price"])
     }))
+  end
+
+  @spec sanitize_price(String.t()) :: String.t()
+  defp sanitize_price(nil), do: 0
+
+  defp sanitize_price(price) do
+    if String.length(price) > 3 do
+      String.replace(price, ".", "")
+    else
+      price
+    end
   end
 end

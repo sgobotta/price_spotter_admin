@@ -23,6 +23,10 @@ defmodule PriceSpotter.Marketplaces do
     Repo.all(Product)
   end
 
+  def list_products(params) do
+    Flop.validate_and_run(Product, params, for: Product)
+  end
+
   @doc """
   Gets a single product.
 
@@ -168,11 +172,21 @@ defmodule PriceSpotter.Marketplaces do
     end)
     |> Ecto.Multi.run(:op, fn
       _repo, %{product: nil} = _multi ->
+        cs = Ecto.Changeset.put_change(cs, :price_updated_at, NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second))
+
         {:ok, %Product{} = p} = create_product(cs.changes)
         {:ok, {:created, p}}
 
       _repo, %{product: %Product{} = product} = _multi ->
-        {:ok, %Product{} = p} = update_product(product, cs.changes)
+        changes = cs.changes
+        changes =
+          if product.price == changes.price do
+            changes
+          else
+            Map.put(changes, :price_updated_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+          end
+
+        {:ok, %Product{} = p} = update_product(product, changes)
         {:ok, {:updated, p}}
     end)
     |> Repo.transaction()
