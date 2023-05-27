@@ -6,13 +6,13 @@ defmodule TimeAgo do
     time_diff = NaiveDateTime.diff(now, datetime, :second)
 
     case time_diff do
-      _ when time_diff < 30 -> "just now"
-      _ when time_diff < 60 -> "less than a minute ago"
-      _ when time_diff < 3600 -> format_minutes(time_diff)
-      _ when time_diff < 86400 -> format_hours(time_diff)
-      _ when time_diff < 2592000 -> format_days(time_diff)
-      _ when time_diff < 31104000 -> format_months(time_diff)
-      _ -> format_years(time_diff)
+      _diff when time_diff < 30 -> "just now"
+      _diff when time_diff < 60 -> "less than a minute ago"
+      _diff when time_diff < 3600 -> format_minutes(time_diff)
+      _diff when time_diff < 86400 -> format_hours(time_diff)
+      _diff when time_diff < 2592000 -> format_days(time_diff)
+      _diff when time_diff < 31104000 -> format_months(time_diff)
+      _diff -> format_years(time_diff)
     end
   end
 
@@ -23,24 +23,21 @@ defmodule TimeAgo do
 
   defp format_hours(seconds) do
     hours = div(seconds, 3600)
-    "#{hours} hour#{pluralize(hours)} ago"
+    ngettext("%{hours} hour ago", "%{hours} hours ago", hours, hours: hours)
   end
 
   defp format_days(seconds) do
     days = div(seconds, 86400)
-    "#{days} day#{pluralize(days)} ago"
+    ngettext("%{days} day ago", "%{days} days ago", days, days: days)
   end
 
   defp format_months(seconds) do
     months = div(seconds, 2592000)
-    "#{months} month#{pluralize(months)} ago"
+    ngettext("%{months} month ago", "%{months} months ago", months, months: months)
   end
 
   defp format_years(seconds) do
     years = div(seconds, 31104000)
-    "#{years} year#{pluralize(years)} ago"
+    ngettext("%{years} year ago", "%{years} years ago", years, years: years)
   end
-
-  defp pluralize(1), do: ""
-  defp pluralize(_), do: "s"
 end

@@ -20,5 +20,5 @@ defmodule PriceSpotterWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :price_spotter
+  use Gettext, otp_app: :price_spotter, default_locale: "es_AR", allowed_locales: ["en", "es_AR"]
 end

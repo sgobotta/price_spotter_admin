@@ -36,6 +36,8 @@ config :price_spotter, PriceSpotterWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :price_spotter, PriceSpotter.Mailer, adapter: Swoosh.Adapters.Local
 
+config :gettext, :default_locale, "es_AR"
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
