@@ -18,7 +18,7 @@ msgid_plural "%{minutes} minutes ago"
 msgstr[0] "Hace %{minutes} minuto"
 msgstr[1] "Hace %{minutes} minutos"
 
-#: lib/price_spotter_web/components/core_components.ex:470
+#: lib/price_spotter_web/components/core_components.ex:471
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Acciones"
@@ -28,3 +28,168 @@ msgstr "Acciones"
 #, elixir-autogen, elixir-format
 msgid "close"
 msgstr "cerrar"
+
+#: lib/price_spotter_web/components/time_ago.ex:33
+#, elixir-autogen, elixir-format
+msgid "%{days} day ago"
+msgid_plural "%{days} days ago"
+msgstr[0] "hace %{days} día"
+msgstr[1] "hace %{days} días"
+
+#: lib/price_spotter_web/components/time_ago.ex:27
+#, elixir-autogen, elixir-format
+msgid "%{hours} hour ago"
+msgid_plural "%{hours} hours ago"
+msgstr[0] "hace %{hours} hora"
+msgstr[1] "hace %{hours} horas"
+
+#: lib/price_spotter_web/components/time_ago.ex:39
+#, elixir-autogen, elixir-format, fuzzy
+msgid "%{months} month ago"
+msgid_plural "%{months} months ago"
+msgstr[0] "Hace %{months} minuto"
+msgstr[1] "Hace %{months} minutos"
+
+#: lib/price_spotter_web/components/time_ago.ex:45
+#, elixir-autogen, elixir-format
+msgid "%{years} year ago"
+msgid_plural "%{years} years ago"
+msgstr[0] "Hace %{years} año"
+msgstr[1] "Hace %{years} años"
+
+#: lib/price_spotter_web/components/core_components.ex:177
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr "Intentando reconectar"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:39
+#, elixir-autogen, elixir-format
+msgid "Back to products"
+msgstr "Volver a productos"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:22
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:37
+#, elixir-autogen, elixir-format
+msgid "Category"
+msgstr "Categoría"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:31
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:20
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "Edit Product"
+msgstr "Actualizar producto"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:26
+#, elixir-autogen, elixir-format
+msgid "External link"
+msgstr "Link externo"
+
+#: lib/price_spotter_web/components/layouts/app.html.heex:22
+#, elixir-autogen, elixir-format
+msgid "Home"
+msgstr "Inicio"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:23
+#, elixir-autogen, elixir-format
+msgid "Img url"
+msgstr "URL de imagen"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:24
+#, elixir-autogen, elixir-format
+msgid "Internal id"
+msgstr "ID interno"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:42
+#, elixir-autogen, elixir-format
+msgid "Last price"
+msgstr "Último precio"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:43
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:4
+#, elixir-autogen, elixir-format
+msgid "Listing Products"
+msgstr "Lista de productos"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:26
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:21
+#, elixir-autogen, elixir-format
+msgid "Name"
+msgstr "Nombre"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:37
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:7
+#, elixir-autogen, elixir-format
+msgid "New Product"
+msgstr "Nuevo Producto"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:27
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:24
+#, elixir-autogen, elixir-format
+msgid "Price"
+msgstr "Precio"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:2
+#, elixir-autogen, elixir-format
+msgid "Product"
+msgstr "Producto"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:83
+#, elixir-autogen, elixir-format
+msgid "Product created successfully"
+msgstr "Producto creado!"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:68
+#, elixir-autogen, elixir-format
+msgid "Product updated successfully"
+msgstr "Producto Actualizado!"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:30
+#, elixir-autogen, elixir-format
+msgid "Save Product"
+msgstr "Guardar"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:30
+#, elixir-autogen, elixir-format
+msgid "Saving..."
+msgstr "Guardando..."
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:19
+#, elixir-autogen, elixir-format
+msgid "Show Product"
+msgstr "Detalle de Producto"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:32
+#, elixir-autogen, elixir-format
+msgid "Supplier"
+msgstr "Mayorista"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:25
+#, elixir-autogen, elixir-format
+msgid "Supplier name"
+msgstr "Nombre de mayorista"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:28
+#, elixir-autogen, elixir-format
+msgid "Supplier url"
+msgstr "URL en mayorista"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:3
+#, elixir-autogen, elixir-format
+msgid "This is a product record from your database."
+msgstr "Este es un registro de la base de datos."
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:69
+#, elixir-autogen, elixir-format
+msgid "Total"
+msgstr "Total"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:12
+#, elixir-autogen, elixir-format
+msgid "Use this form to manage product records in your database."
+msgstr "Utiliza este formulario para administrar los registros de la base."
+
+#: lib/price_spotter_web/components/core_components.ex:172
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr "Sin conexión a internet"

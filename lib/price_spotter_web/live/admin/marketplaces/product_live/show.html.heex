@@ -3,7 +3,7 @@
   <:subtitle><%= gettext("This is a product record from your database.") %></:subtitle>
   <:actions>
     <.link patch={~p"/admin/marketplaces/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
-      <.button><%= gettext("Edit product") %></.button>
+      <.button><%= gettext("Edit Product") %></.button>
     </.link>
   </:actions>
 </.header>
@@ -30,7 +30,7 @@
     </p>
     <div class="flex self-end">
       <p class="text-gray-600 font-semibold text-sm italic">
-        <%= gettext("Last update") %>: <%= TimeAgo.time_ago(@product.price_updated_at) %>
+        <%= gettext("Last price") %>: <%= TimeAgo.time_ago(@product.price_updated_at) %>
       </p>
     </div>
   </div>
