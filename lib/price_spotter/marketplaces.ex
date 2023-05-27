@@ -75,6 +75,7 @@ defmodule PriceSpotter.Marketplaces do
   def create_product(attrs \\ %{}) do
     %Product{}
     |> Product.changeset(attrs)
+    |> Ecto.Changeset.put_change(:price_updated_at, NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second))
     |> Repo.insert()
   end
 

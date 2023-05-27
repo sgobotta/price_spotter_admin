@@ -14,7 +14,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   def handle_params(params, _url, socket) do
     case Marketplaces.list_products(params) do
       {:ok, {products, meta}} ->
-        # IO.inspect(meta, label: "Pagination Meta")
         {:noreply,
           socket
           |> assign(%{products: products, meta: meta})
@@ -46,7 +45,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_info({PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}}, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
+    {:noreply, socket}
   end
 
   @impl true

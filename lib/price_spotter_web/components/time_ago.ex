@@ -1,6 +1,8 @@
 defmodule TimeAgo do
   import PriceSpotterWeb.Gettext
 
+  def time_ago(nil), do: gettext("Unknown")
+
   def time_ago(datetime) do
     now = NaiveDateTime.utc_now()
     time_diff = NaiveDateTime.diff(now, datetime, :second)
