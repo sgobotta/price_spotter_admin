@@ -18,6 +18,9 @@ module.exports = {
       },
       colors: {
         brand: "#FD4F00",
+      },
+      fontFamily: {
+        'sans': ['Montserrat-Thin', 'Helvetica', 'Arial', 'sans-serif']
       }
     },
   },
