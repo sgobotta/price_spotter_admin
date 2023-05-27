@@ -58,20 +58,20 @@ table.table thead {
   @apply border-b-1 border-zinc-400 text-base h-14 bg-zinc-100 text-zinc-500;
 }
 
-table.table tbody tr:nth-child(odd) {
-  @apply bg-zinc-50;
+table.table tbody tr {
+  @apply h-16 cursor-pointer;
 }
 
-table.table tbody tr {
-  @apply h-16;
+table.table tbody tr:nth-child(odd) {
+  @apply bg-zinc-100 px-2 transition duration-200 hover:bg-zinc-300;
+}
+
+table.table tbody tr:nth-child(even) {
+  @apply bg-zinc-200 px-2 duration-200 hover:bg-zinc-300;
 }
 
 table.table tbody tr td {
   @apply p-1 text-zinc-700;
-}
-
-table.table tbody tr:nth-child(even) {
-  @apply bg-zinc-100 px-2;
 }
 
 table.table tfoot {

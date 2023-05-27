@@ -1,10 +1,10 @@
 <div class="xl:mx-32">
   <div class="m-4">
     <.header>
-      Listing Products
+      <%= gettext("Listing Products") %>
       <:actions>
         <.link patch={~p"/admin/marketplaces/products/new"}>
-          <.button>New Product</.button>
+          <.button><%= gettext("New Product") %></.button>
         </.link>
       </:actions>
     </.header>
@@ -12,36 +12,48 @@
 
   <%= if @products && @meta do %>
     <Flop.Phoenix.table
+      row_click={fn product -> JS.navigate(~p"/admin/marketplaces/products/#{product.id}") end}
       items={@products}
       meta={@meta}
       path={~p"/admin/marketplaces/products"}
+      opts={[tbody_tr_attrs: [class: ""]]}
     >
-      <:col :let={product} label="Name" field={:name} col_style="width: 45%;">
+      <:col :let={product} label={gettext("Name")} field={:name} col_style="width: 45%;">
         <div class=""><%= product.name %></div>
       </:col>
-      <:col :let={product} label="Price" field={:price} col_style="width: 10%; text-align: center">
-        <div class="text-center">
-          $<%= product.price %>
+      <:col :let={product} label={gettext("Price")} field={:price} col_style="width: 10%; text-align: center">
+        <div class="flex justify-center">
+          <div class="flex bg-green-100 rounded-lg text-base text-center font-medium w-fit px-1">
+            <.icon name="hero-currency-dollar-solid" class="self-center h-5 w-5 opacity-60 text-zinc-600" />
+            <span class="self-center"><%= product.price %></span>
+          </div>
         </div>
       </:col>
-      <:col :let={product} label="Supplier" field={:supplier_name} col_style="width: 15%;"><%= product.supplier_name %></:col>
-      <:col :let={product} label="Category" field={:category} col_style="width: 20%;"><%= product.category %></:col>
-      <:col :let={product} label="Last update" field={:price_updated_at} col_style="width: 20%;">
-        <%= TimeAgo.time_ago(product.price_updated_at) %>
+      <:col :let={product} label={gettext("Supplier")} field={:supplier_name} col_style="width: 15%;">
+        <div class="flex bg-red-100 rounded-sm px-1 text-xs justify-center text-center">
+          <%= String.replace(product.supplier_name, "-", " ") %>
+        </div>
+      </:col>
+      <:col :let={product} label={gettext("Category")} field={:category} col_style="width: 20%;">
+        <div class="flex bg-blue-100 rounded-sm px-1 text-xs justify-center text-center">
+          <%= String.replace(product.category, "-", " ") %>
+        </div>
+      </:col>
+      <:col :let={product} label={gettext("Last price")} field={:price_updated_at} col_style="width: 20%;" attrs={[class: "text-xs italic"]}>
+        <div class="text-center">
+          <%= TimeAgo.time_ago(product.price_updated_at) %>
+        </div>
       </:col>
       <:action :let={product}>
         <div>
-          <a href={product.supplier_url} target="_blank" class="hover:text-sky-500">
-            <.icon name="hero-link-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+          <a href={product.supplier_url} target="_blank" class="hover:text-sky-500 hover:opacity-100">
+            <.icon name="hero-link-solid" class="h-5 w-5 opacity-60" />
           </a>
         </div>
       </:action>
       <:action :let={product}>
-        <div class="sr-only">
-          <.link navigate={~p"/admin/marketplaces/products/#{product}"}>Show</.link>
-        </div>
         <.link patch={~p"/admin/marketplaces/products/#{product}/edit"} class="hover:text-teal-500">
-          <.icon name="hero-pencil-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+          <.icon name="hero-pencil-solid" class="h-5 w-5 opacity-60" />
         </.link>
       </:action>
       <:action :let={product}>
@@ -50,59 +62,25 @@
           data-confirm="Are you sure?"
           class="hover:text-rose-500"
         >
-          <.icon name="hero-trash-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+          <.icon name="hero-trash-solid" class="h-5 w-5 opacity-60" />
         </.link>
       </:action>
       <:foot>
-        <tr class="h-10"><td>Total: <span class="total"><%= @total %></span></td></tr>
+        <tr class="h-10"><td><%= gettext("Total") %>: <span class="total"><%= @total %></span></td></tr>
       </:foot>
     </Flop.Phoenix.table>
 
     <div class="flex justify-center w-full">
       <Flop.Phoenix.pagination
-          meta={@meta}
-          path={~p"/admin/marketplaces/products"}
-          opts={[
-            next_link_content: "Siguiente",
-            previous_link_content: "Anterior"
-          ]}
-        />
+        meta={@meta}
+        path={~p"/admin/marketplaces/products"}
+        opts={[
+          next_link_content: render_next_icon(@socket),
+          previous_link_content: render_previous_icon(@socket)
+        ]}
+      />
     </div>
   <% end %>
-<%!-- 
-  <.table
-    id="products"
-    rows={@streams.products}
-    row_click={fn {_id, product} -> JS.navigate(~p"/admin/marketplaces/products/#{product}") end}
-  >
-    <:col :let={{_id, product}} label="Supplier">
-      <img src={product.img_url} width="512" />
-    </:col>
-    <:col :let={{_id, product}} label="Name"><%= product.name %></:col>
-    <:col :let={{_id, product}} label="Price"><%= product.price %></:col>
-    <:col :let={{_id, product}} label="Supplier"><%= product.supplier_name %></:col>
-    <:col :let={{_id, product}} label="Category"><%= product.category %></:col>
-    <:col :let={{_id, product}} label="Internal"><%= product.internal_id %></:col>
-    <:col :let={{_id, product}} label="Supplier url">
-      <a href={product.supplier_url} target="_blank" class="hover:text-sky-500">
-        <.icon name="hero-link-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
-      </a>
-    </:col>
-    <:action :let={{_id, product}}>
-      <div class="sr-only">
-        <.link navigate={~p"/admin/marketplaces/products/#{product}"}>Show</.link>
-      </div>
-      <.link patch={~p"/admin/marketplaces/products/#{product}/edit"}>Edit</.link>
-    </:action>
-    <:action :let={{id, product}}>
-      <.link
-        phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{id}")}
-        data-confirm="Are you sure?"
-      >
-        Delete
-      </.link>
-    </:action>
-  </.table> --%>
 
   <.modal :if={@live_action in [:new, :edit]} id="product-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/products")}>
     <.live_component

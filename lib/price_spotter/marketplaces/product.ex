@@ -5,7 +5,8 @@ defmodule PriceSpotter.Marketplaces.Product do
   @derive {
     Flop.Schema,
     filterable: [:name, :category, :internal_id, :supplier_name, :price],
-    sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at]
+    sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
+    default_limit: 10
   }
 
   @type t :: %__MODULE__{}

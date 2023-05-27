@@ -56,4 +56,16 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
     {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
+
+  def render_next_icon(assigns) do
+    ~H"""
+    <.icon name="hero-arrow-right-solid" class="h-7 w-7" />
+    """
+  end
+
+  def render_previous_icon(assigns) do
+    ~H"""
+    <.icon name="hero-arrow-left-solid" class="h-7 w-7" />
+    """
+  end
 end
