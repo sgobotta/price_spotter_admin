@@ -9,7 +9,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage product records in your database.</:subtitle>
+        <:subtitle><%= gettext("Use this form to manage product records in your database.") %></:subtitle>
       </.header>
 
       <.simple_form
@@ -19,15 +19,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:category]} type="text" label="Category" />
-        <.input field={@form[:img_url]} type="text" label="Img url" />
-        <.input disabled={true} field={@form[:internal_id]} type="text" label="Internal" />
-        <.input field={@form[:supplier_name]} type="text" label="Supplier name" />
-        <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:price]} type="number" label="Price" step="any" />
-        <.input field={@form[:supplier_url]} type="text" label="Supplier url" />
+        <.input field={@form[:category]} type="text" label={gettext("Category")} />
+        <.input field={@form[:img_url]} type="text" label={gettext("Img url")} />
+        <.input disabled={true} field={@form[:internal_id]} type="text" label={gettext("Internal")} />
+        <.input field={@form[:supplier_name]} type="text" label={gettext("Supplier name")} />
+        <.input field={@form[:name]} type="text" label={gettext("Name")} />
+        <.input field={@form[:price]} type="number" label={gettext("Price")} step="any" />
+        <.input field={@form[:supplier_url]} type="text" label={gettext("Supplier url")} />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Product</.button>
+          <.button phx-disable-with={gettext("Saving...")}><%= gettext("Save Product") %></.button>
         </:actions>
       </.simple_form>
     </div>
@@ -65,7 +65,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Product updated successfully")
+         |> put_flash(:info, gettext("Product updated successfully"))
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -80,7 +80,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Product created successfully")
+         |> put_flash(:info, gettext("Product created successfully"))
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

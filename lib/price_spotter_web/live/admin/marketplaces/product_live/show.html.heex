@@ -1,24 +1,24 @@
 <.header>
-  Product <%= @product.id %>
-  <:subtitle>This is a product record from your database.</:subtitle>
+  <%= gettext("Product") %> <%= @product.id %>
+  <:subtitle><%= gettext("This is a product record from your database.") %></:subtitle>
   <:actions>
     <.link patch={~p"/admin/marketplaces/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
-      <.button>Edit product</.button>
+      <.button><%= gettext("Edit product") %></.button>
     </.link>
   </:actions>
 </.header>
 
 <.list>
-  <:item title="Img url"><%= @product.img_url %></:item>
-  <:item title="Name"><%= @product.name %></:item>
-  <:item title="Price"><%= @product.price %></:item>
-  <:item title="Supplier name"><%= @product.supplier_name %></:item>
-  <:item title="Category"><%= @product.category %></:item>
-  <:item title="Internal"><%= @product.internal_id %></:item>
-  <:item title="Supplier url"><%= @product.supplier_url %></:item>
+  <:item title={gettext("Img url")}><%= @product.img_url %></:item>
+  <:item title={gettext("Name")}><%= @product.name %></:item>
+  <:item title={gettext("Price")}><%= @product.price %></:item>
+  <:item title={gettext("Supplier name")}><%= @product.supplier_name %></:item>
+  <:item title={gettext("Category")}><%= @product.category %></:item>
+  <:item title={gettext("Internal")}><%= @product.internal_id %></:item>
+  <:item title={gettext("Supplier url")}><%= @product.supplier_url %></:item>
 </.list>
 
-<.back navigate={~p"/admin/marketplaces/products"}>Back to products</.back>
+<.back navigate={~p"/admin/marketplaces/products"}><%= gettext("Back to products") %></.back>
 
 <.modal :if={@live_action == :edit} id="product-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}>
   <.live_component
