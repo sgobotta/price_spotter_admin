@@ -2,18 +2,48 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@import "./fonts.css";
+
 /* This file is for your main application CSS */
 
 nav.pagination {
-  @apply my-4;
+  @apply flex w-full justify-between my-4 cursor-default;
+}
+
+nav.pagination span.pagination-previous, span.pagination-next {
+  @apply text-zinc-400;
+}
+
+nav.pagination a.pagination-previous, a.pagination-next {
+  @apply hover:text-sky-800;
+}
+
+nav.pagination .pagination-previous {
+  @apply order-1;
+}
+
+nav.pagination .pagination-next {
+  @apply order-3;
+}
+
+nav.pagination .pagination-list {
+  @apply order-2;
 }
 
 .pagination-list {
   @apply flex flex-row;
 }
 
-.pagination-list li {
-  @apply px-2;
+ul.pagination-list li {
+  @apply px-2 font-semibold;
+}
+
+ul.pagination-list li a.pagination-link {
+  @apply px-2 font-normal;
+}
+
+ul.pagination-list li a.pagination-link.is-current {
+  @apply px-2 font-semibold;
 }
 
 div.table-container {
@@ -25,17 +55,29 @@ table.table {
 }
 
 table.table thead {
-  @apply border-b-1 border-zinc-400 text-lg h-14 bg-zinc-100 text-zinc-500;
+  @apply border-b-1 border-zinc-400 text-base h-14 bg-zinc-100 text-zinc-500;
 }
 
 table.table tbody tr:nth-child(odd) {
   @apply bg-zinc-50;
 }
 
+table.table tbody tr {
+  @apply h-16;
+}
+
 table.table tbody tr td {
-  @apply p-1;
+  @apply p-1 text-zinc-700;
 }
 
 table.table tbody tr:nth-child(even) {
   @apply bg-zinc-100 px-2;
+}
+
+table.table tfoot {
+  @apply border-t-1 border-t-zinc-400;
+}
+
+table.table tfoot tr td {
+  @apply px-1 text-zinc-500 font-semibold;
 }
