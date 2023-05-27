@@ -8,15 +8,33 @@
   </:actions>
 </.header>
 
-<.list>
-  <:item title={gettext("Img url")}><%= @product.img_url %></:item>
-  <:item title={gettext("Name")}><%= @product.name %></:item>
-  <:item title={gettext("Price")}><%= @product.price %></:item>
-  <:item title={gettext("Supplier name")}><%= @product.supplier_name %></:item>
-  <:item title={gettext("Category")}><%= @product.category %></:item>
-  <:item title={gettext("Internal")}><%= @product.internal_id %></:item>
-  <:item title={gettext("Supplier url")}><%= @product.supplier_url %></:item>
-</.list>
+<div class="relative flex flex-col md:flex-row md:space-x-5 space-y-3 md:space-y-0 rounded-xl shadow-lg p-3 max-w-xs md:max-w-3xl mx-auto border border-white bg-zinc-100">
+  <div class="w-full md:w-1/3 bg-zinc-100 grid place-items-center">
+    <img src={@product.img_url} class="rounded-xl" />
+  </div>
+  <div class="w-full md:w-2/3 bg-zinc-100 flex flex-col space-y-2 p-3">1
+    <div class="flex justify-between item-center">
+      <div class="bg-red-200 px-3 py-1 rounded-full text-xs font-medium text-gray-800 hidden md:block">
+        <%= String.replace(@product.supplier_name, "-", " ") %>
+      </div>
+      <div class="bg-blue-200 px-3 py-1 rounded-full text-xs font-medium text-gray-500 hidden md:block">
+        <%= String.replace(@product.category, "-", " ") %>
+      </div>
+    </div>
+    <h3 class="font-black text-gray-800 md:text-xl text-md"><%= @product.name %></h3>
+    <a href={@product.supplier_url} target="_blank" class="hover:text-sky-500 hover:opacity-100">
+      <.icon name="hero-link-solid" class="h-5 w-5 opacity-60" /><span> <%= gettext("External link") %></span>
+    </a>
+    <p class="text-xl font-black text-green-400">
+      $<%= @product.price %>
+    </p>
+    <div class="flex self-end">
+      <p class="text-gray-600 font-semibold text-sm italic">
+        <%= gettext("Last update") %>: <%= TimeAgo.time_ago(@product.price_updated_at) %>
+      </p>
+    </div>
+  </div>
+</div>
 
 <.back navigate={~p"/admin/marketplaces/products"}><%= gettext("Back to products") %></.back>
 

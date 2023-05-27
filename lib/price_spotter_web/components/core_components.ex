@@ -293,7 +293,8 @@ defmodule PriceSpotterWeb.CoreComponents do
 
   def input(%{type: "checkbox", value: value} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
+      assign_new(assigns, :class, fn -> "" end)
+      |> assign_new(:checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
 
     ~H"""
     <div phx-feedback-for={@name}>
@@ -305,7 +306,7 @@ defmodule PriceSpotterWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
+          class={"rounded border-zinc-300 text-zinc-900 focus:ring-0 #{@class}"}
           {@rest}
         />
         <%= @label %>
