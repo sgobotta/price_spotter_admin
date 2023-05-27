@@ -10,6 +10,39 @@
     </.header>
   </div>
 
+  <div>
+    <.filter_form
+      id={"products-filter-form"}
+      meta={@meta}
+      fields={[
+        name: [
+          label: gettext("Name")
+        ],
+        price: [
+          label: gettext("Price"),
+          op: :ilike_and,
+          type: "number"
+        ], 
+        category: [
+          label: gettext("Category"),
+          type: "select",
+          prompt: "*",
+          options: @product_categories
+        ],
+        supplier_name: [
+          label: gettext("Supplier"),
+          type: "select",
+          prompt: "*",
+          options: @product_suppliers
+        ],
+        price_updated_at: [
+          label: gettext("Price update"),
+          type: "date",
+        ]
+      ]}
+    />
+  </div>
+
   <%= if @products && @meta do %>
     <Flop.Phoenix.table
       row_click={fn product -> JS.navigate(~p"/admin/marketplaces/products/#{product.id}") end}

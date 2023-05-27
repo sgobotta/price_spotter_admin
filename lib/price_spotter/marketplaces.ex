@@ -27,6 +27,14 @@ defmodule PriceSpotter.Marketplaces do
     Flop.validate_and_run(Product, params, for: Product)
   end
 
+  def list_product_categories do
+    Repo.all(from(p in Product, select: p.category, distinct: p.category))
+  end
+
+  def list_product_supplier do
+    Repo.all(from(p in Product, select: p.supplier_name, distinct: p.supplier_name))
+  end
+
   @doc """
   Gets a single product.
 

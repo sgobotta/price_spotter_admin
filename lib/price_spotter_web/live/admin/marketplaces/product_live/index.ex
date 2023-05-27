@@ -14,15 +14,32 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   def handle_params(params, _url, socket) do
     case Marketplaces.list_products(params) do
       {:ok, {products, meta}} ->
+        IO.inspect(meta)
         {:noreply,
           socket
           |> assign(%{products: products, meta: meta})
+          |> assign_selection_options()
           |> assign(:total, meta.total_count)
           |> apply_action(socket.assigns.live_action, params)}
 
       _error ->
         {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
     end
+  end
+
+  @impl true
+  def handle_event("update-filter", params, socket) do
+    IO.inspect(params, label: "Params")
+    IO.inspect(socket.assigns.meta, label: "Params")
+    {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products" |> URI.parse |> Map.put(:query, Plug.Conn.Query.encode(params)) |> URI.to_string)}
+    # {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products?#{params}")}
+  end
+
+  @impl true
+  def handle_event("reset-filter", _, %{assigns: assigns} = socket) do
+    flop = assigns.meta.flop |> Flop.set_page(1) |> Flop.reset_filters()
+    path = Flop.Phoenix.build_path(~p"/admin/marketplaces/products", flop, backend: assigns.meta.backend)
+    {:noreply, push_patch(socket, to: path)}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -66,5 +83,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     ~H"""
     <.icon name="hero-arrow-left-solid" class="h-7 w-7" />
     """
+  end
+
+  defp get_categories(products) do
+    # Stream.map(products, fn product.category)
+  end
+
+  defp assign_selection_options(socket) do
+    socket
+    |> assign(:product_categories, Marketplaces.list_product_categories())
+    |> assign(:product_suppliers, Marketplaces.list_product_supplier())
   end
 end
