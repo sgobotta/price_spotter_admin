@@ -24,9 +24,8 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
   end
 
   def handle_message(_processor, message, _context) do
+    Logger.debug("Loading product from message=#{inspect(message)}")
     %Redis.Stream.Entry{} = entry = Redis.Client.parse_stream_entry(message.data)
-
-    IO.inspect(entry, label: "Got message")
 
     {:ok, :loaded, _product} = load_product(entry)
 
@@ -40,8 +39,9 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
       if message.metadata.attempt < @max_attempts do
         Broadway.Message.configure_ack(message, retry: true)
       else
+        Logger.warn("Dropping product from message=#{inspect(message)}")
         [id, _] = message.data
-        IO.inspect(id, label: "Dropping")
+        id
       end
     end
   end
@@ -53,8 +53,6 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
 
   defp load_product(%Redis.Stream.Entry{values: values}) do
     {:ok, _product} = PriceSpotter.Marketplaces.load_product(values["product_stream_key"])
-    # Logger.debug("Loaded product with id=#{product.id}")
-    Logger.debug("Loaded product")
     {:ok, :loaded, %{}}
   end
 end
