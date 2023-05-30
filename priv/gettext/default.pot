@@ -74,7 +74,7 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:52
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:53
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:32
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:20
 #, elixir-autogen, elixir-format
@@ -101,7 +101,7 @@ msgstr ""
 msgid "Last price"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:64
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:65
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:4
 #, elixir-autogen, elixir-format
 msgid "Listing Products"
@@ -112,7 +112,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:58
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:59
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:7
 #, elixir-autogen, elixir-format
 msgid "New Product"
@@ -255,4 +255,9 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:40
 #, elixir-autogen, elixir-format
 msgid "Min Price"
+msgstr ""
+
+#: lib/price_spotter_web/components/core_components.ex:667
+#, elixir-autogen, elixir-format
+msgid "Clear Filters"
 msgstr ""
