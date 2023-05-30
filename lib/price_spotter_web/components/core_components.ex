@@ -225,7 +225,7 @@ defmodule PriceSpotterWeb.CoreComponents do
   """
   attr :type, :string, default: nil
   attr :class, :string, default: nil
-  attr :rest, :global, include: ~w(disabled form name value)
+  attr :rest, :global, include: ~w(disabled form name value href)
 
   slot :inner_block, required: true
 
@@ -650,19 +650,23 @@ defmodule PriceSpotterWeb.CoreComponents do
       phx-change={@on_change}
       phx-submit={@on_change}
     >
-      <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
-        <.input
-          field={i.field}
-          label={i.label}
-          type={i.type}
-          phx-debounce={120}
-          {i.rest}
-        />
-      </Flop.Phoenix.filter_fields>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
+          <.input
+            field={i.field}
+            label={i.label}
+            type={i.type}
+            phx-debounce={120}
+            {i.rest}
+          />
+        </Flop.Phoenix.filter_fields>
+      </div>
 
-      <a href="#" class="button" phx-target={@target} phx-click={@on_reset}>
-        reset
-      </a>
+      <div class="my-2">
+        <.button class="button" phx-target={@target} phx-click={@on_reset} href="#" >
+          <%= gettext("Clear Filters") %>
+        </.button>
+      </div>
     </.form>
     """
   end
