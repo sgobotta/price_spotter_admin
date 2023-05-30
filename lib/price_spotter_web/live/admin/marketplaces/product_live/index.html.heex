@@ -56,14 +56,14 @@
       items={@products}
       meta={@meta}
       path={~p"/admin/marketplaces/products"}
-      opts={[tbody_tr_attrs: [class: ""]]}
+      opts={[thead_tr_attrs: [class: "text-xs sm:text-base"], tbody_tr_attrs: [class: ""]]}
     >
-      <:col :let={product} label={gettext("Product")} field={:name} col_style="width: 45%;">
-        <div class=""><%= product.name %></div>
+      <:col :let={product} label={gettext("Product")} field={:name} col_style="width: 45%;" attrs={[class: "text-xs sm:text-base"]}>
+        <div><%= product.name %></div>
       </:col>
-      <:col :let={product} label={gettext("Last Price")} field={:price} col_style="width: 10%; text-align: center">
+      <:col :let={product} label={gettext("Last Price")} field={:price} col_style="width: 10%; text-align: center" attrs={[class: "text-xs sm:text-base"]}>
         <div class="flex justify-end">
-          <div class="flex bg-green-200 rounded-lg text-base text-center font-medium w-fit px-1">
+          <div class="flex bg-green-200 rounded-lg text-center font-medium w-fit px-1">
             <%!-- <.icon name="hero-currency-dollar-solid" class="self-center h-5 w-5 opacity-60 text-zinc-600" /> --%>
             <span class="self-center">$<%= product.price %></span>
           </div>
@@ -75,25 +75,25 @@
         </div>
       </:col>
       <:col :let={product} label={gettext("Supplier")} field={:supplier_name} col_style="width: 15%;">
-        <div class="flex bg-red-100 rounded-sm px-1 text-xs justify-center text-center">
-          <%= String.replace(product.supplier_name, "-", " ") %>
+        <div class="flex text-xs justify-center text-center">
+          <span class="bg-red-100 rounded-md px-1"><%= String.replace(product.supplier_name, "-", " ") %></span>
         </div>
       </:col>
       <:col :let={product} label={gettext("Category")} field={:category} col_style="width: 20%;">
-        <div class="flex bg-blue-100 rounded-sm px-1 text-xs justify-center text-center">
-          <%= String.replace(product.category, "-", " ") %>
+        <div class="flex text-xs justify-center text-center">
+          <span class="bg-blue-100 rounded-md px-1"><%= String.replace(product.category, "-", " ") %></span>
         </div>
       </:col>
       <:action :let={product}>
         <div>
           <a href={product.supplier_url} target="_blank" class="hover:text-sky-500 hover:opacity-100">
-            <.icon name="hero-link-solid" class="h-5 w-5 opacity-60" />
+            <.icon name="hero-link-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
           </a>
         </div>
       </:action>
       <:action :let={product}>
         <.link patch={~p"/admin/marketplaces/products/#{product}/edit"} class="hover:text-teal-500">
-          <.icon name="hero-pencil-solid" class="h-5 w-5 opacity-60" />
+          <.icon name="hero-pencil-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
         </.link>
       </:action>
       <:action :let={product}>
@@ -102,7 +102,7 @@
           data-confirm="Are you sure?"
           class="hover:text-rose-500"
         >
-          <.icon name="hero-trash-solid" class="h-5 w-5 opacity-60" />
+          <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
         </.link>
       </:action>
       <:foot>
