@@ -637,6 +637,7 @@ defmodule PriceSpotterWeb.CoreComponents do
   attr :on_change, :string, default: "update-filter"
   attr :on_reset, :string, default: "reset-filter"
   attr :target, :string, default: nil
+  attr :fields, :list, default: nil
 
   def filter_form(%{meta: meta} = assigns) do
     assigns = assign(assigns, form: Phoenix.Component.to_form(meta), meta: nil)
