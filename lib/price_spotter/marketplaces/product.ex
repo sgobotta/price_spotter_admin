@@ -5,7 +5,13 @@ defmodule PriceSpotter.Marketplaces.Product do
   @derive {
     Flop.Schema,
     filterable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
-    sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
+    sortable: [:name, :category, :internal_id, :supplier_name, :price],
+    custom_fields: [
+      price_updated_at: [
+        filter: {PriceSpotter.Marketplaces.Product.CustomFilters, :price_updated_at, []},
+        ecto_type: :naive_datetime
+      ]
+    ],
     default_limit: 10
   }
 
@@ -52,6 +58,31 @@ defmodule PriceSpotter.Marketplaces.Product do
       String.replace(price, ".", "")
     else
       price
+    end
+  end
+end
+
+defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
+  @moduledoc false
+  import Ecto.Query
+
+  @spec price_updated_at(PriceSpotter.Marketplaces.Product.t(), Flop.Filter.t(), keyword()) :: Ecto.Query.t()
+  def price_updated_at(q, %Flop.Filter{value: value, op: op}, _options) do
+    case Ecto.Type.cast(:naive_datetime, value) do
+      {:ok, since_date} ->
+
+        case op do
+          :== -> where(q, [p], p.price_updated_at == ^since_date)
+          :!= -> where(q, [p], p.price_updated_at != ^since_date)
+          :> -> where(q, [p], p.price_updated_at > ^since_date)
+          :< -> where(q, [p], p.price_updated_at < ^since_date)
+          :>= -> where(q, [p], p.price_updated_at >= ^since_date)
+          :<= -> where(q, [p], p.price_updated_at <= ^since_date)
+        end
+
+      :error ->
+        # cannot cast filter value, ignore
+        q
     end
   end
 end
