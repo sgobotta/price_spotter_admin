@@ -8,8 +8,8 @@ defmodule TimeAgo do
     time_diff = NaiveDateTime.diff(now, datetime, :second)
 
     case time_diff do
-      _diff when time_diff < 30 -> "just now"
-      _diff when time_diff < 60 -> "less than a minute ago"
+      _diff when time_diff < 30 -> gettext("just now")
+      _diff when time_diff < 60 -> gettext("less than a minute ago")
       _diff when time_diff < 3600 -> format_minutes(time_diff)
       _diff when time_diff < 86400 -> format_hours(time_diff)
       _diff when time_diff < 2592000 -> format_days(time_diff)
