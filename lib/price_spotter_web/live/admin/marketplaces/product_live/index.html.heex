@@ -16,28 +16,35 @@
       meta={@meta}
       fields={[
         name: [
-          label: gettext("Name")
+          label: gettext("Product"),
+          op: :like
         ],
-        price: [
-          label: gettext("Price"),
-          op: :ilike_and,
-          type: "number"
-        ], 
         category: [
           label: gettext("Category"),
           type: "select",
-          prompt: "*",
+          prompt: gettext("All categories"),
           options: @product_categories
         ],
         supplier_name: [
           label: gettext("Supplier"),
           type: "select",
-          prompt: "*",
+          prompt: gettext("All suppliers"),
           options: @product_suppliers
         ],
         price_updated_at: [
-          label: gettext("Price update"),
-          type: "date",
+          label: gettext("Last Update"),
+          op: :>=,
+          type: "datetime-local",
+        ],
+        price: [
+          label: gettext("Min Price"),
+          op: :>=,
+          type: "number"
+        ],
+        price: [
+          label: gettext("Max Price"),
+          op: :<=,
+          type: "number"
         ]
       ]}
     />
@@ -51,18 +58,18 @@
       path={~p"/admin/marketplaces/products"}
       opts={[tbody_tr_attrs: [class: ""]]}
     >
-      <:col :let={product} label={gettext("Name")} field={:name} col_style="width: 45%;">
+      <:col :let={product} label={gettext("Product")} field={:name} col_style="width: 45%;">
         <div class=""><%= product.name %></div>
       </:col>
-      <:col :let={product} label={gettext("Price")} field={:price} col_style="width: 10%; text-align: center">
+      <:col :let={product} label={gettext("Last Price")} field={:price} col_style="width: 10%; text-align: center">
         <div class="flex justify-end">
           <div class="flex bg-green-200 rounded-lg text-base text-center font-medium w-fit px-1">
-            <.icon name="hero-currency-dollar-solid" class="self-center h-5 w-5 opacity-60 text-zinc-600" />
-            <span class="self-center"><%= product.price %></span>
+            <%!-- <.icon name="hero-currency-dollar-solid" class="self-center h-5 w-5 opacity-60 text-zinc-600" /> --%>
+            <span class="self-center">$<%= product.price %></span>
           </div>
         </div>
       </:col>
-      <:col :let={product} label={gettext("Last price")} field={:price_updated_at} col_style="width: 20%;" attrs={[class: "text-xs italic"]}>
+      <:col :let={product} label={gettext("Last Update")} field={:price_updated_at} col_style="width: 20%;" attrs={[class: "text-xs italic"]}>
         <div class="text-center">
           <%= TimeAgo.time_ago(product.price_updated_at) %>
         </div>

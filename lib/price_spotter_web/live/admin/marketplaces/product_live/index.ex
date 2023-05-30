@@ -14,7 +14,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   def handle_params(params, _url, socket) do
     case Marketplaces.list_products(params) do
       {:ok, {products, meta}} ->
-        IO.inspect(meta)
         {:noreply,
           socket
           |> assign(%{products: products, meta: meta})
@@ -29,8 +28,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_event("update-filter", params, socket) do
-    IO.inspect(params, label: "Params")
-    IO.inspect(socket.assigns.meta, label: "Params")
     {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products" |> URI.parse |> Map.put(:query, Plug.Conn.Query.encode(params)) |> URI.to_string)}
     # {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products?#{params}")}
   end
@@ -40,6 +37,14 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     flop = assigns.meta.flop |> Flop.set_page(1) |> Flop.reset_filters()
     path = Flop.Phoenix.build_path(~p"/admin/marketplaces/products", flop, backend: assigns.meta.backend)
     {:noreply, push_patch(socket, to: path)}
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    product = Marketplaces.get_product!(id)
+    {:ok, _} = Marketplaces.delete_product(product)
+
+    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -65,14 +70,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    product = Marketplaces.get_product!(id)
-    {:ok, _} = Marketplaces.delete_product(product)
-
-    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
-  end
-
   def render_next_icon(assigns) do
     ~H"""
     <.icon name="hero-arrow-right-solid" class="h-7 w-7" />
@@ -83,10 +80,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     ~H"""
     <.icon name="hero-arrow-left-solid" class="h-7 w-7" />
     """
-  end
-
-  defp get_categories(products) do
-    # Stream.map(products, fn product.category)
   end
 
   defp assign_selection_options(socket) do
