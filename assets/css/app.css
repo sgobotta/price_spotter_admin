@@ -81,3 +81,21 @@ table.table tfoot {
 table.table tfoot tr td {
   @apply px-1 text-zinc-500 font-semibold;
 }
+
+select {
+  @apply mt-0 !important;
+}
+
+input {
+  @apply mt-0 !important;
+}
+
+input, select {
+  @apply focus:ring-2 focus:ring-sky-500 bg-zinc-50 shadow-inner-lg !important;
+}
+
+.shadow-inner-lg {
+  --tw-shadow: inset 4px -6px 4px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: inset 0 2px 4px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
