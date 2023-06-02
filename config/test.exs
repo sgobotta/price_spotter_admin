@@ -1,5 +1,7 @@
 import Config
 
+config :price_spotter, :environment, :test
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

@@ -1,5 +1,7 @@
 import Config
 
+config :price_spotter, :environment, :dev
+
 # Configure your database
 config :price_spotter, PriceSpotter.Repo,
   username: "postgres",
