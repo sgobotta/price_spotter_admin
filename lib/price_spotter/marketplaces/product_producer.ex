@@ -10,8 +10,11 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
         module:
           {OffBroadwayRedisStream.Producer,
            [
-             redis_client_opts: [host: "localhost", password: "123456"],
-             stream: "dev_stream_new-products_golosineria_v1",
+             redis_client_opts: [
+               host: System.get_env("REDIS_HOST", "localhost"),
+               password: System.get_env("REDIS_PASS", "123456")
+             ],
+             stream: get_stream(),
              group: "processor-group",
              consumer_name: hostname(),
              make_stream: true
@@ -55,4 +58,8 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
     {:ok, _product} = PriceSpotter.Marketplaces.load_product(values["product_stream_key"])
     {:ok, :loaded, %{}}
   end
+
+  defp get_stream, do: "#{get_stage()}_stream_new-products_golosineria_v1"
+
+  defp get_stage, do: PriceSpotter.Application.stage()
 end
