@@ -37,3 +37,4 @@ npm-debug.log
 
 # Environment
 .env
+.env.prod
