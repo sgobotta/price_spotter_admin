@@ -21,7 +21,7 @@ defmodule PriceSpotter.Application do
       # Start a worker by calling: PriceSpotter.Worker.start_link(arg)
       # {PriceSpotter.Worker, arg}
       {PriceSpotter.Marketplaces.ProductProducer, []},
-      {Redix, host: "localhost", name: :redix, password: "123456"}
+      {Redix, host: redis_host(), name: :redix, password: redis_pass()}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -37,4 +37,14 @@ defmodule PriceSpotter.Application do
     PriceSpotterWeb.Endpoint.config_change(changed, removed)
     :ok
   end
+
+  @spec env :: :dev | :test | :prod
+  def env, do: Application.fetch_env!(:price_spotter, :environment)
+
+  @spec stage :: :local | :dev
+  def stage, do: Application.fetch_env!(:price_spotter, :stage)
+
+  def redis_host, do: Application.fetch_env!(:price_spotter, :redis_host)
+
+  def redis_pass, do: Application.fetch_env!(:price_spotter, :redis_pass)
 end
