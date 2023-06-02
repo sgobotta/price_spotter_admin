@@ -17,7 +17,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @impl true
-  def handle_info({PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}}, socket) do
+  def handle_info(
+        {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}},
+        socket
+      ) do
     {:noreply, socket}
   end
 

@@ -21,16 +21,16 @@ defmodule PriceSpotterWeb.CoreComponents do
 
   def pagination_opts do
     [
-     ellipsis_attrs: [class: "ellipsis"],
-     ellipsis_content: "‥",
-    #  next_link_attrs: [class: "next"],
-    #  next_link_content: next_icon(),
-     page_links: {:ellipsis, 7},
-    #  pagination_link_aria_label: &"#{&1}ページ目へ",
-    #  previous_link_attrs: [class: "prev"],
-    #  previous_link_content: previous_icon()
-   ]
- end
+      ellipsis_attrs: [class: "ellipsis"],
+      ellipsis_content: "‥",
+      #  next_link_attrs: [class: "next"],
+      #  next_link_content: next_icon(),
+      page_links: {:ellipsis, 7}
+      #  pagination_link_aria_label: &"#{&1}ページ目へ",
+      #  previous_link_attrs: [class: "prev"],
+      #  previous_link_content: previous_icon()
+    ]
+  end
 
   def table_opts do
     [
@@ -174,7 +174,8 @@ defmodule PriceSpotterWeb.CoreComponents do
       phx-connected={hide("#disconnected")}
       hidden
     >
-      <%= gettext("Attempting to reconnect") %> <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
+      <%= gettext("Attempting to reconnect") %>
+      <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
   end
@@ -643,27 +644,15 @@ defmodule PriceSpotterWeb.CoreComponents do
     assigns = assign(assigns, form: Phoenix.Component.to_form(meta), meta: nil)
 
     ~H"""
-    <.form
-      for={@form}
-      id={@id}
-      phx-target={@target}
-      phx-change={@on_change}
-      phx-submit={@on_change}
-    >
+    <.form for={@form} id={@id} phx-target={@target} phx-change={@on_change} phx-submit={@on_change}>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
-          <.input
-            field={i.field}
-            label={i.label}
-            type={i.type}
-            phx-debounce={120}
-            {i.rest}
-          />
+          <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
         </Flop.Phoenix.filter_fields>
       </div>
 
       <div class="my-2">
-        <.button class="button" phx-target={@target} phx-click={@on_reset} href="#" >
+        <.button class="button" phx-target={@target} phx-click={@on_reset} href="#">
           <%= gettext("Clear Filters") %>
         </.button>
       </div>

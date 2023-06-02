@@ -15,11 +15,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     case Marketplaces.list_products(params) do
       {:ok, {products, meta}} ->
         {:noreply,
-          socket
-          |> assign(%{products: products, meta: meta})
-          |> assign_selection_options()
-          |> assign(:total, meta.total_count)
-          |> apply_action(socket.assigns.live_action, params)}
+         socket
+         |> assign(%{products: products, meta: meta})
+         |> assign_selection_options()
+         |> assign(:total, meta.total_count)
+         |> apply_action(socket.assigns.live_action, params)}
 
       _error ->
         {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
@@ -28,14 +28,27 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_event("update-filter", params, socket) do
-    {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products" |> URI.parse |> Map.put(:query, Plug.Conn.Query.encode(params)) |> URI.to_string)}
+    {:noreply,
+     push_patch(socket,
+       to:
+         ~p"/admin/marketplaces/products"
+         |> URI.parse()
+         |> Map.put(:query, Plug.Conn.Query.encode(params))
+         |> URI.to_string()
+     )}
+
     # {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products?#{params}")}
   end
 
   @impl true
   def handle_event("reset-filter", _, %{assigns: assigns} = socket) do
     flop = assigns.meta.flop |> Flop.set_page(1) |> Flop.reset_filters()
-    path = Flop.Phoenix.build_path(~p"/admin/marketplaces/products", flop, backend: assigns.meta.backend)
+
+    path =
+      Flop.Phoenix.build_path(~p"/admin/marketplaces/products", flop,
+        backend: assigns.meta.backend
+      )
+
     {:noreply, push_patch(socket, to: path)}
   end
 
@@ -66,7 +79,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   @impl true
-  def handle_info({PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}}, socket) do
+  def handle_info(
+        {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}},
+        socket
+      ) do
     {:noreply, socket}
   end
 

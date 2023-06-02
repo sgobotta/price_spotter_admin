@@ -2,7 +2,7 @@
   <%= gettext("Product") %> <%= @product.id %>
   <:subtitle><%= gettext("This is a product record from your database.") %></:subtitle>
   <:actions>
-    <.link 
+    <.link
       phx-click={JS.push("delete", value: %{id: @product.id}) |> hide("##{@product.id}")}
       data-confirm="Are you sure?"
       class=""
@@ -16,7 +16,10 @@
     </.link>
   </:actions>
   <:actions>
-    <.link patch={~p"/admin/marketplaces/products/#{@product}/show/edit"} phx-click={JS.push_focus()}>
+    <.link
+      patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
+      phx-click={JS.push_focus()}
+    >
       <.button><%= gettext("Edit Product") %></.button>
     </.link>
   </:actions>
@@ -37,7 +40,9 @@
     </div>
     <h3 class="font-black text-gray-800 md:text-xl text-md"><%= @product.name %></h3>
     <a href={@product.supplier_url} target="_blank" class="hover:text-sky-500 hover:opacity-100">
-      <.icon name="hero-link-solid" class="h-5 w-5 opacity-60" /><span> <%= gettext("External link") %></span>
+      <.icon name="hero-link-solid" class="h-5 w-5 opacity-60" /><span>
+        <%= gettext("External link") %>
+      </span>
     </a>
     <p class="text-xl font-black text-green-400">
       $<%= @product.price %>
@@ -52,7 +57,12 @@
 
 <.back navigate={~p"/admin/marketplaces/products"}><%= gettext("Back to products") %></.back>
 
-<.modal :if={@live_action == :edit} id="product-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="product-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}
+>
   <.live_component
     module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
     id={@product.id}

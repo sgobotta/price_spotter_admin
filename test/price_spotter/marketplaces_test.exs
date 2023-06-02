@@ -8,7 +8,16 @@ defmodule PriceSpotter.MarketplacesTest do
 
     import PriceSpotter.MarketplacesFixtures
 
-    @invalid_attrs %{category: nil, img_url: nil, internal_id: nil, meta: nil, name: nil, price: nil, supplier_name: nil, supplier_url: nil}
+    @invalid_attrs %{
+      category: nil,
+      img_url: nil,
+      internal_id: nil,
+      meta: nil,
+      name: nil,
+      price: nil,
+      supplier_name: nil,
+      supplier_url: nil
+    }
 
     test "list_products/0 returns all products" do
       product = product_fixture()
@@ -21,7 +30,16 @@ defmodule PriceSpotter.MarketplacesTest do
     end
 
     test "create_product/1 with valid data creates a product" do
-      valid_attrs = %{category: "some category", img_url: "some img_url", internal_id: "some internal_id", meta: %{}, name: "some name", price: "120.5", supplier_name: "some supplier_name", supplier_url: "some supplier_url"}
+      valid_attrs = %{
+        category: "some category",
+        img_url: "some img_url",
+        internal_id: "some internal_id",
+        meta: %{},
+        name: "some name",
+        price: "120.5",
+        supplier_name: "some supplier_name",
+        supplier_url: "some supplier_url"
+      }
 
       assert {:ok, %Product{} = product} = Marketplaces.create_product(valid_attrs)
       assert product.category == "some category"
@@ -40,7 +58,17 @@ defmodule PriceSpotter.MarketplacesTest do
 
     test "update_product/2 with valid data updates the product" do
       product = product_fixture()
-      update_attrs = %{category: "some updated category", img_url: "some updated img_url", internal_id: "some updated internal_id", meta: %{}, name: "some updated name", price: "456.7", supplier_name: "some updated supplier_name", supplier_url: "some updated supplier_url"}
+
+      update_attrs = %{
+        category: "some updated category",
+        img_url: "some updated img_url",
+        internal_id: "some updated internal_id",
+        meta: %{},
+        name: "some updated name",
+        price: "456.7",
+        supplier_name: "some updated supplier_name",
+        supplier_url: "some updated supplier_url"
+      }
 
       assert {:ok, %Product{} = product} = Marketplaces.update_product(product, update_attrs)
       assert product.category == "some updated category"

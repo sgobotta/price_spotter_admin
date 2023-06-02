@@ -7,13 +7,17 @@ defmodule Redis.Client do
   @doc """
   Given a key returns the stored value.
   """
-  @spec get(binary) :: {:ok, Redix.Protocol.redis_value} | {:error, atom | Redix.Error.t | Redix.ConnectionError.t}
+  @spec get(binary) ::
+          {:ok, Redix.Protocol.redis_value()}
+          | {:error, atom | Redix.Error.t() | Redix.ConnectionError.t()}
   def get(key), do: Redix.command(:redix, ["GET", key])
 
   @doc """
   Given a key and a map as value, encodes and sets the value in the given key.
   """
-  @spec set(binary, map) :: {:ok, Redix.Protocol.redis_value} | {:error, atom | Redix.Error.t | Redix.ConnectionError.t}
+  @spec set(binary, map) ::
+          {:ok, Redix.Protocol.redis_value()}
+          | {:error, atom | Redix.Error.t() | Redix.ConnectionError.t()}
   def set(key, value), do: Redix.command(:redix, ["SET", key, Jason.encode!(value)])
 
   @doc """
@@ -47,9 +51,10 @@ defmodule Redis.Client do
     end
   end
 
-  @spec fetch_reverse_range(binary, binary | non_neg_integer()) :: {:ok, binary} | {:error, :no_result}
+  @spec fetch_reverse_range(binary, binary | non_neg_integer()) ::
+          {:ok, binary} | {:error, :no_result}
   def fetch_reverse_range(stream_name, count),
-    do: fetch_stream(stream_name, [count: count, command: :desc])
+    do: fetch_stream(stream_name, count: count, command: :desc)
 
   @spec parse_command_opt(keyword) :: binary
   defp parse_command_opt(opts) do
@@ -83,11 +88,14 @@ defmodule Redis.Client do
   defp parse_stream_reply(reply) do
     with {:ok, entries} <- parse_reply(reply),
          parsed_entries <- parse_stream_entries(entries) do
-          {:ok, parsed_entries}
+      {:ok, parsed_entries}
     end
   rescue
     error ->
-      Logger.error("There was an error while processing the stream result error=#{inspect(error)}")
+      Logger.error(
+        "There was an error while processing the stream result error=#{inspect(error)}"
+      )
+
       {:error, :stream_parse_error}
   end
 

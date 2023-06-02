@@ -83,7 +83,10 @@ defmodule PriceSpotter.Marketplaces do
   def create_product(attrs \\ %{}) do
     %Product{}
     |> Product.changeset(attrs)
-    |> Ecto.Changeset.put_change(:price_updated_at, NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second))
+    |> Ecto.Changeset.put_change(
+      :price_updated_at,
+      NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    )
     |> Repo.insert()
   end
 
@@ -155,12 +158,13 @@ defmodule PriceSpotter.Marketplaces do
           Logger.debug("Created product product=#{inspect(p)}")
           # Trace new added product
           {:ok, p}
-
       end
-
     else
       %Ecto.Changeset{valid?: false} = cs ->
-        Logger.error("An error occured while casting stream values into Product changeset=#{inspect(cs)}")
+        Logger.error(
+          "An error occured while casting stream values into Product changeset=#{inspect(cs)}"
+        )
+
         {:error, :invalid_values}
 
       error ->
@@ -175,24 +179,35 @@ defmodule PriceSpotter.Marketplaces do
   @spec upsert_product(Ecto.Changeset.t()) :: any()
   def upsert_product(cs) do
     internal_id = cs.changes.internal_id
+
     Ecto.Multi.new()
     |> Ecto.Multi.one(:product, fn _multi ->
       from(p in Product, where: p.internal_id == ^internal_id)
     end)
     |> Ecto.Multi.run(:op, fn
       _repo, %{product: nil} = _multi ->
-        cs = Ecto.Changeset.put_change(cs, :price_updated_at, NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second))
+        cs =
+          Ecto.Changeset.put_change(
+            cs,
+            :price_updated_at,
+            NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+          )
 
         {:ok, %Product{} = p} = create_product(cs.changes)
         {:ok, {:created, p}}
 
       _repo, %{product: %Product{} = product} = _multi ->
         changes = cs.changes
+
         changes =
           if product.price == changes.price do
             changes
           else
-            Map.put(changes, :price_updated_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+            Map.put(
+              changes,
+              :price_updated_at,
+              NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+            )
           end
 
         {:ok, %Product{} = p} = update_product(product, changes)
@@ -204,19 +219,21 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, result.op}
 
       error ->
-        Logger.error("There was an error while processing a product upsert error=#{inspect(error, pretty: true)}")
-        error
+        Logger.error(
+          "There was an error while processing a product upsert error=#{inspect(error, pretty: true)}"
+        )
 
+        error
     end
   end
 
-  @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) :: {:ok, any()} | {:error, :no_product}
+  @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) ::
+          {:ok, any()} | {:error, :no_product}
   def fetch_last_product_entry(stream_key, _count \\ "*") do
     stream_name = get_stream_name("product-history_" <> stream_key)
 
     with {:ok, %Redis.Stream.Entry{} = entry} <- Redis.Client.fetch_last_stream_entry(stream_name) do
       entry
-
     else
       {:error, :no_product} ->
         []
@@ -224,11 +241,10 @@ defmodule PriceSpotter.Marketplaces do
       error ->
         Logger.error("An error occured while fetching product history results from redis.")
         error
-
     end
   end
 
-  defp get_stream_name(stream_key), do: "#{get_env()}_stream_#{stream_key}_v1"
+  defp get_stream_name(stream_key), do: "#{get_stage()}_stream_#{stream_key}_v1"
 
-  defp get_env, do: Atom.to_string(Mix.env())
+  defp get_stage, do: PriceSpotter.Application.stage()
 end

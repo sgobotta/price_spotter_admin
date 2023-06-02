@@ -36,18 +36,39 @@ defmodule PriceSpotter.Marketplaces.Product do
   @doc false
   def changeset(product, attrs) do
     product
-    |> cast(attrs, [:category, :img_url, :internal_id, :supplier_name, :meta, :name, :price, :supplier_url, :price_updated_at])
-    |> validate_required([:category, :img_url, :internal_id, :supplier_name, :name, :price, :supplier_url])
+    |> cast(attrs, [
+      :category,
+      :img_url,
+      :internal_id,
+      :supplier_name,
+      :meta,
+      :name,
+      :price,
+      :supplier_url,
+      :price_updated_at
+    ])
+    |> validate_required([
+      :category,
+      :img_url,
+      :internal_id,
+      :supplier_name,
+      :name,
+      :price,
+      :supplier_url
+    ])
     |> unique_constraint(:internal_id)
   end
 
   @spec from_entry!(Redis.Stream.Entry.t()) :: Ecto.Changeset.t()
   def from_entry!(%Redis.Stream.Entry{values: product}) do
-    changeset(%__MODULE__{}, Map.merge(product, %{
-      "supplier_name" => product["supplier"],
-      "meta" => Jason.decode!(product["meta"]),
-      "price" => sanitize_price(product["price"])
-    }))
+    changeset(
+      %__MODULE__{},
+      Map.merge(product, %{
+        "supplier_name" => product["supplier"],
+        "meta" => Jason.decode!(product["meta"]),
+        "price" => sanitize_price(product["price"])
+      })
+    )
   end
 
   @spec sanitize_price(String.t()) :: String.t()
@@ -66,11 +87,11 @@ defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
   @moduledoc false
   import Ecto.Query
 
-  @spec price_updated_at(PriceSpotter.Marketplaces.Product.t(), Flop.Filter.t(), keyword()) :: Ecto.Query.t()
+  @spec price_updated_at(PriceSpotter.Marketplaces.Product.t(), Flop.Filter.t(), keyword()) ::
+          Ecto.Query.t()
   def price_updated_at(q, %Flop.Filter{value: value, op: op}, _options) do
     case Ecto.Type.cast(:naive_datetime, value) do
       {:ok, since_date} ->
-
         case op do
           :== -> where(q, [p], p.price_updated_at == ^since_date)
           :!= -> where(q, [p], p.price_updated_at != ^since_date)
