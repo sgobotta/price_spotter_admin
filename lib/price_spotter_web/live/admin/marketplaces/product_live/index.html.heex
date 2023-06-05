@@ -14,39 +14,7 @@
     <.filter_form
       id="products-filter-form"
       meta={@meta}
-      fields={[
-        name: [
-          label: gettext("Product"),
-          op: :like
-        ],
-        category: [
-          label: gettext("Category"),
-          type: "select",
-          prompt: gettext("All categories"),
-          options: @product_categories
-        ],
-        supplier_name: [
-          label: gettext("Supplier"),
-          type: "select",
-          prompt: gettext("All suppliers"),
-          options: @product_suppliers
-        ],
-        price_updated_at: [
-          label: gettext("Last Update"),
-          op: :>=,
-          type: "datetime-local"
-        ],
-        price: [
-          label: gettext("Min Price"),
-          op: :>=,
-          type: "number"
-        ],
-        price: [
-          label: gettext("Max Price"),
-          op: :<=,
-          type: "number"
-        ]
-      ]}
+      fields={@filter_fields}
     />
   </div>
 

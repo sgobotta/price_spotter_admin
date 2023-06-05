@@ -18,6 +18,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          socket
          |> assign(%{products: products, meta: meta})
          |> assign_selection_options()
+         |> assign_filter_fields()
          |> assign(:total, meta.total_count)
          |> apply_action(socket.assigns.live_action, params)}
 
@@ -102,5 +103,42 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     socket
     |> assign(:product_categories, Marketplaces.list_product_categories())
     |> assign(:product_suppliers, Marketplaces.list_product_supplier())
+  end
+
+  defp assign_filter_fields(socket) do
+    fields = [
+      name: [
+        label: gettext("Product"),
+        op: :like
+      ],
+      category: [
+        label: gettext("Category"),
+        type: "select",
+        prompt: gettext("All categories"),
+        options: socket.assigns.product_categories
+      ],
+      supplier_name: [
+        label: gettext("Supplier"),
+        type: "select",
+        prompt: gettext("All suppliers"),
+        options: socket.assigns.product_suppliers
+      ],
+      price_updated_since: [
+        label: gettext("Last Update"),
+        op: :>=,
+        type: "datetime-local"
+      ],
+      min_price: [
+        label: gettext("Min Price"),
+        op: :>=,
+        type: "number"
+      ],
+      max_price: [
+        label: gettext("Max Price"),
+        op: :<=,
+        type: "number"
+      ]
+    ]
+    assign(socket, :filter_fields, fields)
   end
 end

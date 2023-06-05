@@ -4,12 +4,20 @@ defmodule PriceSpotter.Marketplaces.Product do
 
   @derive {
     Flop.Schema,
-    filterable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
-    sortable: [:name, :category, :internal_id, :supplier_name, :price],
+    filterable: [:name, :category, :internal_id, :supplier_name, :price_updated_since, :min_price, :max_price],
+    sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
     custom_fields: [
-      price_updated_at: [
-        filter: {PriceSpotter.Marketplaces.Product.CustomFilters, :price_updated_at, []},
+      price_updated_since: [
+        filter: {PriceSpotter.Marketplaces.Product.CustomFilters, :price_updated_since, []},
         ecto_type: :naive_datetime
+      ],
+      max_price: [
+        filter: {PriceSpotter.Marketplaces.Product.CustomFilters, :price, []},
+        ecto_type: :decimal
+      ],
+      min_price: [
+        filter: {PriceSpotter.Marketplaces.Product.CustomFilters, :price, []},
+        ecto_type: :decimal
       ]
     ],
     default_limit: 10
@@ -87,9 +95,10 @@ defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
   @moduledoc false
   import Ecto.Query
 
-  @spec price_updated_at(PriceSpotter.Marketplaces.Product.t(), Flop.Filter.t(), keyword()) ::
-          Ecto.Query.t()
-  def price_updated_at(q, %Flop.Filter{value: value, op: op}, _options) do
+  alias PriceSpotter.Marketplaces.Product
+
+  @spec price_updated_since(Product.t(), Flop.Filter.t(), keyword()) :: Ecto.Query.t()
+  def price_updated_since(q, %Flop.Filter{value: value, op: op}, _options) do
     case Ecto.Type.cast(:naive_datetime, value) do
       {:ok, since_date} ->
         case op do
@@ -100,6 +109,31 @@ defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
           :>= -> where(q, [p], p.price_updated_at >= ^since_date)
           :<= -> where(q, [p], p.price_updated_at <= ^since_date)
         end
+
+      :error ->
+        # cannot cast filter value, ignore
+        q
+    end
+  end
+
+  @spec price(Product.t(), Flop.Filter.t(), keyword()) :: Ecto.Query.t()
+  def price(q, %Flop.Filter{value: value, op: :<=}, _options) do
+    case Ecto.Type.cast(:decimal, value) do
+      {:ok, price} ->
+        IO.inspect(price, label: "Less than or equal, Decimal")
+        where(q, [p], p.price <= ^price)
+
+      :error ->
+        # cannot cast filter value, ignore
+        q
+    end
+  end
+
+  def price(q, %Flop.Filter{value: value, op: :>=}, _options) do
+    case Ecto.Type.cast(:decimal, value) do
+      {:ok, price} ->
+        IO.inspect(price, label: "Greater than or equal, Decimal")
+        where(q, [p], p.price >= ^price)
 
       :error ->
         # cannot cast filter value, ignore
