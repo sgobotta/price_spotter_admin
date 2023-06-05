@@ -141,4 +141,14 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     ]
     assign(socket, :filter_fields, fields)
   end
+
+  defp get_export_url(meta) do
+    %{flop: %Flop{} = flop} = meta
+
+    %Flop{} = flop = %Flop{flop | page_size: nil, limit: Product.max_limit()}
+
+    query = Flop.Phoenix.to_query(flop)
+
+    PriceSpotterWeb.Router.Helpers.export_path(PriceSpotterWeb.Endpoint, :create, query)
+  end
 end
