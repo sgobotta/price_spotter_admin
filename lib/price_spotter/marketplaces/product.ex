@@ -2,6 +2,9 @@ defmodule PriceSpotter.Marketplaces.Product do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @max_limit 10_000
+  @default_limit 10
+
   @derive {
     Flop.Schema,
     filterable: [:name, :category, :internal_id, :supplier_name, :price_updated_since, :min_price, :max_price],
@@ -20,7 +23,8 @@ defmodule PriceSpotter.Marketplaces.Product do
         ecto_type: :decimal
       ]
     ],
-    default_limit: 10
+    default_limit: @default_limit,
+    max_limit: @max_limit
   }
 
   @type t :: %__MODULE__{}
@@ -78,6 +82,12 @@ defmodule PriceSpotter.Marketplaces.Product do
       })
     )
   end
+
+  @spec max_limit() :: non_neg_integer()
+  def max_limit, do: @max_limit
+
+  @spec limit() :: non_neg_integer()
+  def limit, do: @default_limit
 
   @spec sanitize_price(String.t()) :: String.t()
   defp sanitize_price(nil), do: 0
