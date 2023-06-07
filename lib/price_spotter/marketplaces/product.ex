@@ -130,7 +130,6 @@ defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
   def price(q, %Flop.Filter{value: value, op: :<=}, _options) do
     case Ecto.Type.cast(:decimal, value) do
       {:ok, price} ->
-        IO.inspect(price, label: "Less than or equal, Decimal")
         where(q, [p], p.price <= ^price)
 
       :error ->
@@ -142,7 +141,6 @@ defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
   def price(q, %Flop.Filter{value: value, op: :>=}, _options) do
     case Ecto.Type.cast(:decimal, value) do
       {:ok, price} ->
-        IO.inspect(price, label: "Greater than or equal, Decimal")
         where(q, [p], p.price >= ^price)
 
       :error ->
