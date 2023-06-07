@@ -140,20 +140,23 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
         type: "number"
       ]
     ]
+
     assign(socket, :filter_fields, fields)
   end
 
-  defp get_column_names, do: Enum.join(Enum.map(get_columns(), &Atom.to_string(Map.get(&1, :name))), ",")
+  defp get_column_names,
+    do: Enum.join(Enum.map(get_columns(), &Atom.to_string(Map.get(&1, :name))), ",")
 
-  defp get_columns, do: [
-    %{name: :name, label: gettext("Product")},
-    %{name: :price, label: gettext("Price")},
-    %{name: :price_updated_at, label: gettext("Last Price Update")},
-    %{name: :supplier_name, label: gettext("Supplier")},
-    %{name: :category, label: gettext("Category")},
-    %{name: :img_url, label: gettext("Image URL")},
-    %{name: :supplier_url, label: gettext("Product URL")}
-  ]
+  defp get_columns,
+    do: [
+      %{name: :name, label: gettext("Product")},
+      %{name: :price, label: gettext("Price")},
+      %{name: :price_updated_at, label: gettext("Last Price Update")},
+      %{name: :supplier_name, label: gettext("Supplier")},
+      %{name: :category, label: gettext("Category")},
+      %{name: :img_url, label: gettext("Image URL")},
+      %{name: :supplier_url, label: gettext("Product URL")}
+    ]
 
   defp get_max_limit, do: Product.max_limit()
 

@@ -1,14 +1,16 @@
 defmodule PriceSpotterWeb.ExportController do
   use PriceSpotterWeb, :controller
 
-  def create(conn, %{"all_pages" => all_pages?, "columns" => columns, "max_limit" => max_limit} = params) do
+  def create(
+        conn,
+        %{"all_pages" => all_pages?, "columns" => columns, "max_limit" => max_limit} = params
+      ) do
     with columns <- parse_columns(columns),
          params <- sanitize_empty_params(params),
          params <- maybe_put_max_limit(all_pages?, params, max_limit),
          fields <- parse_fields(params, columns),
          {:ok, {products, _meta}} <- PriceSpotter.Marketplaces.list_products(params),
          csv_data <- csv_content(products, fields) do
-
       conn
       |> put_resp_content_type("text/csv")
       |> put_resp_header("content-disposition", "attachment; filename=\"export.csv\"")
@@ -34,7 +36,7 @@ defmodule PriceSpotterWeb.ExportController do
   defp parse_fields(params, columns) do
     Enum.reduce(params, [], fn {field, active}, acc ->
       if active == "true" and Enum.member?(columns, field),
-        do: [String.to_existing_atom(field)|acc],
+        do: [String.to_existing_atom(field) | acc],
         else: acc
     end)
   end
@@ -44,7 +46,8 @@ defmodule PriceSpotterWeb.ExportController do
     |> Enum.map(fn record ->
       record
       |> Map.from_struct()
-      |> Map.take([]) # gives an empty map
+      # gives an empty map
+      |> Map.take([])
       |> Map.merge(Map.take(record, fields))
       |> Map.values()
     end)

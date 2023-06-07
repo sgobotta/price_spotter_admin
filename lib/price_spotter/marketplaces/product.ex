@@ -7,7 +7,15 @@ defmodule PriceSpotter.Marketplaces.Product do
 
   @derive {
     Flop.Schema,
-    filterable: [:name, :category, :internal_id, :supplier_name, :price_updated_since, :min_price, :max_price],
+    filterable: [
+      :name,
+      :category,
+      :internal_id,
+      :supplier_name,
+      :price_updated_since,
+      :min_price,
+      :max_price
+    ],
     sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
     custom_fields: [
       price_updated_since: [
