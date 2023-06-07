@@ -307,7 +307,7 @@ defmodule PriceSpotterWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class={"rounded border-zinc-300 text-zinc-900 focus:ring-0 #{@class}"}
+          class={"rounded focus:ring-0 checkbox #{@class}"}
           {@rest}
         />
         <%= @label %>
@@ -357,9 +357,14 @@ defmodule PriceSpotterWeb.CoreComponents do
   end
 
   # All other inputs text, datetime-local, url, password, etc. are handled here...
-  def input(assigns) do
+  def input(%{type: type} = assigns) do
+    assigns =
+      assign_new(assigns, :container_class, fn ->
+        if type == "hidden", do: "hidden", else: ""
+      end)
+
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div phx-feedback-for={@name} class={@container_class}>
       <.label for={@id}><%= @label %></.label>
       <input
         type={@type}
@@ -657,6 +662,22 @@ defmodule PriceSpotterWeb.CoreComponents do
         </.button>
       </div>
     </.form>
+    """
+  end
+
+  attr :id, :string, required: true
+  slot :toggle, required: true
+
+  def dropdown(assigns) do
+    ~H"""
+    <div class="relative inline-block text-left">
+      <.button class="flex flex-row" phx-click={ JS.toggle(to: "##{@id}", in: {"duration-300", "opacity-0", "opacity-100"}, out: {"duration-75", "opacity-100", "opacity-0"})  } >
+        <%= render_slot(@toggle) %>
+      </.button>
+      <div id={@id} class="absolute right-0 z-20 hidden" phx-click-away={JS.hide(to: "##{@id}", transition: {"duration-75", "opacity-100", "opacity-0"})}>
+        <%= render_slot(@inner_block, assigns) %>
+      </div>
+    </div>
     """
   end
 

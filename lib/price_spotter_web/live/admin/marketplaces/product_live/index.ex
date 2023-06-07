@@ -20,6 +20,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          |> assign_selection_options()
          |> assign_filter_fields()
          |> assign(:total, meta.total_count)
+         |> assign(filter_fields_form: to_form(meta))
          |> apply_action(socket.assigns.live_action, params)}
 
       _error ->
@@ -142,13 +143,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     assign(socket, :filter_fields, fields)
   end
 
-  defp get_export_url(meta) do
-    %{flop: %Flop{} = flop} = meta
+  defp get_column_names, do: Enum.join(Enum.map(get_columns(), &Atom.to_string(Map.get(&1, :name))), ",")
 
-    %Flop{} = flop = %Flop{flop | page_size: nil, limit: Product.max_limit()}
+  defp get_columns, do: [
+    %{name: :name, label: gettext("Product")},
+    %{name: :price, label: gettext("Price")},
+    %{name: :price_updated_at, label: gettext("Last Price Update")},
+    %{name: :supplier_name, label: gettext("Supplier")},
+    %{name: :category, label: gettext("Category")},
+    %{name: :img_url, label: gettext("Image URL")},
+    %{name: :supplier_url, label: gettext("Product URL")}
+  ]
 
-    query = Flop.Phoenix.to_query(flop)
+  defp get_max_limit, do: Product.max_limit()
 
-    PriceSpotterWeb.Router.Helpers.export_path(PriceSpotterWeb.Endpoint, :create, query)
-  end
+  defp get_limit, do: Product.limit()
 end
