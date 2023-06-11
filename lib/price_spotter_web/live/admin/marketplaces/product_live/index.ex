@@ -110,7 +110,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     fields = [
       name: [
         label: gettext("Product"),
-        op: :like
+        op: :ilike,
+        placeholder: gettext("Filter by product name")
       ],
       category: [
         label: gettext("Category"),
@@ -132,11 +133,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
       min_price: [
         label: gettext("Min Price"),
         op: :>=,
+        placeholder: gettext("Choose a minimum price"),
         type: "number"
       ],
       max_price: [
         label: gettext("Max Price"),
         op: :<=,
+        placeholder: gettext("Choose a maximum price"),
         type: "number"
       ]
     ]
