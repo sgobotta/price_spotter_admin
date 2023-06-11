@@ -33,7 +33,7 @@ docker.delete:
 
 #🐳 docker.run: @ Run the price_spotter_app docker instance
 docker.run:
-	@docker run --name price_spotter_app --network price_spotter_devops_default -p 5000:5000 --env-file .env.prod price_spotter_app
+	@docker run --detach --name price_spotter_app --network price_spotter_devops_default -p 5000:5000 --env-file .env.prod price_spotter_app
 
 #🐳 docker.connect: @ Connect to the price_spotter_app running container
 docker.connect:
