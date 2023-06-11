@@ -1,6 +1,7 @@
 defmodule PriceSpotterWeb.ExportController do
   use PriceSpotterWeb, :controller
 
+  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(
         conn,
         %{"all_pages" => all_pages?, "columns" => columns, "max_limit" => max_limit} = params
@@ -10,10 +11,12 @@ defmodule PriceSpotterWeb.ExportController do
          params <- maybe_put_max_limit(all_pages?, params, max_limit),
          fields <- parse_fields(params, columns),
          {:ok, {products, _meta}} <- PriceSpotter.Marketplaces.list_products(params),
-         csv_data <- csv_content(products, fields) do
+         csv_data <- csv_content(products, fields),
+         datetime <- NaiveDateTime.utc_now(),
+         filename <- get_filename(datetime) do
       conn
       |> put_resp_content_type("text/csv")
-      |> put_resp_header("content-disposition", "attachment; filename=\"export.csv\"")
+      |> put_resp_header("content-disposition", "attachment; filename=\"#{filename}.csv\"")
       |> send_resp(200, csv_data)
     end
   end
@@ -55,4 +58,14 @@ defmodule PriceSpotterWeb.ExportController do
     |> Enum.to_list()
     |> to_string()
   end
+
+  defp get_filename(%NaiveDateTime{
+         year: year,
+         month: month,
+         day: day,
+         hour: hour,
+         minute: minute,
+         second: second
+       }),
+       do: "#{year}-#{month}-#{day}T#{hour}-#{minute}-#{second}_export"
 end
