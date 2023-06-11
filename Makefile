@@ -45,7 +45,7 @@ docker.release: docker.stop docker.delete docker.build docker.run
 #❓ help: @ Displays this message
 help: SHELL:=/bin/bash
 help:
-	@grep -E '[a-zA-Z\.\-]+:.*?@ .*$$' $(firstword $(MAKEFILE_LIST))| tr -d '#'  | awk 'BEGIN {FS = ":.*?@ "}; {printf "${GREEN}%-30s${NOFORMAT} %s\n", $$1, $$2}'|
+	@grep -E '[a-zA-Z\.\-]+:.*?@ .*$$' $(firstword $(MAKEFILE_LIST))| tr -d '#'  | awk 'BEGIN {FS = ":.*?@ "}; {printf "${GREEN}%-30s${NOFORMAT} %s\n", $$1, $$2}'
 
 #💻 server: @ Starts a server with an interactive elixir shell.
 server: SHELL:=/bin/bash
