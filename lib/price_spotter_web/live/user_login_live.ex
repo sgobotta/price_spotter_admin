@@ -7,10 +7,10 @@ defmodule PriceSpotterWeb.UserLoginLive do
       <.header class="text-center">
         <%= gettext("Sign in to account") %>
         <:subtitle>
-          <%= gettext("Don't have an account?") %>
+          <%!-- <%= gettext("Don't have an account?") %>
           <.link navigate={~p"/users/register"} class="font-semibold text-brand hover:underline">
             <%= gettext("Sign up") %>
-          </.link>
+          </.link> --%>
         </:subtitle>
       </.header>
 
@@ -20,9 +20,9 @@ defmodule PriceSpotterWeb.UserLoginLive do
 
         <:actions>
           <.input field={@form[:remember_me]} type="checkbox" label={gettext("Keep me logged in")} />
-          <.link href={~p"/users/reset_password"} class="text-sm font-semibold">
+          <%!-- <.link href={~p"/users/reset_password"} class="text-sm font-semibold">
             <%= gettext("Forgot your password?") %>
-          </.link>
+          </.link> --%>
         </:actions>
         <:actions>
           <.button phx-disable-with={gettext("Signing in...")} class="w-full">
