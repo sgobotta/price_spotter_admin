@@ -9,3 +9,7 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+:ok =
+  System.fetch_env!("MIX_ENV")
+  |> String.to_atom()
+  |> PriceSpotter.Seeds.populate()

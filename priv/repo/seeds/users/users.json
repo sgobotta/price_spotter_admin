@@ -1,0 +1,10 @@
+[
+  {
+    "id": "b41fbc4f-e55c-4cf1-afbd-250e266f5898",
+    "email": "demo0@pricespotter.com.ar",
+    "hashed_password": "$2b$12$Eivdo.1i26tBvOua/V606ejDMh5O6Uq.1.k6D9BT.edfPA3Gt.ajW",
+    "confirmed_at": "2020-11-15 22:14:57",
+    "inserted_at": "2020-11-15 22:13:29",
+    "updated_at": "2020-11-17 14:15:00"
+  }
+]
