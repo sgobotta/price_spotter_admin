@@ -32,14 +32,16 @@ docker.delete:
 	@docker rm price_spotter_app || true
 
 #🐳 docker.run: @ Run the price_spotter_app docker instance
+docker.run: PORT:=5000
 docker.run:
-	@docker run --detach --name price_spotter_app --network price_spotter_devops_default -p 5000:5000 --env-file .env.prod price_spotter_app
+	@docker run --detach --name price_spotter_app --network price_spotter_devops_default -p ${PORT}:5000 --env-file .env.prod price_spotter_app
 
 #🐳 docker.connect: @ Connect to the price_spotter_app running container
 docker.connect:
 	@docker exec -it price_spotter_app /bin/bash
 
 #🐳 docker.release: @ Re-create a docker image and run it
+docker.release: PORT:=5000
 docker.release: docker.stop docker.delete docker.build docker.run
 
 #❓ help: @ Displays this message
