@@ -59,7 +59,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert index_live
              |> form("#product-form", product: @invalid_attrs)
-            #  |> render_change() =~ "can&#39;t be blank"
+             #  |> render_change() =~ "can&#39;t be blank"
              |> render_change() =~ "no puede estar en blanco"
 
       assert index_live
@@ -126,7 +126,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert show_live
              |> form("#product-form", product: @invalid_attrs)
-            #  |> render_change() =~ gettext("can't be blank")
+             #  |> render_change() =~ gettext("can't be blank")
              |> render_change() =~ gettext("no puede estar en blanco")
 
       assert show_live
