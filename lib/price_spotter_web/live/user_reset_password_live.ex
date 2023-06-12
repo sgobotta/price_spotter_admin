@@ -26,7 +26,9 @@ defmodule PriceSpotterWeb.UserResetPasswordLive do
           required
         />
         <:actions>
-          <.button phx-disable-with={gettext("Resetting...")} class="w-full"><%= gettext("Reset Password") %></.button>
+          <.button phx-disable-with={gettext("Resetting...")} class="w-full">
+            <%= gettext("Reset Password") %>
+          </.button>
         </:actions>
       </.simple_form>
 
