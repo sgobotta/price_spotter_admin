@@ -77,7 +77,9 @@ defmodule PriceSpotter.Seeds.Utils do
       """
       @spec populate :: :ok
       def populate do
-        with {:ok, body} <- File.read(@json_file),
+        file_path = "#{:code.priv_dir(:price_spotter)}/repo/seeds/#{@plural_element}/#{@json_file}"
+
+        with {:ok, body} <- File.read(file_path),
           {:ok, elements} <- Jason.decode(body, keys: :atoms) do
 
           elements = for element <- elements do

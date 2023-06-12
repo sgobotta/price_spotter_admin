@@ -5,7 +5,7 @@ defmodule PriceSpotter.Seeds.Users do
 
   use PriceSpotter.Seeds.Utils,
     repo: PriceSpotter.Repo,
-    json_file: "#{__DIR__}/users.json",
+    json_file: "users.json",
     plural_element: "users",
     element_module: PriceSpotter.Accounts.User,
     date_keys: [:confirmed_at, :inserted_at, :updated_at]
