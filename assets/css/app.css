@@ -127,3 +127,7 @@ input[type=checkbox]:focus {
 input[type=checkbox]:checked {
   @apply bg-sky-500 text-sky-500 rounded-lg !important;
 }
+
+span.order-direction {
+  @apply text-xl;
+}
