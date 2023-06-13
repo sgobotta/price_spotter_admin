@@ -119,7 +119,16 @@
       items={@products}
       meta={@meta}
       path={~p"/admin/marketplaces/products"}
-      opts={[thead_tr_attrs: [class: "text-xs sm:text-base"], tbody_tr_attrs: [class: ""]]}
+      opts={[
+        symbol_asc: ~H"""
+        <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600" />
+        """,
+        symbol_desc: ~H"""
+        <.icon name="hero-chevron-down-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600" />
+        """,
+        thead_tr_attrs: [class: "text-xs sm:text-base"],
+        tbody_tr_attrs: [class: ""]
+      ]}
     >
       <:col
         :let={product}
