@@ -239,9 +239,53 @@ defmodule PriceSpotter.Marketplaces do
         []
 
       error ->
-        Logger.error("An error occured while fetching product history results from redis.")
+        Logger.error(
+          "An error occured while fetching last product entry from redis for stream_key=#{stream_key}."
+        )
+
         error
     end
+  end
+
+  @doc """
+  Given a supplier name and an internal id for a product, returns a list of
+  redis stream entries for all the avaialble historical data.
+  """
+  @spec fetch_product_history(String.t(), String.t()) :: {:ok, [Redis.Stream.Entry.t()]} | :error
+  def fetch_product_history(supplier_name, internal_id) do
+    stream_name = get_stream_name("product-history_" <> supplier_name <> "_" <> internal_id)
+
+    with {:ok, entries} <- Redis.Client.fetch_history(stream_name, :all),
+         history <- map_product_history(entries) do
+      {:ok, history}
+    else
+      error ->
+        Logger.error(
+          "An error occured while fetching product history from redis for supplier_name=#{supplier_name} internal_id=#{internal_id} error=#{inspect(error)}"
+        )
+
+        :error
+    end
+  rescue
+    error ->
+      Logger.error(
+        "Recovered from an while fetching product history from redis error=#{inspect(error)}"
+      )
+
+      :error
+  end
+
+  @spec map_product_history([Redis.Stream.Entry.t()]) :: [{NaiveDateTime.t(), Product.t()}]
+  defp map_product_history(entries) do
+    Enum.map(entries, fn %Redis.Stream.Entry{datetime: datetime} = entry ->
+      %Product{} =
+        product =
+        entry
+        |> Product.from_entry!()
+        |> Ecto.Changeset.apply_changes()
+
+      {datetime, product}
+    end)
   end
 
   defp get_stream_name(stream_key), do: "#{get_stage()}_stream_#{stream_key}_v1"

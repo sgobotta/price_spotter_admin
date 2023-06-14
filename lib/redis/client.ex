@@ -26,10 +26,7 @@ defmodule Redis.Client do
   """
   @spec fetch_stream(binary, keyword) :: {atom, binary}
   def fetch_stream(stream_name, opts) do
-    opts =
-      opts
-      |> Keyword.put(:count, parse_count_opt(opts))
-      |> Keyword.put(:command, parse_command_opt(opts))
+    opts = parse_opts(opts)
 
     fetch_stream(stream_name, opts[:command], opts[:count])
   end
@@ -51,14 +48,36 @@ defmodule Redis.Client do
     end
   end
 
+  @spec fetch_history(binary, binary | non_neg_integer()) ::
+          {:ok, binary} | {:error, :no_result}
+  def fetch_history(stream_name, :all) do
+    opts = parse_opts(command: :asc)
+
+    Redix.command(:redix, [opts[:command], stream_name, "-", "+"])
+    |> parse_stream_reply()
+  end
+
+  def fetch_history(stream_name, count) do
+    opts = parse_opts(count: count, command: :asc)
+
+    Redix.command(:redix, [opts[:command], stream_name, "-", "+", "COUNT", opts[:count]])
+    |> parse_stream_reply()
+  end
+
   @spec fetch_reverse_range(binary, binary | non_neg_integer()) ::
           {:ok, binary} | {:error, :no_result}
   def fetch_reverse_range(stream_name, count),
     do: fetch_stream(stream_name, count: count, command: :desc)
 
+  defp parse_opts(opts) do
+    opts
+    |> Keyword.put(:count, parse_count_opt(opts))
+    |> Keyword.put(:command, parse_command_opt(opts))
+  end
+
   @spec parse_command_opt(keyword) :: binary
   defp parse_command_opt(opts) do
-    case Keyword.get(opts, :asc, false) == :asc do
+    case Keyword.get(opts, :command, :asc) == :asc do
       true ->
         "XRANGE"
 
@@ -109,8 +128,8 @@ end
 defmodule Redis.Stream.Entry do
   require Integer
 
-  @enforce_keys [:id, :values]
-  defstruct id: nil, values: nil
+  @enforce_keys [:id, :values, :datetime]
+  defstruct id: nil, values: nil, datetime: nil
 
   @type t :: %__MODULE__{}
 
@@ -120,6 +139,8 @@ defmodule Redis.Stream.Entry do
   """
   @spec from_raw_entry(any()) :: map()
   def from_raw_entry([entry_id, entry]) do
+    datetime = parse_stream_entry_id(entry_id)
+
     Enum.reduce(Enum.with_index(entry), {[], []}, fn {value, index}, {keys, values} ->
       case Integer.is_even(index) do
         true ->
@@ -131,6 +152,16 @@ defmodule Redis.Stream.Entry do
     end)
     |> then(fn {keys, values} -> Enum.zip(keys, values) end)
     |> Enum.into(%{})
-    |> then(fn values -> %__MODULE__{id: entry_id, values: values} end)
+    |> then(fn values -> %__MODULE__{id: entry_id, values: values, datetime: datetime} end)
+  end
+
+  @spec parse_stream_entry_id(String.t()) :: NaiveDateTime.t()
+  defp parse_stream_entry_id(entry_id) do
+    entry_id
+    |> String.split("-")
+    |> hd
+    |> String.to_integer()
+    |> DateTime.from_unix!(:millisecond)
+    |> DateTime.to_naive()
   end
 end
