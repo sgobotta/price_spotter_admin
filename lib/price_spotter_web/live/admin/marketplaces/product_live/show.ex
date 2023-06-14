@@ -5,6 +5,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Process.send_after(self(), :update_chart, 500)
+    end
+
     {:ok, socket}
   end
 
@@ -25,6 +29,33 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @impl true
+  def handle_info(:update_chart, socket) do
+    with %Marketplaces.Product{
+           internal_id: internal_id,
+           name: product_name,
+           supplier_name: supplier_name
+         } <- socket.assigns.product,
+         {:ok, history} <- Marketplaces.fetch_product_history(supplier_name, internal_id) do
+      socket =
+        Enum.reduce(build_dataset(product_name, history), socket, fn data, acc ->
+          push_event(acc, "new-point", data)
+        end)
+
+      {:noreply, socket}
+    else
+      _error ->
+        {:noreply,
+         socket
+         |> push_event("new-point", %{
+           data_label: get_datetime_label(NaiveDateTime.utc_now()),
+           label: socket.assigns.product.name,
+           value: 0
+         })
+         |> put_flash(:error, gettext("There was an error loading the price chart"))}
+    end
+  end
+
+  @impl true
   def handle_event("delete", _params, socket) do
     {:ok, _} = Marketplaces.delete_product(socket.assigns.product)
 
@@ -33,4 +64,32 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp page_title(:show), do: gettext("Show Product")
   defp page_title(:edit), do: gettext("Edit Product")
+
+  defp render_chart(assigns) do
+    ~H"""
+    <canvas
+      id="chart-canvas"
+      phx-update="ignore"
+      phx-hook="LineChart"
+      height="200"
+      width="300"
+    />
+    """
+  end
+
+  @spec build_dataset(String.t(), [{NaiveDateTime.t(), Marketplaces.Product.t()}]) :: [map()]
+  defp build_dataset(product_name, product_history) do
+    Enum.map(product_history, fn {datetime, %Marketplaces.Product{price: price}} ->
+      %{data_label: get_datetime_label(datetime), label: product_name, value: price}
+    end)
+  end
+
+  defp get_datetime_label(%NaiveDateTime{
+         year: year,
+         month: month,
+         day: day,
+         hour: hour,
+         minute: minute
+       }),
+       do: "#{day}/#{month}/#{year} #{hour}:#{minute}hs"
 end
