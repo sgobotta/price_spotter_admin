@@ -67,13 +67,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp render_chart(assigns) do
     ~H"""
-    <canvas
-      id="chart-canvas"
-      phx-update="ignore"
-      phx-hook="LineChart"
-      height="200"
-      width="300"
-    />
+    <canvas id="chart-canvas" phx-update="ignore" phx-hook="LineChart" height="200" width="300" />
     """
   end
 
@@ -90,6 +84,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
          day: day,
          hour: hour,
          minute: minute
-       }),
-       do: "#{day}/#{month}/#{year} #{hour}:#{minute}hs"
+       }) do
+    minute = if minute < 10, do: "0#{minute}", else: minute
+    "#{day}/#{month}/#{year} #{hour}:#{minute}hs"
+  end
 end
