@@ -59,7 +59,7 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
     {:ok, :loaded, %{}}
   end
 
-  defp get_stream, do: "#{get_stage()}_stream_new-products_golosineria_v1"
+  defp get_stream, do: "#{get_stage()}_stream_new-products_la-golosineria_v1"
 
   defp get_stage, do: PriceSpotter.Application.stage()
 end
