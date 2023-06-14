@@ -17,7 +17,7 @@ export default class {
         datasets: {
           // https://www.chartjs.org/docs/3.6.0/charts/line.html#dataset-properties
           line: {
-            tension: 0.1
+            tension: 0.09
           }
         },
         plugins: {
@@ -60,7 +60,7 @@ export default class {
   }
 
   _createDataset(label) {
-    const newDataset = {label, data: [], borderColor: this.colors.pop()}
+    const newDataset = {label, data: [], borderColor: this.colors.pop(), fill: 'origin', backgroundColor: 'rgba(74, 222, 128, 0.1)'}
     this.chart.data.datasets.push(newDataset)
     return newDataset
   }
