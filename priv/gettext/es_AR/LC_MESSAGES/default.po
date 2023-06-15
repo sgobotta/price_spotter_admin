@@ -574,7 +574,7 @@ msgstr ""
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:69
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Products"
-msgstr "Producto"
+msgstr "Productos"
 
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:54
 #, elixir-autogen, elixir-format
