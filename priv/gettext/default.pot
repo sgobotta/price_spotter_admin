@@ -62,7 +62,7 @@ msgstr[1] ""
 msgid "Attempting to reconnect"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:60
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:65
 #, elixir-autogen, elixir-format
 msgid "Back to products"
 msgstr ""
@@ -76,18 +76,18 @@ msgid "Category"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:67
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:35
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:66
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:24
 #, elixir-autogen, elixir-format
 msgid "Edit Product"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:46
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:47
 #, elixir-autogen, elixir-format
 msgid "External link"
 msgstr ""
 
-#: lib/price_spotter_web/components/layouts/app.html.heex:17
+#: lib/price_spotter_web/components/layouts/app.html.heex:14
 #, elixir-autogen, elixir-format
 msgid "Home"
 msgstr ""
@@ -97,7 +97,7 @@ msgstr ""
 msgid "Img url"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:54
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:55
 #, elixir-autogen, elixir-format
 msgid "Last price"
 msgstr ""
@@ -153,7 +153,7 @@ msgstr ""
 msgid "Saving..."
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:34
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:65
 #, elixir-autogen, elixir-format
 msgid "Show Product"
 msgstr ""
@@ -565,6 +565,7 @@ msgstr ""
 msgid "You must log in to access this page."
 msgstr ""
 
+#: lib/price_spotter_web/components/layouts/app.html.heex:8
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:45
 #, elixir-autogen, elixir-format
 msgid "Price Spotter"
@@ -583,4 +584,9 @@ msgstr ""
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:51
 #, elixir-autogen, elixir-format
 msgid "Wholesaler products and prices"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:54
+#, elixir-autogen, elixir-format
+msgid "There was an error loading the price chart"
 msgstr ""
