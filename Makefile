@@ -62,8 +62,16 @@ setup:
 
 #🧪 test: @ Runs all test suites
 test: SHELL:=/bin/bash
+test: MIX_ENV=test
 test:
 	@mix test
+
+#🧪 test.watch: @ Runs and watches all test suites
+test.watch: SHELL:=/bin/bash
+test: MIX_ENV=test
+test.watch:
+	@echo "🧪👁️  Watching all test suites..."
+	@mix test.watch
 
 #📙 translations: @ Extract new untranslated phrases and merge translations to avaialble languages. This command uses fuzzy auto-generated transaltions, it generally needs a manual update to each language afterwards.
 translations: SHELL:=/bin/bash
