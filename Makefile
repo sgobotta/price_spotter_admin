@@ -68,10 +68,17 @@ test:
 
 #🧪 test.watch: @ Runs and watches all test suites
 test.watch: SHELL:=/bin/bash
-test: MIX_ENV=test
+test.watch: MIX_ENV=test
 test.watch:
 	@echo "🧪👁️  Watching all test suites..."
 	@mix test.watch
+
+#🧪 test.wip.watch: @ Runs and watches test suites that match the wip tag
+test.wip.watch: SHELL:=/bin/bash
+test.wip.watch: MIX_ENV=test
+test.wip.watch:
+	@echo "🧪👁️  Watching test suites tagged with wip..."
+	@mix test.watch --only wip
 
 #📙 translations: @ Extract new untranslated phrases and merge translations to avaialble languages. This command uses fuzzy auto-generated transaltions, it generally needs a manual update to each language afterwards.
 translations: SHELL:=/bin/bash
