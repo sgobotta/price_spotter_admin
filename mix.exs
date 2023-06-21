@@ -75,9 +75,18 @@ defmodule PriceSpotter.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.install": ["cmd npm i --prefix assets"],
-      "assets.setup": ["assets.install", "tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": [
+        "assets.install",
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing"
+      ],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["assets.install", "tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": [
+        "assets.install",
+        "tailwind default --minify",
+        "esbuild default --minify",
+        "phx.digest"
+      ]
     ]
   end
 end
