@@ -5,6 +5,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
   alias PriceSpotter.Accounts
   alias PriceSpotterWeb.UserAuth
   import PriceSpotter.AccountsFixtures
+  import PriceSpotterWeb.Gettext
 
   @remember_me_cookie "_price_spotter_web_user_remember_me"
 
@@ -234,7 +235,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
       assert redirected_to(conn) == ~p"/users/log_in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
-               "You must log in to access this page."
+               gettext("You must log in to access this page.")
     end
 
     test "stores the path to redirect to on GET", %{conn: conn} do

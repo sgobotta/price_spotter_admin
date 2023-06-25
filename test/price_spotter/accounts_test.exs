@@ -2,9 +2,10 @@ defmodule PriceSpotter.AccountsTest do
   use PriceSpotter.DataCase
 
   alias PriceSpotter.Accounts
+  alias PriceSpotter.Accounts.{User, UserToken}
 
   import PriceSpotter.AccountsFixtures
-  alias PriceSpotter.Accounts.{User, UserToken}
+  import PriceSpotterWeb.Gettext
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -52,36 +53,59 @@ defmodule PriceSpotter.AccountsTest do
     test "requires email and password to be set" do
       {:error, changeset} = Accounts.register_user(%{})
 
+      password_msg = dgettext("errors", "can't be blank")
+      email_msg = dgettext("errors", "can't be blank")
+
       assert %{
-               password: ["can't be blank"],
-               email: ["can't be blank"]
+               password: [^password_msg],
+               email: [^email_msg]
              } = errors_on(changeset)
     end
 
     test "validates email and password when given" do
       {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
 
+      email_msg = dgettext("errors", "must have the @ sign and no spaces")
+
+      password_msg =
+        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+
       assert %{
-               email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
+               email: [^email_msg],
+               password: [^password_msg]
              } = errors_on(changeset)
     end
 
     test "validates maximum values for email and password for security" do
       too_long = String.duplicate("db", 100)
       {:error, changeset} = Accounts.register_user(%{email: too_long, password: too_long})
-      assert "should be at most 160 character(s)" in errors_on(changeset).email
-      assert "should be at most 72 character(s)" in errors_on(changeset).password
+
+      email_length_msg =
+        dngettext(
+          "errors",
+          "should be at most %{count} character(s)",
+          "should be at most %{count} character(s)",
+          16
+        )
+
+      email_should_contain_msg = dgettext("errors", "must have the @ sign and no spaces")
+      assert email_length_msg in errors_on(changeset).email
+      assert email_should_contain_msg in errors_on(changeset).email
+
+      password_msg =
+        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+
+      assert password_msg in errors_on(changeset).password
     end
 
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
       {:error, changeset} = Accounts.register_user(%{email: email})
-      assert "has already been taken" in errors_on(changeset).email
+      assert dgettext("errors", "has already been taken") in errors_on(changeset).email
 
       # Now try with the upper cased email too, to check that email case is ignored.
       {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
-      assert "has already been taken" in errors_on(changeset).email
+      assert dgettext("errors", "has already been taken") in errors_on(changeset).email
     end
 
     test "registers users with a hashed password" do
@@ -131,14 +155,15 @@ defmodule PriceSpotter.AccountsTest do
 
     test "requires email to change", %{user: user} do
       {:error, changeset} = Accounts.apply_user_email(user, valid_user_password(), %{})
-      assert %{email: ["did not change"]} = errors_on(changeset)
+      assert %{email: [gettext("did not change")]} == errors_on(changeset)
     end
 
     test "validates email", %{user: user} do
       {:error, changeset} =
         Accounts.apply_user_email(user, valid_user_password(), %{email: "not valid"})
 
-      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
+      email_msg = dgettext("errors", "must have the @ sign and no spaces")
+      assert %{email: [^email_msg]} = errors_on(changeset)
     end
 
     test "validates maximum value for email for security", %{user: user} do
@@ -147,7 +172,14 @@ defmodule PriceSpotter.AccountsTest do
       {:error, changeset} =
         Accounts.apply_user_email(user, valid_user_password(), %{email: too_long})
 
-      assert "should be at most 160 character(s)" in errors_on(changeset).email
+      assert dngettext(
+               "errors",
+               "should be at most %{count} character(s)",
+               "should be at most %{count} character(s)",
+               16
+             ) in errors_on(changeset).email
+
+      assert dgettext("errors", "must have the @ sign and no spaces") in errors_on(changeset).email
     end
 
     test "validates email uniqueness", %{user: user} do
@@ -156,14 +188,14 @@ defmodule PriceSpotter.AccountsTest do
 
       {:error, changeset} = Accounts.apply_user_email(user, password, %{email: email})
 
-      assert "has already been taken" in errors_on(changeset).email
+      assert dgettext("errors", "has already been taken") in errors_on(changeset).email
     end
 
     test "validates current password", %{user: user} do
       {:error, changeset} =
         Accounts.apply_user_email(user, "invalid", %{email: unique_user_email()})
 
-      assert %{current_password: ["is not valid"]} = errors_on(changeset)
+      assert %{current_password: [dgettext("errors", "is not valid")]} == errors_on(changeset)
     end
 
     test "applies the email without persisting it", %{user: user} do
@@ -266,9 +298,14 @@ defmodule PriceSpotter.AccountsTest do
           password_confirmation: "another"
         })
 
+      password_msg =
+        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+
+      password_confirmation_msg = gettext("does not match password")
+
       assert %{
-               password: ["should be at least 12 character(s)"],
-               password_confirmation: ["does not match password"]
+               password: [^password_msg],
+               password_confirmation: [^password_confirmation_msg]
              } = errors_on(changeset)
     end
 
@@ -278,14 +315,18 @@ defmodule PriceSpotter.AccountsTest do
       {:error, changeset} =
         Accounts.update_user_password(user, valid_user_password(), %{password: too_long})
 
-      assert "should be at most 72 character(s)" in errors_on(changeset).password
+      password_msg =
+        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+
+      assert password_msg in errors_on(changeset).password
     end
 
     test "validates current password", %{user: user} do
       {:error, changeset} =
         Accounts.update_user_password(user, "invalid", %{password: valid_user_password()})
 
-      assert %{current_password: ["is not valid"]} = errors_on(changeset)
+      password_msg = dgettext("errors", "is not valid")
+      assert %{current_password: [^password_msg]} = errors_on(changeset)
     end
 
     test "updates the password", %{user: user} do
@@ -475,16 +516,24 @@ defmodule PriceSpotter.AccountsTest do
           password_confirmation: "another"
         })
 
+      password_msg =
+        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+
+      password_confirmation_msg = gettext("does not match password")
+
       assert %{
-               password: ["should be at least 12 character(s)"],
-               password_confirmation: ["does not match password"]
+               password: [^password_msg],
+               password_confirmation: [^password_confirmation_msg]
              } = errors_on(changeset)
     end
 
     test "validates maximum values for password for security", %{user: user} do
       too_long = String.duplicate("db", 100)
       {:error, changeset} = Accounts.reset_user_password(user, %{password: too_long})
-      assert "should be at most 72 character(s)" in errors_on(changeset).password
+
+      assert dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72) in errors_on(
+               changeset
+             ).password
     end
 
     test "updates the password", %{user: user} do

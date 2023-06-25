@@ -8,7 +8,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
   @create_attrs %{
     category: "some category",
     img_url: "some img_url",
-    internal_id: "some internal_id",
+    internal_id: "some internal_id #{System.unique_integer()}",
     name: "some name",
     price: "120.5",
     supplier_name: "some supplier_name",
@@ -17,7 +17,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
   @update_attrs %{
     category: "some updated category",
     img_url: "some updated img_url",
-    internal_id: "some updated internal_id",
+    internal_id: "some updated internal_id #{System.unique_integer()}",
     name: "some updated name",
     price: "456.7",
     supplier_name: "some updated supplier_name",
@@ -39,7 +39,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
   end
 
   describe "Index" do
-    setup [:create_product]
+    setup [:create_product, :register_and_log_in_user]
 
     test "lists all products", %{conn: conn, product: product} do
       {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/products")
@@ -48,7 +48,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ product.category
     end
 
-    @tag :skip
     test "saves new product", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
@@ -59,8 +58,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert index_live
              |> form("#product-form", product: @invalid_attrs)
-             #  |> render_change() =~ "can&#39;t be blank"
-             |> render_change() =~ "no puede estar en blanco"
+             |> render_change() =~ dgettext("errors", "can't be blank")
 
       assert index_live
              |> form("#product-form", product: @create_attrs)
@@ -69,22 +67,21 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert_patch(index_live, ~p"/admin/marketplaces/products")
 
       html = render(index_live)
-      assert html =~ "Product created successfully"
+      assert html =~ gettext("Product created successfully")
       assert html =~ "some category"
     end
 
-    @tag :skip
     test "updates product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      assert index_live |> element("#products-#{product.id} a", "Edit") |> render_click() =~
-               "Edit Product"
+      assert index_live |> element("a#products-edit-#{product.id}") |> render_click() =~
+               gettext("Edit Product")
 
       assert_patch(index_live, ~p"/admin/marketplaces/products/#{product}/edit")
 
       assert index_live
              |> form("#product-form", product: @invalid_attrs)
-             |> render_change() =~ "can&#39;t be blank"
+             |> render_change() =~ dgettext("errors", "can't be blank")
 
       assert index_live
              |> form("#product-form", product: @update_attrs)
@@ -93,21 +90,26 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert_patch(index_live, ~p"/admin/marketplaces/products")
 
       html = render(index_live)
-      assert html =~ "Product updated successfully"
-      assert html =~ "some updated category"
+      assert html =~ gettext("Product updated successfully")
+      assert html =~ @update_attrs[:category]
+      assert html =~ @update_attrs[:name]
+      assert html =~ @update_attrs[:price]
+      assert html =~ @update_attrs[:supplier_name]
+      assert html =~ @update_attrs[:supplier_url]
     end
 
     @tag :skip
     test "deletes product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      assert index_live |> element("#products-#{product.id} a", "Delete") |> render_click()
-      refute has_element?(index_live, "#products-#{product.id}")
+      assert index_live |> element("a#products-delete-#{product.id}") |> render_click()
+      # FIXME: liveview exits
+      refute has_element?(index_live, "a#products-delete-#{product.id}")
     end
   end
 
   describe "Show" do
-    setup [:create_product]
+    setup [:create_product, :register_and_log_in_user]
 
     test "displays product", %{conn: conn, product: product} do
       {:ok, _show_live, html} = live(conn, ~p"/admin/marketplaces/products/#{product}")

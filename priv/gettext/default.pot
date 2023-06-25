@@ -180,7 +180,7 @@ msgstr ""
 msgid "This is a product record from your database."
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:216
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:218
 #, elixir-autogen, elixir-format
 msgid "Total"
 msgstr ""
@@ -383,6 +383,7 @@ msgid "Email"
 msgstr ""
 
 #: lib/price_spotter_web/live/user_forgot_password_live.ex:10
+#: lib/price_spotter_web/live/user_login_live.ex:24
 #, elixir-autogen, elixir-format
 msgid "Forgot your password?"
 msgstr ""
@@ -459,6 +460,7 @@ msgstr ""
 msgid "Password updated successfully!"
 msgstr ""
 
+#: lib/price_spotter_web/components/layouts/root.html.heex:43
 #: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:24
 #: lib/price_spotter_web/live/user_confirmation_live.ex:21
 #: lib/price_spotter_web/live/user_forgot_password_live.ex:23
@@ -589,4 +591,40 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:54
 #, elixir-autogen, elixir-format
 msgid "There was an error loading the price chart"
+msgstr ""
+
+#: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:44
+#, elixir-autogen, elixir-format
+msgid "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+msgstr ""
+
+#: lib/price_spotter_web/components/layouts/root.html.heex:25
+#, elixir-autogen, elixir-format
+msgid "Settings"
+msgstr ""
+
+#: lib/price_spotter/accounts/user.ex:126
+#, elixir-autogen, elixir-format
+msgid "did not change"
+msgstr ""
+
+#: lib/price_spotter/accounts/user.ex:145
+#, elixir-autogen, elixir-format
+msgid "does not match password"
+msgstr ""
+
+#: lib/price_spotter_web/live/user_login_live.ex:10
+#, elixir-autogen, elixir-format
+msgid "Don't have an account?"
+msgstr ""
+
+#: lib/price_spotter_web/live/user_login_live.ex:12
+#, elixir-autogen, elixir-format
+msgid "Sign up"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:210
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:7
+#, elixir-autogen, elixir-format
+msgid "Delete product \"%{name}\"?"
 msgstr ""

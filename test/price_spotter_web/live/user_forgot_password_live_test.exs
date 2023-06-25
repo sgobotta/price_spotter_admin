@@ -1,6 +1,8 @@
 defmodule PriceSpotterWeb.UserForgotPasswordLiveTest do
   use PriceSpotterWeb.ConnCase
 
+  import PriceSpotterWeb.Gettext
+
   import Phoenix.LiveViewTest
   import PriceSpotter.AccountsFixtures
 
@@ -11,9 +13,9 @@ defmodule PriceSpotterWeb.UserForgotPasswordLiveTest do
     test "renders email page", %{conn: conn} do
       {:ok, lv, html} = live(conn, ~p"/users/reset_password")
 
-      assert html =~ "Forgot your password?"
-      assert has_element?(lv, ~s|a[href="#{~p"/users/register"}"]|, "Register")
-      assert has_element?(lv, ~s|a[href="#{~p"/users/log_in"}"]|, "Log in")
+      assert html =~ gettext("Forgot your password?")
+      assert has_element?(lv, ~s|a[href="#{~p"/users/register"}"]|, gettext("Register"))
+      assert has_element?(lv, ~s|a[href="#{~p"/users/log_in"}"]|, gettext("Log in"))
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -41,7 +43,10 @@ defmodule PriceSpotterWeb.UserForgotPasswordLiveTest do
         |> render_submit()
         |> follow_redirect(conn, "/")
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               gettext(
+                 "If your email is in our system, you will receive instructions to reset your password shortly."
+               )
 
       assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context ==
                "reset_password"
@@ -56,7 +61,11 @@ defmodule PriceSpotterWeb.UserForgotPasswordLiveTest do
         |> render_submit()
         |> follow_redirect(conn, "/")
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               gettext(
+                 "If your email is in our system, you will receive instructions to reset your password shortly."
+               )
+
       assert Repo.all(Accounts.UserToken) == []
     end
   end

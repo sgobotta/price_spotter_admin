@@ -1,6 +1,7 @@
 defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
   use PriceSpotterWeb.ConnCase
 
+  import PriceSpotterWeb.Gettext
   import Phoenix.LiveViewTest
   import PriceSpotter.AccountsFixtures
 
@@ -21,14 +22,14 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
     test "renders reset password with valid token", %{conn: conn, token: token} do
       {:ok, _lv, html} = live(conn, ~p"/users/reset_password/#{token}")
 
-      assert html =~ "Reset Password"
+      assert html =~ gettext("Reset Password")
     end
 
     test "does not render reset password with invalid token", %{conn: conn} do
       {:error, {:redirect, to}} = live(conn, ~p"/users/reset_password/invalid")
 
       assert to == %{
-               flash: %{"error" => "Reset password link is invalid or it has expired."},
+               flash: %{"error" => gettext("Reset password link is invalid or it has expired.")},
                to: ~p"/"
              }
     end
@@ -43,9 +44,13 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
           user: %{"password" => "secret12", "confirmation_password" => "secret123456"}
         )
 
-      # assert result =~ "should be at least 12 character"
-      assert result =~ "debe tener al menos 12 caracteres"
-      assert result =~ "does not match password"
+      assert result =~
+               dgettext("errors", "should be between %{min} and %{max} characters",
+                 min: 12,
+                 max: 72
+               )
+
+      assert result =~ gettext("does not match password")
     end
   end
 
@@ -65,7 +70,10 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
         |> follow_redirect(conn, ~p"/users/log_in")
 
       refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Password reset successfully"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               gettext("Password reset successfully.")
+
       assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
     end
 
@@ -82,10 +90,15 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
         )
         |> render_submit()
 
-      assert result =~ "Reset Password"
-      # assert result =~ "should be at least 12 character(s)"
-      assert result =~ "debe tener al menos 12 caracteres"
-      assert result =~ "does not match password"
+      assert result =~ gettext("Reset Password")
+
+      assert result =~
+               dgettext("errors", "should be between %{min} and %{max} characters",
+                 min: 12,
+                 max: 72
+               )
+
+      assert result =~ gettext("does not match password")
     end
   end
 
@@ -93,13 +106,15 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
     test "redirects to login page when the Log in button is clicked", %{conn: conn, token: token} do
       {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
 
+      msg = gettext("Log in")
+
       {:ok, conn} =
         lv
-        |> element(~s|main a:fl-contains("Log in")|)
+        |> element(~s|main a:fl-contains("#{msg}")|)
         |> render_click()
         |> follow_redirect(conn, ~p"/users/log_in")
 
-      assert conn.resp_body =~ "Log in"
+      assert conn.resp_body =~ gettext("Log in")
     end
 
     test "redirects to password reset page when the Register button is clicked", %{
@@ -108,13 +123,15 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
     } do
       {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
 
+      msg = gettext("Register")
+
       {:ok, conn} =
         lv
-        |> element(~s|main a:fl-contains("Register")|)
+        |> element(~s|main a:fl-contains("#{msg}")|)
         |> render_click()
         |> follow_redirect(conn, ~p"/users/register")
 
-      assert conn.resp_body =~ "Register"
+      assert conn.resp_body =~ gettext("Register")
     end
   end
 end
