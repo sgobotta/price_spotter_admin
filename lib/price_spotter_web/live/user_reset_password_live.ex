@@ -52,7 +52,10 @@ defmodule PriceSpotterWeb.UserResetPasswordLive do
           %{}
       end
 
-    {:ok, assign_form(socket, form_source), temporary_assigns: [form: nil]}
+    {:ok,
+     socket
+     |> assign(:page_title, gettext("Reset Password"))
+     |> assign_form(form_source), temporary_assigns: [form: nil]}
   end
 
   # Do not log in the user after reset password to avoid a

@@ -48,6 +48,7 @@ defmodule PriceSpotterWeb.UserRegistrationLive do
 
     socket =
       socket
+      |> assign(:page_title, gettext("Register"))
       |> assign(trigger_submit: false, check_errors: false)
       |> assign_form(changeset)
 
