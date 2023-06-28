@@ -2,6 +2,12 @@ defmodule PriceSpotter.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
   import PriceSpotterWeb.Gettext
+  import EctoEnum
+
+  defenum(RolesEnum, :role, [
+    :user,
+    :admin
+  ])
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -10,6 +16,7 @@ defmodule PriceSpotter.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :role, RolesEnum, default: :user
 
     timestamps()
   end
@@ -42,6 +49,20 @@ defmodule PriceSpotter.Accounts.User do
     |> cast(attrs, [:email, :password])
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  @doc """
+  A user changeset for registering admins.
+  """
+  def admin_registration_changeset(user, attrs) do
+    user
+    |> registration_changeset(attrs)
+    |> prepare_changes(&set_admin_role/1)
+  end
+
+  defp set_admin_role(changeset) do
+    changeset
+    |> put_change(:role, :admin)
   end
 
   defp validate_email(changeset, opts) do
