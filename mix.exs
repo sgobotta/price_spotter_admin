@@ -58,7 +58,8 @@ defmodule PriceSpotter.MixProject do
       {:off_broadway_redis_stream, "~> 0.5.0"},
       {:flop_phoenix, "~> 0.18.2"},
       {:csv, "~> 2.4"},
-      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:ecto_enum, "~> 1.4"}
     ]
   end
 
