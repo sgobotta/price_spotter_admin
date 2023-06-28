@@ -218,12 +218,30 @@ defmodule PriceSpotter.Accounts do
   ## Session
 
   @doc """
-  Generates a session token.
+  Revokes previous user sessions to generates a new session token.
   """
   def generate_user_session_token(user) do
-    {token, user_token} = UserToken.build_session_token(user)
-    Repo.insert!(user_token)
-    token
+    with {:ok, %{session: {token, %UserToken{}}, tokens: {_n, tokens}}} <-
+           Repo.transaction(generate_unique_session_token(user)) do
+      {token, tokens}
+    end
+  end
+
+  defp generate_unique_session_token(user) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["session"]))
+    |> Ecto.Multi.run(:session, fn _repo, _ctx ->
+      case UserToken.build_session_token(user) do
+        {_token, %UserToken{}} = session ->
+          {:ok, session}
+
+        _else ->
+          {:error, :no_session_token}
+      end
+    end)
+    |> Ecto.Multi.insert(:token, fn %{session: {_token, %UserToken{} = user_token}} ->
+      user_token
+    end)
   end
 
   @doc """

@@ -77,6 +77,8 @@ defmodule PriceSpotterWeb.UserRegistrationLive do
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
+  def handle_info({:email, _email}, socket), do: {:noreply, socket}
+
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     form = to_form(changeset, as: "user")
 

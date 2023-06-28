@@ -95,7 +95,9 @@ defmodule PriceSpotterWeb.UserSettingsLive do
     {:ok, push_navigate(socket, to: ~p"/users/settings")}
   end
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    socket = assign_defaults(session, socket)
+
     user = socket.assigns.current_user
     email_changeset = Accounts.change_user_email(user)
     password_changeset = Accounts.change_user_password(user)

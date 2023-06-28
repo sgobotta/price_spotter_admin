@@ -163,9 +163,14 @@ defmodule PriceSpotterWeb.CoreComponents do
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   def flash_group(assigns) do
+    assigns =
+      assigns
+      |> assign_new(:info_msg, fn -> gettext("Success!") end)
+      |> assign_new(:error__msg, fn -> gettext("Error!") end)
+
     ~H"""
-    <.flash kind={:info} title={gettext("Success!")} flash={@flash} />
-    <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
+    <.flash kind={:info} title={@info_msg} flash={@flash} />
+    <.flash kind={:error} title={@error__msg} flash={@flash} />
     <.flash
       id="disconnected"
       kind={:error}
