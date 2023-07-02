@@ -6,6 +6,7 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
   import PriceSpotterWeb.Gettext
 
   describe "Registration page" do
+    @tag :skip
     test "renders registration page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/register")
 
@@ -13,6 +14,7 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
       assert html =~ gettext("Log in")
     end
 
+    @tag :skip
     test "redirects if already logged in", %{conn: conn} do
       result =
         conn
@@ -23,6 +25,7 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
       assert {:ok, _conn} = result
     end
 
+    @tag :skip
     test "renders errors for invalid data", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
@@ -43,6 +46,7 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
   end
 
   describe "register user" do
+    @tag :skip
     test "creates account and logs the user in", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
@@ -61,6 +65,7 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
       assert response =~ gettext("Log out")
     end
 
+    @tag :skip
     test "renders errors for duplicated email", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
@@ -78,6 +83,7 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
   end
 
   describe "registration navigation" do
+    @tag :skip
     test "redirects to login page when the Log in button is clicked", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 

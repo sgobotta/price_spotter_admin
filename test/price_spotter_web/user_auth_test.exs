@@ -30,7 +30,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
     end
 
     test "revokes previous session when logging in for a second time" do
-      %{conn: conn, user: user} = register_and_log_in_user(%{conn: build_conn()})
+      %{conn: conn, user: user} = register_and_log_in_admin(%{conn: build_conn()})
 
       {:ok, lv, html} = live(conn, ~p"/users/settings")
       assert html =~ gettext("Account Settings")

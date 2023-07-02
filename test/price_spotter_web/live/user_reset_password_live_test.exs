@@ -117,6 +117,7 @@ defmodule PriceSpotterWeb.UserResetPasswordLiveTest do
       assert conn.resp_body =~ gettext("Log in")
     end
 
+    @tag :skip
     test "redirects to password reset page when the Register button is clicked", %{
       conn: conn,
       token: token

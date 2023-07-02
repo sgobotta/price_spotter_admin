@@ -10,7 +10,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
     test "renders settings page", %{conn: conn} do
       {:ok, _lv, html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(admin_fixture())
         |> live(~p"/users/settings")
 
       assert html =~ gettext("Change Email")
@@ -30,7 +30,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
   describe "update email form" do
     setup %{conn: conn} do
       password = valid_user_password()
-      user = user_fixture(%{password: password})
+      user = admin_fixture(%{password: password})
       %{conn: log_in_user(conn, user), user: user, password: password}
     end
 
@@ -88,7 +88,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
   describe "update password form" do
     setup %{conn: conn} do
       password = valid_user_password()
-      user = user_fixture(%{password: password})
+      user = admin_fixture(%{password: password})
       %{conn: log_in_user(conn, user), user: user, password: password}
     end
 
