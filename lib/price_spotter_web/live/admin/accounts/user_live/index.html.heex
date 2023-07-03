@@ -1,0 +1,57 @@
+<.header>
+  <%= gettext("Users") %>
+  <:actions>
+    <.link patch={~p"/admin/accounts/users/new"}>
+      <.button><%= gettext("New User") %></.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="users"
+  rows={@streams.users}
+  row_click={fn {_id, user} -> JS.navigate(~p"/admin/accounts/users/#{user}") end}
+>
+  <:col :let={{_id, user}} label={gettext("Email")}><%= user.email %></:col>
+  <:col :let={{_id, user}} label={gettext("Role")}><%= user.role %></:col>
+  <:action :let={{_id, user}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/accounts/users/#{user}"}><%= gettext("Show") %></.link>
+    </div>
+  </:action>
+  <:action :let={{_id, user}}>
+    <.link
+      id={"users-edit-#{user.id}"}
+      patch={~p"/admin/accounts/users/#{user}/edit"}
+      class="hover:text-teal-500"
+    >
+      <.icon name="hero-pencil-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
+    </.link>
+  </:action>
+  <:action :let={{_id, user}}>
+    <.link
+      id={"users-delete-#{user.id}"}
+      phx-click={JS.push("delete", value: %{id: user.id}) |> hide("##{user.id}")}
+      data-confirm={gettext("Delete user \"%{name}\"?", name: user.email)}
+      class="hover:text-rose-500"
+    >
+      <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="user-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/accounts/users")}
+>
+  <.live_component
+    module={PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent}
+    id={@user.id || :new}
+    title={@page_title}
+    action={@live_action}
+    user={@user}
+    patch={~p"/admin/accounts/users"}
+  />
+</.modal>

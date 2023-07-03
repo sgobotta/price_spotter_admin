@@ -41,6 +41,17 @@ defmodule PriceSpotterWeb.Router do
       live "/products/:id/show/edit", ProductLive.Show, :edit
     end
 
+    scope "/admin/accounts", Admin.Accounts do
+      pipe_through [:require_authenticated_user, :admin]
+
+      live "/users", UserLive.Index, :index
+      live "/users/new", UserLive.Index, :new
+      live "/users/:id/edit", UserLive.Index, :edit
+
+      live "/users/:id", UserLive.Show, :show
+      live "/users/:id/show/edit", UserLive.Show, :edit
+    end
+
     get "/products/export", ExportController, :create
   end
 
@@ -73,11 +84,11 @@ defmodule PriceSpotterWeb.Router do
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{PriceSpotterWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-        live "/users/log_in", UserLoginLive, :new
-        live "/users/reset_password", UserForgotPasswordLive, :new
-        live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password", UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
 
-        # live "/users/register", UserRegistrationLive, :new
+      # live "/users/register", UserRegistrationLive, :new
     end
 
     post "/users/log_in", UserSessionController, :create
@@ -88,10 +99,10 @@ defmodule PriceSpotterWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{PriceSpotterWeb.UserAuth, :ensure_authenticated}] do
-        live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
-        pipe_through [:admin]
-        live "/users/settings", UserSettingsLive, :edit
+      pipe_through [:admin]
+      live "/users/settings", UserSettingsLive, :edit
     end
   end
 

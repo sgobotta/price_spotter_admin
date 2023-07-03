@@ -11,14 +11,14 @@ msgstr ""
 "Language: es_AR\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/price_spotter/accounts/user.ex:49
-#: lib/price_spotter/accounts/user.ex:68
+#: lib/price_spotter/accounts/user.ex:78
+#: lib/price_spotter/accounts/user.ex:97
 #, elixir-autogen
 msgid "can't be blank"
 msgstr "no puede estar en blanco"
 
-#: lib/price_spotter/accounts/user.ex:107
-#: lib/price_spotter/accounts/user.ex:109
+#: lib/price_spotter/accounts/user.ex:136
+#: lib/price_spotter/accounts/user.ex:138
 #, elixir-autogen
 msgid "has already been taken"
 msgstr "este valor ya existe"
@@ -107,29 +107,29 @@ msgstr "debe ser mayor o igual a %{number}"
 msgid "must be equal to %{number}"
 msgstr "debe ser igual a %{number}"
 
-#: lib/price_spotter/accounts/user.ex:56
+#: lib/price_spotter/accounts/user.ex:85
 #, elixir-autogen, elixir-format, fuzzy
 msgid "should have at most %{count} caracters(s)"
 msgid_plural "should have at most %{count} caracters(s)"
 msgstr[0] "debe tener como máximo %{count} caracteres"
 msgstr[1] "debe tener como máximo %{count} caracteres"
 
-#: lib/price_spotter/accounts/user.ex:51
+#: lib/price_spotter/accounts/user.ex:80
 #, elixir-autogen, elixir-format
 msgid "must have the @ sign and no spaces"
 msgstr "debe contener @ y no debe contener espacios"
 
-#: lib/price_spotter/accounts/user.ex:73
+#: lib/price_spotter/accounts/user.ex:102
 #, elixir-autogen, elixir-format
 msgid "should be between %{min} and %{max} characters"
 msgstr "debe contener entre %{min} y %{max} caracteres"
 
-#: lib/price_spotter/accounts/user.ex:92
+#: lib/price_spotter/accounts/user.ex:121
 #, elixir-autogen, elixir-format, fuzzy
 msgid "should be at most %{count} byte(s)"
 msgstr "debe tener como máximo %{count} byte"
 
-#: lib/price_spotter/accounts/user.ex:180
+#: lib/price_spotter/accounts/user.ex:209
 #, elixir-autogen, elixir-format, fuzzy
 msgid "is not valid"
 msgstr "no es válido"

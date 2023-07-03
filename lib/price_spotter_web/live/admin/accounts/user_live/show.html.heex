@@ -1,0 +1,31 @@
+<.header>
+  <%= gettext("User") %> <%= @user.id %>
+  <:actions>
+    <.link patch={~p"/admin/accounts/users/#{@user}/show/edit"} phx-click={JS.push_focus()}>
+      <.button><%= gettext("Edit user") %></.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title={gettext("Email")}><%= @user.email %></:item>
+  <:item title={gettext("Role")}><%= @user.role %></:item>
+</.list>
+
+<.back navigate={~p"/admin/accounts/users"}><%= gettext("Back to users") %></.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="user-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/accounts/users/#{@user}")}
+>
+  <.live_component
+    module={PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent}
+    id={@user.id}
+    title={@page_title}
+    action={@live_action}
+    user={@user}
+    patch={~p"/admin/accounts/users/#{@user}"}
+  />
+</.modal>

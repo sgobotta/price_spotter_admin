@@ -65,11 +65,9 @@ defmodule PriceSpotter.AccountsTest do
     test "requires email and password to be set" do
       {:error, changeset} = Accounts.register_user(%{})
 
-      password_msg = dgettext("errors", "can't be blank")
       email_msg = dgettext("errors", "can't be blank")
 
       assert %{
-               password: [^password_msg],
                email: [^email_msg]
              } = errors_on(changeset)
     end
@@ -133,7 +131,7 @@ defmodule PriceSpotter.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:email]
     end
 
     test "allows fields to be set" do
