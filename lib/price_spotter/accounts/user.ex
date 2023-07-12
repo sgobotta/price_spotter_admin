@@ -22,11 +22,18 @@ defmodule PriceSpotter.Accounts.User do
   end
 
   def changeset(user, attrs) do
-    user
-    |> cast(attrs, [:email, :password, :role])
-    |> validate_required([:email, :role])
-    |> unique_constraint(:email)
-    |> validate_password([])
+    changeset =
+      user
+      |> cast(attrs, [:email, :password, :role])
+      |> validate_required([:email, :role])
+      |> unique_constraint(:email)
+
+    if attrs[:password] do
+      changeset
+      |> validate_password([])
+    else
+      changeset
+    end
   end
 
   @doc """
@@ -53,16 +60,10 @@ defmodule PriceSpotter.Accounts.User do
       Defaults to `true`.
   """
   def registration_changeset(user, attrs, opts \\ []) do
-    changeset =
-      user
-      |> cast(attrs, [:email, :password])
-      |> validate_email(opts)
-
-    if attrs[:password] do
-      validate_password(changeset, opts)
-    else
-      changeset
-    end
+    user
+    |> cast(attrs, [:email, :password, :role])
+    |> validate_email(opts)
+    |> validate_password(opts)
   end
 
   @doc """
