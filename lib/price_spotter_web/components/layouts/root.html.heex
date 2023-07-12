@@ -17,14 +17,16 @@
         <li class="text-[0.8125rem] leading-6 text-zinc-900">
           <%= @current_user.email %>
         </li>
-        <li>
-          <.link
-            href={~p"/users/settings"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-          >
-            <%= gettext("Settings") %>
-          </.link>
-        </li>
+        <%= if @current_user.role in [:admin] do %>
+          <li>
+            <.link
+              href={~p"/users/settings"}
+              class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            >
+              <%= gettext("Settings") %>
+            </.link>
+          </li>
+        <% end %>
         <li>
           <.link
             href={~p"/users/log_out"}
