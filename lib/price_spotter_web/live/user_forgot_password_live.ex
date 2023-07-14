@@ -28,7 +28,10 @@ defmodule PriceSpotterWeb.UserForgotPasswordLive do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, form: to_form(%{}, as: "user"))}
+    {:ok,
+     socket
+     |> assign(:page_title, gettext("Reset Password"))
+     |> assign(form: to_form(%{}, as: "user"))}
   end
 
   def handle_event("send_email", %{"user" => %{"email" => email}}, socket) do

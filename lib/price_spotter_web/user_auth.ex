@@ -13,6 +13,7 @@ defmodule PriceSpotterWeb.UserAuth do
   @max_age 60 * 60 * 24 * 60
   @remember_me_cookie "_price_spotter_web_user_remember_me"
   @remember_me_options [sign: true, max_age: @max_age, same_site: "Lax"]
+  @pubsub_topic "user_updates"
 
   @doc """
   Logs the user in.
@@ -27,7 +28,18 @@ defmodule PriceSpotterWeb.UserAuth do
   if you are not using LiveView.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    token = Accounts.generate_user_session_token(user)
+    {token, tokens} = Accounts.generate_user_session_token(user)
+
+    Enum.each(tokens, fn %Accounts.UserToken{token: _token, user_id: user_id} ->
+      :ok =
+        PriceSpotterWeb.Endpoint.broadcast_from(
+          self(),
+          pubsub_topic(),
+          "logout_user",
+          %{user_id: user_id}
+        )
+    end)
+
     user_return_to = get_session(conn, :user_return_to)
 
     conn
@@ -108,6 +120,12 @@ defmodule PriceSpotterWeb.UserAuth do
       end
     end
   end
+
+  @doc """
+  Returns the pubsub topic name for receiving  notifications when a user updated
+  """
+  @spec pubsub_topic() :: String.t()
+  def pubsub_topic, do: @pubsub_topic
 
   @doc """
   Handles mounting and authenticating the current_user in LiveViews.

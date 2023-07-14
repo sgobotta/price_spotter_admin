@@ -5,6 +5,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
   alias PriceSpotter.Accounts
   alias PriceSpotterWeb.UserAuth
   import PriceSpotter.AccountsFixtures
+  import PriceSpotterWeb.Gettext
 
   @remember_me_cookie "_price_spotter_web_user_remember_me"
 
@@ -18,12 +19,38 @@ defmodule PriceSpotterWeb.UserAuthTest do
   end
 
   describe "log_in_user/3" do
+    import Phoenix.LiveViewTest
+
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
       assert get_session(conn, :live_socket_id) == "users_sessions:#{Base.url_encode64(token)}"
       assert redirected_to(conn) == ~p"/"
       assert Accounts.get_user_by_session_token(token)
+    end
+
+    test "revokes previous session when logging in for a second time" do
+      %{conn: conn, user: user} = register_and_log_in_admin(%{conn: build_conn()})
+
+      {:ok, lv, html} = live(conn, ~p"/users/settings")
+      assert html =~ gettext("Account Settings")
+      assert html =~ gettext("Manage your account email address and password settings")
+
+      another_conn =
+        build_conn()
+        |> init_test_session(%{})
+        |> UserAuth.log_in_user(user)
+
+      assert token = get_session(another_conn, :user_token)
+
+      assert redirected_to(another_conn) == ~p"/"
+      assert Accounts.get_user_by_session_token(token)
+
+      assert_redirect(lv, ~p"/users/log_in")
+
+      assert {:error, {:redirect, %{flash: flash}}} = live(conn, ~p"/users/settings")
+
+      assert flash["error"] == gettext("You must log in to access this page.")
     end
 
     test "clears everything previously stored in the session", %{conn: conn, user: user} do
@@ -48,7 +75,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
   describe "logout_user/1" do
     test "erases session and cookies", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+      {user_token, _tokens} = Accounts.generate_user_session_token(user)
 
       conn =
         conn
@@ -85,7 +112,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
   describe "fetch_current_user/2" do
     test "authenticates user from session", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+      {user_token, _tokens} = Accounts.generate_user_session_token(user)
       conn = conn |> put_session(:user_token, user_token) |> UserAuth.fetch_current_user([])
       assert conn.assigns.current_user.id == user.id
     end
@@ -119,7 +146,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
   describe "on_mount: mount_current_user" do
     test "assigns current_user based on a valid user_token ", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+      {user_token, _tokens} = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       {:cont, updated_socket} =
@@ -150,7 +177,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
   describe "on_mount: ensure_authenticated" do
     test "authenticates current_user based on a valid user_token ", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+      {user_token, _tokens} = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       {:cont, updated_socket} =
@@ -187,7 +214,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
   describe "on_mount: :redirect_if_user_is_authenticated" do
     test "redirects if there is an authenticated  user ", %{conn: conn, user: user} do
-      user_token = Accounts.generate_user_session_token(user)
+      {user_token, _tokens} = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       assert {:halt, _updated_socket} =
@@ -234,7 +261,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
       assert redirected_to(conn) == ~p"/users/log_in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
-               "You must log in to access this page."
+               gettext("You must log in to access this page.")
     end
 
     test "stores the path to redirect to on GET", %{conn: conn} do

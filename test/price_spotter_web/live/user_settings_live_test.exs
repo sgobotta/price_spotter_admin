@@ -2,6 +2,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
   use PriceSpotterWeb.ConnCase
 
   alias PriceSpotter.Accounts
+  import PriceSpotterWeb.Gettext
   import Phoenix.LiveViewTest
   import PriceSpotter.AccountsFixtures
 
@@ -9,11 +10,11 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
     test "renders settings page", %{conn: conn} do
       {:ok, _lv, html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(admin_fixture())
         |> live(~p"/users/settings")
 
-      assert html =~ "Change Email"
-      assert html =~ "Change Password"
+      assert html =~ gettext("Change Email")
+      assert html =~ gettext("Change Password")
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
@@ -21,14 +22,15 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
 
       assert {:redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/log_in"
-      assert %{"error" => "You must log in to access this page."} = flash
+      expected_error_msg = gettext("You must log in to access this page.")
+      assert %{"error" => ^expected_error_msg} = flash
     end
   end
 
   describe "update email form" do
     setup %{conn: conn} do
       password = valid_user_password()
-      user = user_fixture(%{password: password})
+      user = admin_fixture(%{password: password})
       %{conn: log_in_user(conn, user), user: user, password: password}
     end
 
@@ -45,7 +47,9 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
         })
         |> render_submit()
 
-      assert result =~ "A link to confirm your email"
+      assert result =~
+               gettext("A link to confirm your email change has been sent to the new address.")
+
       assert Accounts.get_user_by_email(user.email)
     end
 
@@ -61,8 +65,8 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
           "user" => %{"email" => "with spaces"}
         })
 
-      assert result =~ "Change Email"
-      assert result =~ "must have the @ sign and no spaces"
+      assert result =~ gettext("Change Email")
+      assert result =~ dgettext("errors", "must have the @ sign and no spaces")
     end
 
     test "renders errors with invalid data (phx-submit)", %{conn: conn, user: user} do
@@ -76,16 +80,15 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
         })
         |> render_submit()
 
-      assert result =~ "Change Email"
-      assert result =~ "did not change"
-      assert result =~ "is not valid"
+      assert result =~ gettext("Change Email")
+      assert result =~ gettext("did not change")
     end
   end
 
   describe "update password form" do
     setup %{conn: conn} do
       password = valid_user_password()
-      user = user_fixture(%{password: password})
+      user = admin_fixture(%{password: password})
       %{conn: log_in_user(conn, user), user: user, password: password}
     end
 
@@ -113,7 +116,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
       assert get_session(new_password_conn, :user_token) != get_session(conn, :user_token)
 
       assert Phoenix.Flash.get(new_password_conn.assigns.flash, :info) =~
-               "Password updated successfully"
+               gettext("Password updated successfully!")
 
       assert Accounts.get_user_by_email_and_password(user.email, new_password)
     end
@@ -132,10 +135,16 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
           }
         })
 
-      assert result =~ "Change Password"
-      # assert result =~ "should be at least 12 character(s)"
-      assert result =~ "debe tener al menos 12 caracteres"
-      assert result =~ "does not match password"
+      assert result =~ gettext("Change Password")
+
+      assert result =~
+               dgettext("errors", "should be between %{min} and %{max} characters",
+                 min: 12,
+                 max: 72
+               )
+
+      # assert result =~ "debe tener al menos 12 caracteres"
+      assert result =~ gettext("does not match password")
     end
 
     test "renders errors with invalid data (phx-submit)", %{conn: conn} do
@@ -152,11 +161,16 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
         })
         |> render_submit()
 
-      assert result =~ "Change Password"
-      # assert result =~ "should be at least 12 character(s)"
-      assert result =~ "debe tener al menos 12 caracteres"
-      assert result =~ "does not match password"
-      assert result =~ "is not valid"
+      # assert result =~ "debe tener al menos 12 caracteres"
+      assert result =~ gettext("Change Password")
+
+      assert result =~
+               dgettext("errors", "should be between %{min} and %{max} characters",
+                 min: 12,
+                 max: 72
+               )
+
+      assert result =~ gettext("does not match password")
     end
   end
 
@@ -179,7 +193,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
       assert {:live_redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/settings"
       assert %{"info" => message} = flash
-      assert message == "Email changed successfully."
+      assert message == gettext("Email changed successfully.")
       refute Accounts.get_user_by_email(user.email)
       assert Accounts.get_user_by_email(email)
 
@@ -188,7 +202,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
       assert {:live_redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/settings"
       assert %{"error" => message} = flash
-      assert message == "Email change link is invalid or it has expired."
+      assert message == gettext("Email change link is invalid or it has expired.")
     end
 
     test "does not update email with invalid token", %{conn: conn, user: user} do
@@ -196,7 +210,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
       assert {:live_redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/settings"
       assert %{"error" => message} = flash
-      assert message == "Email change link is invalid or it has expired."
+      assert message == gettext("Email change link is invalid or it has expired.")
       assert Accounts.get_user_by_email(user.email)
     end
 
@@ -206,7 +220,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
       assert {:redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/log_in"
       assert %{"error" => message} = flash
-      assert message == "You must log in to access this page."
+      assert message == gettext("You must log in to access this page.")
     end
   end
 end

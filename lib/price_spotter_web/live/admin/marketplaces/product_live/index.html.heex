@@ -196,6 +196,7 @@
       </:action>
       <:action :let={product}>
         <.link
+          id={"products-edit-#{product.id}"}
           patch={~p"/admin/marketplaces/products/#{product}/edit"}
           class="hover:text-teal-500"
         >
@@ -204,8 +205,9 @@
       </:action>
       <:action :let={product}>
         <.link
+          id={"products-delete-#{product.id}"}
           phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{product.id}")}
-          data-confirm="Are you sure?"
+          data-confirm={gettext("Delete product \"%{name}\"?", name: product.name)}
           class="hover:text-rose-500"
         >
           <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />

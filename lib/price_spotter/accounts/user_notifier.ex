@@ -5,6 +5,13 @@ defmodule PriceSpotter.Accounts.UserNotifier do
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
+    require Config
+
+    if PriceSpotter.Application.env() == :dev do
+      require Logger
+      Logger.debug(body)
+    end
+
     email =
       new()
       |> to(recipient)

@@ -8,6 +8,53 @@ defmodule PriceSpotter.Accounts do
 
   alias PriceSpotter.Accounts.{User, UserToken, UserNotifier}
 
+  @doc """
+  Returns the list of users.
+
+  ## Examples
+
+      iex> list_users()
+      [%User{}, ...]
+
+  """
+  def list_users do
+    Repo.all(User)
+  end
+
+  @doc """
+  Creates a user.
+
+  ## Examples
+
+      iex> create_user(%{field: value})
+      {:ok, %User{}}
+
+      iex> create_user(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user(attrs \\ %{}) do
+    %User{}
+    |> User.registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a user.
+
+  ## Examples
+
+      iex> delete_user(user)
+      {:ok, %User{}}
+
+      iex> delete_user(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
+  end
+
   ## Database getters
 
   @doc """
@@ -81,6 +128,35 @@ defmodule PriceSpotter.Accounts do
   end
 
   @doc """
+  Registers an admin.
+
+  ## Examples
+      iex> register_admin(%{field: value})
+      {:ok, %User{}}
+
+      iex> register_admin(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+  """
+  def register_admin(attrs) do
+    %User{}
+    |> User.admin_registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user changes.
+
+  ## Examples
+
+      iex> change_user(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.changeset(user, attrs)
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking user changes.
 
   ## Examples
@@ -91,6 +167,24 @@ defmodule PriceSpotter.Accounts do
   """
   def change_user_registration(%User{} = user, attrs \\ %{}) do
     User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
+  end
+
+  @doc """
+  Updates a user.
+
+  ## Examples
+
+      iex> update_user(product, %{field: new_value})
+      {:ok, %User{}}
+
+      iex> update_user(product, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user(%User{} = user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
   end
 
   ## Settings
@@ -218,12 +312,30 @@ defmodule PriceSpotter.Accounts do
   ## Session
 
   @doc """
-  Generates a session token.
+  Revokes previous user sessions to generates a new session token.
   """
   def generate_user_session_token(user) do
-    {token, user_token} = UserToken.build_session_token(user)
-    Repo.insert!(user_token)
-    token
+    with {:ok, %{session: {token, %UserToken{}}, tokens: {_n, tokens}}} <-
+           Repo.transaction(generate_unique_session_token(user)) do
+      {token, tokens}
+    end
+  end
+
+  defp generate_unique_session_token(user) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["session"]))
+    |> Ecto.Multi.run(:session, fn _repo, _ctx ->
+      case UserToken.build_session_token(user) do
+        {_token, %UserToken{}} = session ->
+          {:ok, session}
+
+        _else ->
+          {:error, :no_session_token}
+      end
+    end)
+    |> Ecto.Multi.insert(:token, fn %{session: {_token, %UserToken{} = user_token}} ->
+      user_token
+    end)
   end
 
   @doc """

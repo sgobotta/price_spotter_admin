@@ -1,6 +1,8 @@
 defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
   use PriceSpotterWeb.ConnCase
 
+  import PriceSpotterWeb.Gettext
+
   import Phoenix.LiveViewTest
   import PriceSpotter.AccountsFixtures
 
@@ -14,7 +16,7 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
   describe "Resend confirmation" do
     test "renders the resend confirmation page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/confirm")
-      assert html =~ "Resend confirmation instructions"
+      assert html =~ gettext("Resend confirmation instructions")
     end
 
     test "sends a new confirmation token", %{conn: conn, user: user} do
@@ -27,7 +29,9 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
         |> follow_redirect(conn, ~p"/")
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "If your email is in our system"
+               gettext(
+                 "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+               )
 
       assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "confirm"
     end
@@ -44,7 +48,9 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
         |> follow_redirect(conn, ~p"/")
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "If your email is in our system"
+               gettext(
+                 "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+               )
 
       refute Repo.get_by(Accounts.UserToken, user_id: user.id)
     end
@@ -59,7 +65,9 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
         |> follow_redirect(conn, ~p"/")
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "If your email is in our system"
+               gettext(
+                 "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+               )
 
       assert Repo.all(Accounts.UserToken) == []
     end

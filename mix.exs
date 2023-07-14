@@ -9,7 +9,10 @@ defmodule PriceSpotter.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      preferred_cli_env: [
+        "test.watch": :test
+      ]
     ]
   end
 
@@ -54,7 +57,9 @@ defmodule PriceSpotter.MixProject do
       {:decimal, "~> 2.0"},
       {:off_broadway_redis_stream, "~> 0.5.0"},
       {:flop_phoenix, "~> 0.18.2"},
-      {:csv, "~> 2.4"}
+      {:csv, "~> 2.4"},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:ecto_enum, "~> 1.4"}
     ]
   end
 
@@ -71,9 +76,18 @@ defmodule PriceSpotter.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.install": ["cmd npm i --prefix assets"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": [
+        "assets.install",
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing"
+      ],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["assets.install", "tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": [
+        "assets.install",
+        "tailwind default --minify",
+        "esbuild default --minify",
+        "phx.digest"
+      ]
     ]
   end
 end

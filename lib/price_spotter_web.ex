@@ -55,6 +55,25 @@ defmodule PriceSpotterWeb do
         layout: {PriceSpotterWeb.Layouts, :app}
 
       unquote(html_helpers())
+
+      import PriceSpotterWeb.LiveHelpers
+
+      alias PriceSpotter.Accounts.User
+
+      def handle_info(%{event: "logout_user", payload: %{user_id: user_id}}, socket) do
+        with %User{id: ^user_id} <- socket.assigns.current_user do
+          {:noreply,
+           socket
+           |> Phoenix.LiveView.put_flash(
+             :info,
+             gettext("You were logged out. Please login again to continue using our application.")
+           )
+           |> redirect(to: ~p"/users/log_in")}
+        else
+          _any ->
+            {:noreply, socket}
+        end
+      end
     end
   end
 

@@ -1,6 +1,14 @@
 defmodule PriceSpotter.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  import PriceSpotterWeb.Gettext
+  import EctoEnum
+
+  defenum(RolesEnum, :role, [
+    :user,
+    :admin
+  ])
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
@@ -8,8 +16,24 @@ defmodule PriceSpotter.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :role, RolesEnum, default: :user
 
     timestamps()
+  end
+
+  def changeset(user, attrs) do
+    changeset =
+      user
+      |> cast(attrs, [:email, :password, :role])
+      |> validate_required([:email, :role])
+      |> unique_constraint(:email)
+
+    if attrs[:password] do
+      changeset
+      |> validate_password([])
+    else
+      changeset
+    end
   end
 
   @doc """
@@ -37,23 +61,53 @@ defmodule PriceSpotter.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :role])
     |> validate_email(opts)
     |> validate_password(opts)
   end
 
+  @doc """
+  A user changeset for registering admins.
+  """
+  def admin_registration_changeset(user, attrs) do
+    user
+    |> registration_changeset(attrs)
+    |> prepare_changes(&set_admin_role/1)
+  end
+
+  defp set_admin_role(changeset) do
+    changeset
+    |> put_change(:role, :admin)
+  end
+
   defp validate_email(changeset, opts) do
     changeset
-    |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, max: 160)
+    |> validate_required([:email], message: dgettext("errors", "can't be blank"))
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/,
+      message: dgettext("errors", "must have the @ sign and no spaces")
+    )
+    |> validate_length(:email,
+      max: 160,
+      message:
+        dngettext(
+          "errors",
+          "should have at most %{count} caracters(s)",
+          "should have at most %{count} caracters(s)",
+          16
+        )
+    )
     |> maybe_validate_unique_email(opts)
   end
 
   defp validate_password(changeset, opts) do
     changeset
-    |> validate_required([:password])
-    |> validate_length(:password, min: 12, max: 72)
+    |> validate_required([:password], message: dgettext("errors", "can't be blank"))
+    |> validate_length(:password,
+      min: 12,
+      max: 72,
+      message:
+        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+    )
     # Examples of additional password validation:
     # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
@@ -68,7 +122,11 @@ defmodule PriceSpotter.Accounts.User do
     if hash_password? && password && changeset.valid? do
       changeset
       # If using Bcrypt, then further validate it is at most 72 bytes long
-      |> validate_length(:password, max: 72, count: :bytes)
+      |> validate_length(:password,
+        max: 72,
+        count: :bytes,
+        message: dgettext("errors", "should be at most %{count} byte(s)", count: 72)
+      )
       # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
       # would keep the database transaction open longer and hurt performance.
       |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
@@ -81,8 +139,10 @@ defmodule PriceSpotter.Accounts.User do
   defp maybe_validate_unique_email(changeset, opts) do
     if Keyword.get(opts, :validate_email, true) do
       changeset
-      |> unsafe_validate_unique(:email, PriceSpotter.Repo)
-      |> unique_constraint(:email)
+      |> unsafe_validate_unique(:email, PriceSpotter.Repo,
+        message: dgettext("errors", "has already been taken")
+      )
+      |> unique_constraint(:email, message: dgettext("errors", "has already been taken"))
     else
       changeset
     end
@@ -99,7 +159,7 @@ defmodule PriceSpotter.Accounts.User do
     |> validate_email(opts)
     |> case do
       %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, "did not change")
+      %{} = changeset -> add_error(changeset, :email, gettext("did not change"))
     end
   end
 
@@ -118,7 +178,7 @@ defmodule PriceSpotter.Accounts.User do
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_confirmation(:password, message: gettext("does not match password"))
     |> validate_password(opts)
   end
 
@@ -153,7 +213,7 @@ defmodule PriceSpotter.Accounts.User do
     if valid_password?(changeset.data, password) do
       changeset
     else
-      add_error(changeset, :current_password, "is not valid")
+      add_error(changeset, :current_password, dgettext("errors", "is not valid"))
     end
   end
 end

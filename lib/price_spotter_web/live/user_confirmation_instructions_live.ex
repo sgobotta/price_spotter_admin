@@ -29,7 +29,10 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLive do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, form: to_form(%{}, as: "user"))}
+    {:ok,
+     socket
+     |> assign(:page_title, gettext("Confirm Account"))
+     |> assign(form: to_form(%{}, as: "user"))}
   end
 
   def handle_event("send_instructions", %{"user" => %{"email" => email}}, socket) do
@@ -41,7 +44,9 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLive do
     end
 
     info =
-      "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+      gettext(
+        "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+      )
 
     {:noreply,
      socket

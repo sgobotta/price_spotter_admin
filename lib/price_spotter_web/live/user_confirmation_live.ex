@@ -27,7 +27,11 @@ defmodule PriceSpotterWeb.UserConfirmationLive do
 
   def mount(%{"token" => token}, _session, socket) do
     form = to_form(%{"token" => token}, as: "user")
-    {:ok, assign(socket, form: form), temporary_assigns: [form: nil]}
+
+    {:ok,
+     socket
+     |> assign(:page_title, gettext("Confirm Account"))
+     |> assign(form: form), temporary_assigns: [form: nil]}
   end
 
   # Do not log in the user after confirmation to avoid a

@@ -18,7 +18,7 @@ msgid_plural "%{minutes} minutes ago"
 msgstr[0] "Hace %{minutes} minuto"
 msgstr[1] "Hace %{minutes} minutos"
 
-#: lib/price_spotter_web/components/core_components.ex:477
+#: lib/price_spotter_web/components/core_components.ex:482
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Acciones"
@@ -57,7 +57,7 @@ msgid_plural "%{years} years ago"
 msgstr[0] "Hace %{years} año"
 msgstr[1] "Hace %{years} años"
 
-#: lib/price_spotter_web/components/core_components.ex:177
+#: lib/price_spotter_web/components/core_components.ex:182
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr "Intentando reconectar"
@@ -68,14 +68,14 @@ msgid "Back to products"
 msgstr "Volver a productos"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:24
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:117
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:159
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:118
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:160
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:179
 #, elixir-autogen, elixir-format
 msgid "Category"
 msgstr "Categoría"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:67
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:68
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:66
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:24
 #, elixir-autogen, elixir-format
@@ -102,7 +102,7 @@ msgstr "URL de imagen"
 msgid "Last price"
 msgstr "Último Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:79
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:80
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:4
 #, elixir-autogen, elixir-format
 msgid "Listing Products"
@@ -113,20 +113,20 @@ msgstr "Lista de productos"
 msgid "Name"
 msgstr "Nombre"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:73
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:74
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:7
 #, elixir-autogen, elixir-format
 msgid "New Product"
 msgstr "Nuevo Producto"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:29
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:156
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:157
 #, elixir-autogen, elixir-format
 msgid "Price"
 msgstr "Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:112
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:155
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:113
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:156
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:135
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:2
 #, elixir-autogen, elixir-format
@@ -148,6 +148,7 @@ msgstr "Producto Actualizado"
 msgid "Save Product"
 msgstr "Guardar"
 
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:32
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:32
 #, elixir-autogen, elixir-format
 msgid "Saving..."
@@ -158,8 +159,8 @@ msgstr "Guardando..."
 msgid "Show Product"
 msgstr "Detalle de Producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:123
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:158
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:124
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:159
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:169
 #, elixir-autogen, elixir-format
 msgid "Supplier"
@@ -180,7 +181,7 @@ msgstr "Web en proveedor"
 msgid "This is a product record from your database."
 msgstr "Este es un registro de la base de datos."
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:216
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:218
 #, elixir-autogen, elixir-format
 msgid "Total"
 msgstr "Total"
@@ -190,7 +191,7 @@ msgstr "Total"
 msgid "Use this form to manage product records in your database."
 msgstr "Utiliza este formulario para administrar los registros de la base."
 
-#: lib/price_spotter_web/components/core_components.ex:172
+#: lib/price_spotter_web/components/core_components.ex:177
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr "Sin conexión a internet"
@@ -200,12 +201,12 @@ msgstr "Sin conexión a internet"
 msgid "Internal id"
 msgstr "ID interno"
 
-#: lib/price_spotter_web/components/core_components.ex:168
+#: lib/price_spotter_web/components/core_components.ex:169
 #, elixir-autogen, elixir-format
 msgid "Error!"
 msgstr "Error!"
 
-#: lib/price_spotter_web/components/core_components.ex:167
+#: lib/price_spotter_web/components/core_components.ex:168
 #, elixir-autogen, elixir-format
 msgid "Success!"
 msgstr "Éxito!"
@@ -230,12 +231,12 @@ msgstr "Recién"
 msgid "less than a minute ago"
 msgstr "Hace menos de un minuto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:119
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:120
 #, elixir-autogen, elixir-format
 msgid "All categories"
 msgstr "Todas las categorías"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:125
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:126
 #, elixir-autogen, elixir-format
 msgid "All suppliers"
 msgstr "Todos los proveedores"
@@ -245,33 +246,33 @@ msgstr "Todos los proveedores"
 msgid "Last Price"
 msgstr "Último Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:129
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:130
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:158
 #, elixir-autogen, elixir-format
 msgid "Last Update"
 msgstr "Última Actualización"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:140
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:141
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Max Price"
 msgstr "Hasta $"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:134
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:135
 #, elixir-autogen, elixir-format
 msgid "Min Price"
 msgstr "Desde $"
 
-#: lib/price_spotter_web/components/core_components.ex:661
+#: lib/price_spotter_web/components/core_components.ex:666
 #, elixir-autogen, elixir-format
 msgid "Clear Filters"
 msgstr "Resetear Filtros"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:142
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:143
 #, elixir-autogen, elixir-format
 msgid "Choose a maximum price"
 msgstr "Elegí un precio máximo"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:136
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:137
 #, elixir-autogen, elixir-format
 msgid "Choose a minimum price"
 msgstr "Elegí un precio mínimo"
@@ -287,27 +288,28 @@ msgstr "Elegí las columnas a exportar"
 msgid "Export"
 msgstr "Exportar"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:114
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:115
 #, elixir-autogen, elixir-format
 msgid "Filter by product name"
 msgstr "Filtro por nombre de producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:160
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:161
 #, elixir-autogen, elixir-format
 msgid "Image URL"
 msgstr "URL de imagen"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:157
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:158
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Last Price Update"
 msgstr "Último Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:161
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:162
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Product URL"
 msgstr "Producto"
 
 #: lib/price_spotter_web/live/user_settings_live.ex:9
+#: lib/price_spotter_web/live/user_settings_live.ex:113
 #, elixir-autogen, elixir-format
 msgid "Account Settings"
 msgstr "Configuración de Cuenta"
@@ -338,7 +340,9 @@ msgstr "Actualizar Contraseña"
 msgid "Changing..."
 msgstr "Actualizando..."
 
+#: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:34
 #: lib/price_spotter_web/live/user_confirmation_live.ex:9
+#: lib/price_spotter_web/live/user_confirmation_live.ex:33
 #, elixir-autogen, elixir-format
 msgid "Confirm Account"
 msgstr "Confirmar Cuenta"
@@ -375,6 +379,9 @@ msgstr "Creando cuenta..."
 msgid "Current password"
 msgstr "Contraseña actual"
 
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:22
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:15
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.html.heex:11
 #: lib/price_spotter_web/live/user_login_live.ex:18
 #: lib/price_spotter_web/live/user_registration_live.ex:33
 #: lib/price_spotter_web/live/user_settings_live.ex:21
@@ -383,11 +390,12 @@ msgid "Email"
 msgstr "Email"
 
 #: lib/price_spotter_web/live/user_forgot_password_live.ex:10
+#: lib/price_spotter_web/live/user_login_live.ex:24
 #, elixir-autogen, elixir-format
 msgid "Forgot your password?"
 msgstr "Olvidaste tu contraseña"
 
-#: lib/price_spotter_web/live/user_forgot_password_live.ex:43
+#: lib/price_spotter_web/live/user_forgot_password_live.ex:46
 #, elixir-autogen, elixir-format
 msgid "If your email is in our system, you will receive instructions to reset your password shortly."
 msgstr "Si el correo existe pronto vas a recibir instrucciones para restablecer tu contraseña."
@@ -402,16 +410,17 @@ msgstr "Contraseña o email no válido"
 msgid "Keep me logged in"
 msgstr "Mantenerme en línea"
 
-#: lib/price_spotter_web/components/layouts/root.html.heex:51
+#: lib/price_spotter_web/components/layouts/root.html.heex:53
 #: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:25
 #: lib/price_spotter_web/live/user_confirmation_live.ex:22
 #: lib/price_spotter_web/live/user_forgot_password_live.ex:24
+#: lib/price_spotter_web/live/user_login_live.ex:43
 #: lib/price_spotter_web/live/user_reset_password_live.ex:37
 #, elixir-autogen, elixir-format
 msgid "Log in"
 msgstr "Acceder"
 
-#: lib/price_spotter_web/components/layouts/root.html.heex:34
+#: lib/price_spotter_web/components/layouts/root.html.heex:36
 #, elixir-autogen, elixir-format
 msgid "Log out"
 msgstr "Cerrar Sesión"
@@ -443,13 +452,14 @@ msgstr "No recibí instrucciones de confirmación."
 msgid "Oops, something went wrong! Please check the errors below."
 msgstr "Ups, algo salió mal! Por favor revisá los errores."
 
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:23
 #: lib/price_spotter_web/live/user_login_live.ex:19
 #: lib/price_spotter_web/live/user_registration_live.ex:34
 #, elixir-autogen, elixir-format
 msgid "Password"
 msgstr "Contraseña"
 
-#: lib/price_spotter_web/live/user_reset_password_live.ex:65
+#: lib/price_spotter_web/live/user_reset_password_live.ex:68
 #, elixir-autogen, elixir-format
 msgid "Password reset successfully."
 msgstr "Contraseña restablecida con éxito."
@@ -459,9 +469,11 @@ msgstr "Contraseña restablecida con éxito."
 msgid "Password updated successfully!"
 msgstr "Contraseña actualizada con éxito!"
 
+#: lib/price_spotter_web/components/layouts/root.html.heex:45
 #: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:24
 #: lib/price_spotter_web/live/user_confirmation_live.ex:21
 #: lib/price_spotter_web/live/user_forgot_password_live.ex:23
+#: lib/price_spotter_web/live/user_registration_live.ex:51
 #: lib/price_spotter_web/live/user_reset_password_live.ex:36
 #, elixir-autogen, elixir-format
 msgid "Register"
@@ -477,13 +489,15 @@ msgstr "Registrate"
 msgid "Resend confirmation instructions"
 msgstr "Reenviar instrucciones de confirmación"
 
+#: lib/price_spotter_web/live/user_forgot_password_live.ex:33
 #: lib/price_spotter_web/live/user_reset_password_live.ex:9
 #: lib/price_spotter_web/live/user_reset_password_live.ex:30
+#: lib/price_spotter_web/live/user_reset_password_live.ex:57
 #, elixir-autogen, elixir-format
 msgid "Reset Password"
 msgstr "Restablecer Contraseña"
 
-#: lib/price_spotter_web/live/user_reset_password_live.ex:83
+#: lib/price_spotter_web/live/user_reset_password_live.ex:86
 #, elixir-autogen, elixir-format
 msgid "Reset password link is invalid or it has expired."
 msgstr "El enlace de restablecimiento de contraseña no es válido o expiró."
@@ -519,12 +533,12 @@ msgstr "Acceder a la cuenta"
 msgid "Signing in..."
 msgstr "Accediendo..."
 
-#: lib/price_spotter_web/live/user_confirmation_live.ex:55
+#: lib/price_spotter_web/live/user_confirmation_live.ex:59
 #, elixir-autogen, elixir-format
 msgid "User confirmation link is invalid or it has expired."
 msgstr "El enlace de confirmación no es válido o expiró"
 
-#: lib/price_spotter_web/live/user_confirmation_live.ex:40
+#: lib/price_spotter_web/live/user_confirmation_live.ex:44
 #, elixir-autogen, elixir-format
 msgid "User confirmed successfully."
 msgstr "Usuario confirmado con éxito."
@@ -544,7 +558,7 @@ msgstr "Enviaremos un enlace a su correo para restablecer la contraseña"
 msgid "Welcome back!"
 msgstr "Hola de nuevo!"
 
-#: lib/price_spotter_web/live/user_settings_live.ex:139
+#: lib/price_spotter_web/live/user_settings_live.ex:142
 #, elixir-autogen, elixir-format
 msgid "A link to confirm your email change has been sent to the new address."
 msgstr "Enviamos un enlace de confirmación al nuevo correo."
@@ -559,8 +573,8 @@ msgstr "El enlace para actualizar el correo no es válido o expiró."
 msgid "Email changed successfully."
 msgstr "Correo actualizado con éxito."
 
-#: lib/price_spotter_web/user_auth.ex:159
-#: lib/price_spotter_web/user_auth.ex:208
+#: lib/price_spotter_web/user_auth.ex:177
+#: lib/price_spotter_web/user_auth.ex:226
 #, elixir-autogen, elixir-format
 msgid "You must log in to access this page."
 msgstr "Debes iniciar sesión para ver esta sección."
@@ -590,3 +604,145 @@ msgstr "Productos y precios mayoristas"
 #, elixir-autogen, elixir-format
 msgid "There was an error loading the price chart"
 msgstr "Ocurrió un error cargando el gráfico de precios"
+
+#: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:47
+#, elixir-autogen, elixir-format
+msgid "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+msgstr "Si el email existe y aún no ha sido confirmado recibirá un correo con instrucciones en un momento."
+
+#: lib/price_spotter_web/components/layouts/root.html.heex:26
+#, elixir-autogen, elixir-format
+msgid "Settings"
+msgstr "Configuración"
+
+#: lib/price_spotter/accounts/user.ex:162
+#, elixir-autogen, elixir-format
+msgid "did not change"
+msgstr "no cambió"
+
+#: lib/price_spotter/accounts/user.ex:181
+#, elixir-autogen, elixir-format
+msgid "does not match password"
+msgstr "la contrasena no coincide"
+
+#: lib/price_spotter_web/live/user_login_live.ex:10
+#, elixir-autogen, elixir-format
+msgid "Don't have an account?"
+msgstr "No tienes cuenta?"
+
+#: lib/price_spotter_web/live/user_login_live.ex:12
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Sign up"
+msgstr "Registrarme"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:210
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:7
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Delete product \"%{name}\"?"
+msgstr "Borrar producto \"%{name}\"?"
+
+#: lib/price_spotter_web/controllers/page_controller.ex:7
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Homepage"
+msgstr "Inicio"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.ex:2
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.ex:2
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:2
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:2
+#: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:2
+#: lib/price_spotter_web/live/user_confirmation_live.ex:2
+#: lib/price_spotter_web/live/user_forgot_password_live.ex:2
+#: lib/price_spotter_web/live/user_login_live.ex:2
+#: lib/price_spotter_web/live/user_registration_live.ex:2
+#: lib/price_spotter_web/live/user_reset_password_live.ex:2
+#: lib/price_spotter_web/live/user_settings_live.ex:2
+#, elixir-autogen, elixir-format
+msgid "You were logged out. Please login again to continue using our application."
+msgstr "Has sido desconectado. Por favor intenta acceder nuevamente para seguir navegando."
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.html.heex:15
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Back to users"
+msgstr "Volver a usuari@s"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:35
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Delete user \"%{name}\"?"
+msgstr "Borrar producto \"%{name}\"?"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.ex:19
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.ex:25
+#, elixir-autogen, elixir-format
+msgid "Edit User"
+msgstr "Editar usuari@"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.html.heex:5
+#, elixir-autogen, elixir-format
+msgid "Edit user"
+msgstr "Editar usuari@"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.ex:25
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:5
+#, elixir-autogen, elixir-format
+msgid "New User"
+msgstr "Nuev@ Usuari@"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:27
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:16
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.html.heex:12
+#, elixir-autogen, elixir-format
+msgid "Role"
+msgstr "Rol"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:19
+#, elixir-autogen, elixir-format
+msgid "Show"
+msgstr "Mostrar"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.ex:24
+#, elixir-autogen, elixir-format
+msgid "Show User"
+msgstr "Mostrar usuari@"
+
+#: lib/price_spotter_web/plugs/ensure_role_plug.ex:50
+#, elixir-autogen, elixir-format
+msgid "Unauthorised"
+msgstr "No autorizada"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/show.html.heex:2
+#, elixir-autogen, elixir-format
+msgid "User"
+msgstr "Usuari@"
+
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:81
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.ex:31
+#: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:2
+#, elixir-autogen, elixir-format
+msgid "Users"
+msgstr "Usuari@s"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:28
+#, elixir-autogen, elixir-format
+msgid "Choose a user role"
+msgstr "Elige un rol de usuari@"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:32
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Save User"
+msgstr "Nuev@ Usuari@"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:12
+#, elixir-autogen, elixir-format
+msgid "Use this form to edit the user settings"
+msgstr "Utilice este formulario para editar usuari@s"
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:105
+#, elixir-autogen, elixir-format, fuzzy
+msgid "User created successfully"
+msgstr "Usuario confirmado con éxito."
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:90
+#, elixir-autogen, elixir-format, fuzzy
+msgid "User updated successfully"
+msgstr "Producto creado"

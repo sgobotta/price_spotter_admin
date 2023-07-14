@@ -4,7 +4,7 @@
   <:actions>
     <.link
       phx-click={JS.push("delete", value: %{id: @product.id}) |> hide("##{@product.id}")}
-      data-confirm="Are you sure?"
+      data-confirm={gettext("Delete product \"%{name}\"?", name: @product.name)}
       class=""
     >
       <.button class="bg-rose-500 hover:bg-rose-400">

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title suffix=" · Phoenix Framework">
+    <.live_title suffix=" · Price Spotter">
       <%= assigns[:page_title] || "Price Spotter" %>
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
@@ -17,14 +17,16 @@
         <li class="text-[0.8125rem] leading-6 text-zinc-900">
           <%= @current_user.email %>
         </li>
-        <%!-- <li>
-          <.link
-            href={~p"/users/settings"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-          >
-            <%= gettext("Settings") %>
-          </.link>
-        </li> --%>
+        <%= if @current_user.role in [:admin] do %>
+          <li>
+            <.link
+              href={~p"/users/settings"}
+              class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            >
+              <%= gettext("Settings") %>
+            </.link>
+          </li>
+        <% end %>
         <li>
           <.link
             href={~p"/users/log_out"}
@@ -35,14 +37,14 @@
           </.link>
         </li>
       <% else %>
-        <%!-- <li>
+        <li>
           <.link
             href={~p"/users/register"}
             class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
           >
             <%= gettext("Register") %>
           </.link>
-        </li> --%>
+        </li>
         <li>
           <.link
             href={~p"/users/log_in"}
