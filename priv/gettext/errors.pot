@@ -8,15 +8,15 @@
 ## date. Leave `msgstr`s empty as changing them here has no
 ## effect: edit them in PO (`.po`) files instead.
 ## From Ecto.Changeset.cast/4
-#: lib/price_spotter/accounts/user.ex:78
-#: lib/price_spotter/accounts/user.ex:97
+#: lib/price_spotter/accounts/user.ex:85
+#: lib/price_spotter/accounts/user.ex:104
 #, elixir-autogen
 msgid "can't be blank"
 msgstr ""
 
 ## From Ecto.Changeset.unique_constraint/3
-#: lib/price_spotter/accounts/user.ex:136
-#: lib/price_spotter/accounts/user.ex:138
+#: lib/price_spotter/accounts/user.ex:143
+#: lib/price_spotter/accounts/user.ex:145
 #, elixir-autogen
 msgid "has already been taken"
 msgstr ""
@@ -114,29 +114,29 @@ msgstr ""
 msgid "must be equal to %{number}"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:85
+#: lib/price_spotter/accounts/user.ex:92
 #, elixir-autogen, elixir-format
 msgid "should have at most %{count} caracters(s)"
 msgid_plural "should have at most %{count} caracters(s)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/price_spotter/accounts/user.ex:80
+#: lib/price_spotter/accounts/user.ex:87
 #, elixir-autogen, elixir-format
 msgid "must have the @ sign and no spaces"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:102
+#: lib/price_spotter/accounts/user.ex:109
 #, elixir-autogen, elixir-format
 msgid "should be between %{min} and %{max} characters"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:121
+#: lib/price_spotter/accounts/user.ex:128
 #, elixir-autogen, elixir-format
 msgid "should be at most %{count} byte(s)"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:209
+#: lib/price_spotter/accounts/user.ex:216
 #, elixir-autogen, elixir-format
 msgid "is not valid"
 msgstr ""
