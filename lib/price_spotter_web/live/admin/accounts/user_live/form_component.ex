@@ -9,7 +9,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage user records in your database.</:subtitle>
+        <:subtitle><%= gettext("Use this form to edit the user settings") %></:subtitle>
       </.header>
 
       <.simple_form
@@ -19,17 +19,17 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:email]} type="text" label="Email" />
-        <.input field={@form[:password]} type="text" label="Password" />
+        <.input field={@form[:email]} type="text" label={gettext("Email")} />
+        <.input field={@form[:password]} type="text" label={gettext("Password")} />
         <.input
           field={@form[:role]}
           type="select"
-          label="Role"
-          prompt="Choose a value"
+          label={gettext("Role")}
+          prompt={gettext("Choose a user role")}
           options={PriceSpotter.Accounts.User.RolesEnum.__enum_map__()}
         />
         <:actions>
-          <.button phx-disable-with="Saving...">Save User</.button>
+          <.button phx-disable-with={gettext("Saving...")}><%= gettext("Save User") %></.button>
         </:actions>
       </.simple_form>
     </div>
@@ -38,7 +38,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
 
   @impl true
   def update(%{user: user} = assigns, socket) do
-    changeset = Accounts.change_user_registration(user)
+    changeset = Accounts.change_user(user)
 
     {:ok,
      socket
@@ -47,7 +47,25 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"user" => user_params}, socket) do
+  def handle_event("validate", %{"user" => user_params}, %{assigns: %{action: :edit}} = socket) do
+    changeset =
+      socket.assigns.user
+      |> Accounts.change_user(user_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
+  @impl true
+  def handle_event("validate", params, socket) do
+    handle_validate(socket, socket.assigns.action, params)
+  end
+
+  def handle_event("save", %{"user" => user_params}, socket) do
+    save_user(socket, socket.assigns.action, user_params)
+  end
+
+  defp handle_validate(socket, :new, %{"user" => user_params}) do
     changeset =
       socket.assigns.user
       |> Accounts.change_user_registration(user_params)
@@ -56,8 +74,13 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("save", %{"user" => user_params}, socket) do
-    save_user(socket, socket.assigns.action, user_params)
+  defp handle_validate(socket, _action, %{"user" => user_params}) do
+    changeset =
+      socket.assigns.user
+      |> Accounts.change_user(user_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset)}
   end
 
   defp save_user(socket, :edit, user_params) do
@@ -67,7 +90,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "User updated successfully")
+         |> put_flash(:info, gettext("User updated successfully"))
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -82,7 +105,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "User created successfully")
+         |> put_flash(:info, gettext("User created successfully"))
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
