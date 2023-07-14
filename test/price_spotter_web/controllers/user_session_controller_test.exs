@@ -5,7 +5,7 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
   import PriceSpotterWeb.Gettext
 
   setup do
-    %{user: user_fixture()}
+    %{user: user_fixture(), admin_user: admin_fixture()}
   end
 
   describe "POST /users/log_in" do
@@ -22,6 +22,23 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
       conn = get(conn, ~p"/")
       response = html_response(conn, 200)
       assert response =~ user.email
+      refute response =~ ~p"/users/settings"
+      assert response =~ ~p"/users/log_out"
+    end
+
+    test "logs the admin user in", %{conn: conn, admin_user: admin_user} do
+      conn =
+        post(conn, ~p"/users/log_in", %{
+          "user" => %{"email" => admin_user.email, "password" => valid_user_password()}
+        })
+
+      assert get_session(conn, :user_token)
+      assert redirected_to(conn) == ~p"/"
+
+      # Now do a logged in request and assert on the menu
+      conn = get(conn, ~p"/")
+      response = html_response(conn, 200)
+      assert response =~ admin_user.email
       assert response =~ ~p"/users/settings"
       assert response =~ ~p"/users/log_out"
     end
