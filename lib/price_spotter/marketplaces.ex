@@ -178,7 +178,7 @@ defmodule PriceSpotter.Marketplaces do
   """
   @spec upsert_product(Ecto.Changeset.t()) :: any()
   def upsert_product(cs) do
-    internal_id = cs.changes.internal_id
+    internal_id = Ecto.Changeset.get_field(cs, :internal_id)
 
     Ecto.Multi.new()
     |> Ecto.Multi.one(:product, fn _multi ->

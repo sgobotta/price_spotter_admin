@@ -97,5 +97,46 @@ defmodule PriceSpotter.MarketplacesTest do
       product = product_fixture()
       assert %Ecto.Changeset{} = Marketplaces.change_product(product)
     end
+
+    test "upsert_product/1 updates a product when the product already exists" do
+      # Setup
+      product = product_fixture()
+      update_attrs = update_attrs(%{internal_id: product.internal_id})
+      cs = Marketplaces.change_product(product, update_attrs)
+
+      # Exercise
+      result = Marketplaces.upsert_product(cs)
+
+      # Verify
+      assert {:ok, {:updated, product}} = result
+      assert product.category == update_attrs.category
+      assert product.img_url == update_attrs.img_url
+      assert product.internal_id == update_attrs.internal_id
+      assert product.meta == %{}
+      assert product.name == update_attrs.name
+      assert product.price == Decimal.new(update_attrs.price)
+      assert product.supplier_name == update_attrs.supplier_name
+      assert product.supplier_url == update_attrs.supplier_url
+    end
+
+    test "upsert_product/1 creates a product when the product does not exist" do
+      # Setup
+      valid_attrs = valid_attrs()
+      cs = Marketplaces.change_product(%Product{}, valid_attrs)
+
+      # Exercise
+      result = Marketplaces.upsert_product(cs)
+
+      # Verify
+      assert {:ok, {:created, product}} = result
+      assert product.category == valid_attrs.category
+      assert product.img_url == valid_attrs.img_url
+      assert product.internal_id == valid_attrs.internal_id
+      assert product.meta == %{}
+      assert product.name == valid_attrs.name
+      assert product.price == Decimal.new(valid_attrs.price)
+      assert product.supplier_name == valid_attrs.supplier_name
+      assert product.supplier_url == valid_attrs.supplier_url
+    end
   end
 end
