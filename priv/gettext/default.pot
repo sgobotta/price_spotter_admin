@@ -109,6 +109,9 @@ msgid "Listing Products"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:28
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:22
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:15
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr ""
@@ -150,6 +153,7 @@ msgstr ""
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:32
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:32
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:24
 #, elixir-autogen, elixir-format
 msgid "Saving..."
 msgstr ""
@@ -162,6 +166,7 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:124
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:159
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:169
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:2
 #, elixir-autogen, elixir-format
 msgid "Supplier"
 msgstr ""
@@ -650,6 +655,8 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/accounts/user_live/show.ex:2
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:2
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:2
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:2
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:2
 #: lib/price_spotter_web/live/user_confirmation_instructions_live.ex:2
 #: lib/price_spotter_web/live/user_confirmation_live.ex:2
 #: lib/price_spotter_web/live/user_forgot_password_live.ex:2
@@ -696,6 +703,7 @@ msgid "Role"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:19
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:18
 #, elixir-autogen, elixir-format
 msgid "Show"
 msgstr ""
@@ -737,12 +745,85 @@ msgstr ""
 msgid "Use this form to edit the user settings"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:105
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:108
 #, elixir-autogen, elixir-format
 msgid "User created successfully"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:90
+#: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:93
 #, elixir-autogen, elixir-format
 msgid "User updated successfully"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:19
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:25
+#, elixir-autogen, elixir-format
+msgid "Edit Supplier"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:31
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:2
+#, elixir-autogen, elixir-format
+msgid "Listing Suppliers"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:25
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:5
+#, elixir-autogen, elixir-format
+msgid "New Supplier"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:24
+#, elixir-autogen, elixir-format
+msgid "Show Supplier"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:77
+#, elixir-autogen, elixir-format
+msgid "Supplier created successfully"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:62
+#, elixir-autogen, elixir-format
+msgid "Supplier updated successfully"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:12
+#, elixir-autogen, elixir-format
+msgid "Use this form to manage supplier records in your database."
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:15
+#, elixir-autogen, elixir-format
+msgid "Back to suppliers"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:27
+#, elixir-autogen, elixir-format
+msgid "Delete"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:25
+#, elixir-autogen, elixir-format
+msgid "Delete supplier \"%{name}\"?"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:20
+#, elixir-autogen, elixir-format
+msgid "Edit"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "Edit supplier"
+msgstr ""
+
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:92
+#, elixir-autogen, elixir-format
+msgid "Suppliers"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:3
+#, elixir-autogen, elixir-format
+msgid "This is a supplier record from your database."
 msgstr ""

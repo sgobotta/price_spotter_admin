@@ -1,0 +1,41 @@
+<.header>
+  <%= gettext("Listing Suppliers") %>
+  <:actions>
+    <.link patch={~p"/admin/marketplaces/suppliers/new"}>
+      <.button><%= gettext("New Supplier") %></.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="suppliers"
+  rows={@streams.suppliers}
+  row_click={fn {_id, supplier} -> JS.navigate(~p"/admin/marketplaces/suppliers/#{supplier}") end}
+>
+  <:col :let={{_id, supplier}} label={gettext("Name")}><%= supplier.name %></:col>
+  <:action :let={{_id, supplier}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}><%= gettext("Show") %></.link>
+    </div>
+    <.link patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}><%= gettext("Edit") %></.link>
+  </:action>
+  <:action :let={{id, supplier}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: supplier.id}) |> hide("##{id}")}
+      data-confirm={gettext("Delete supplier \"%{name}\"?", name: supplier.name)}
+    >
+      <%= gettext("Delete") %>
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="supplier-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/suppliers")}>
+  <.live_component
+    module={PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent}
+    id={@supplier.id || :new}
+    title={@page_title}
+    action={@live_action}
+    supplier={@supplier}
+    patch={~p"/admin/marketplaces/suppliers"}
+  />
+</.modal>

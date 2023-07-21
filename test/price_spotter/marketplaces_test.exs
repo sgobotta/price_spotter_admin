@@ -139,4 +139,58 @@ defmodule PriceSpotter.MarketplacesTest do
       assert product.supplier_url == valid_attrs.supplier_url
     end
   end
+
+  describe "suppliers" do
+    alias PriceSpotter.Marketplaces.Supplier
+
+    import PriceSpotter.MarketplacesFixtures
+
+    @invalid_attrs %{name: nil}
+
+    test "list_suppliers/0 returns all suppliers" do
+      supplier = supplier_fixture()
+      assert Marketplaces.list_suppliers() == [supplier]
+    end
+
+    test "get_supplier!/1 returns the supplier with given id" do
+      supplier = supplier_fixture()
+      assert Marketplaces.get_supplier!(supplier.id) == supplier
+    end
+
+    test "create_supplier/1 with valid data creates a supplier" do
+      valid_attrs = %{name: "some name"}
+
+      assert {:ok, %Supplier{} = supplier} = Marketplaces.create_supplier(valid_attrs)
+      assert supplier.name == "some name"
+    end
+
+    test "create_supplier/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Marketplaces.create_supplier(@invalid_attrs)
+    end
+
+    test "update_supplier/2 with valid data updates the supplier" do
+      supplier = supplier_fixture()
+      update_attrs = %{name: "some updated name"}
+
+      assert {:ok, %Supplier{} = supplier} = Marketplaces.update_supplier(supplier, update_attrs)
+      assert supplier.name == "some updated name"
+    end
+
+    test "update_supplier/2 with invalid data returns error changeset" do
+      supplier = supplier_fixture()
+      assert {:error, %Ecto.Changeset{}} = Marketplaces.update_supplier(supplier, @invalid_attrs)
+      assert supplier == Marketplaces.get_supplier!(supplier.id)
+    end
+
+    test "delete_supplier/1 deletes the supplier" do
+      supplier = supplier_fixture()
+      assert {:ok, %Supplier{}} = Marketplaces.delete_supplier(supplier)
+      assert_raise Ecto.NoResultsError, fn -> Marketplaces.get_supplier!(supplier.id) end
+    end
+
+    test "change_supplier/1 returns a supplier changeset" do
+      supplier = supplier_fixture()
+      assert %Ecto.Changeset{} = Marketplaces.change_supplier(supplier)
+    end
+  end
 end

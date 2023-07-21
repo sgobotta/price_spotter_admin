@@ -38,4 +38,18 @@ defmodule PriceSpotter.MarketplacesFixtures do
 
     product
   end
+
+  @doc """
+  Generate a supplier.
+  """
+  def supplier_fixture(attrs \\ %{}) do
+    {:ok, supplier} =
+      attrs
+      |> Enum.into(%{
+        name: "some name"
+      })
+      |> PriceSpotter.Marketplaces.create_supplier()
+
+    supplier
+  end
 end
