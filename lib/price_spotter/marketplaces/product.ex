@@ -43,7 +43,7 @@ defmodule PriceSpotter.Marketplaces.Product do
     field :category, :string
     field :img_url, :string
     field :internal_id, :string
-    field :meta, :map
+    field :meta, :map, default: %{}
     field :name, :string
     field :price, :decimal
     field :supplier_name, :string
