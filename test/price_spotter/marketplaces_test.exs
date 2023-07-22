@@ -143,17 +143,17 @@ defmodule PriceSpotter.MarketplacesTest do
   describe "suppliers" do
     alias PriceSpotter.Marketplaces.Supplier
 
-    import PriceSpotter.MarketplacesFixtures
+    alias PriceSpotter.Marketplaces.SuppliersFixtures
 
     @invalid_attrs %{name: nil}
 
     test "list_suppliers/0 returns all suppliers" do
-      supplier = supplier_fixture()
+      supplier = SuppliersFixtures.create()
       assert Marketplaces.list_suppliers() == [supplier]
     end
 
     test "get_supplier!/1 returns the supplier with given id" do
-      supplier = supplier_fixture()
+      supplier = SuppliersFixtures.create()
       assert Marketplaces.get_supplier!(supplier.id) == supplier
     end
 
@@ -169,7 +169,7 @@ defmodule PriceSpotter.MarketplacesTest do
     end
 
     test "update_supplier/2 with valid data updates the supplier" do
-      supplier = supplier_fixture()
+      supplier = SuppliersFixtures.create()
       update_attrs = %{name: "some updated name"}
 
       assert {:ok, %Supplier{} = supplier} = Marketplaces.update_supplier(supplier, update_attrs)
@@ -177,19 +177,19 @@ defmodule PriceSpotter.MarketplacesTest do
     end
 
     test "update_supplier/2 with invalid data returns error changeset" do
-      supplier = supplier_fixture()
+      supplier = SuppliersFixtures.create()
       assert {:error, %Ecto.Changeset{}} = Marketplaces.update_supplier(supplier, @invalid_attrs)
       assert supplier == Marketplaces.get_supplier!(supplier.id)
     end
 
     test "delete_supplier/1 deletes the supplier" do
-      supplier = supplier_fixture()
+      supplier = SuppliersFixtures.create()
       assert {:ok, %Supplier{}} = Marketplaces.delete_supplier(supplier)
       assert_raise Ecto.NoResultsError, fn -> Marketplaces.get_supplier!(supplier.id) end
     end
 
     test "change_supplier/1 returns a supplier changeset" do
-      supplier = supplier_fixture()
+      supplier = SuppliersFixtures.create()
       assert %Ecto.Changeset{} = Marketplaces.change_supplier(supplier)
     end
   end

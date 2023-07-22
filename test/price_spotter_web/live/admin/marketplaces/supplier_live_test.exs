@@ -2,15 +2,16 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
   use PriceSpotterWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import PriceSpotter.MarketplacesFixtures
   import PriceSpotterWeb.Gettext
 
-  @create_attrs %{name: "some name"}
-  @update_attrs %{name: "some updated name"}
-  @invalid_attrs %{name: nil}
+  alias PriceSpotter.Marketplaces.SuppliersFixtures
+
+  @create_attrs SuppliersFixtures.valid_attrs()
+  @update_attrs SuppliersFixtures.update_attrs()
+  @invalid_attrs SuppliersFixtures.invalid_attrs()
 
   defp create_supplier(_) do
-    supplier = supplier_fixture()
+    supplier = SuppliersFixtures.create()
     %{supplier: supplier}
   end
 
@@ -44,13 +45,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
 
       html = render(index_live)
       assert html =~ gettext("Supplier created successfully")
-      assert html =~ "some name"
+      assert html =~ @create_attrs.name
     end
 
     test "updates supplier in listing", %{conn: conn, supplier: supplier} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
-      assert index_live |> element("#suppliers-#{supplier.id} a", gettext("Edit")) |> render_click() =~
+      assert index_live
+             |> element("#suppliers-#{supplier.id} a", gettext("Edit"))
+             |> render_click() =~
                gettext("Edit Supplier")
 
       assert_patch(index_live, ~p"/admin/marketplaces/suppliers/#{supplier}/edit")
@@ -73,7 +76,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
     test "deletes supplier in listing", %{conn: conn, supplier: supplier} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
-      assert index_live |> element("#suppliers-#{supplier.id} a", gettext("Delete")) |> render_click()
+      assert index_live
+             |> element("#suppliers-#{supplier.id} a", gettext("Delete"))
+             |> render_click()
+
       refute has_element?(index_live, "#suppliers-#{supplier.id}")
     end
   end

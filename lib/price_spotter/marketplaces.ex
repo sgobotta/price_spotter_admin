@@ -213,6 +213,12 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, %Product{} = p} = update_product(product, changes)
         {:ok, {:updated, p}}
     end)
+    |> Ecto.Multi.run(:maybe_add_shop, fn
+      repo, multi ->
+        IO.inspect(multi, label: "multi")
+
+        {:ok, {:created_shop, %{}}}
+    end)
     |> Repo.transaction()
     |> case do
       {:ok, result} ->

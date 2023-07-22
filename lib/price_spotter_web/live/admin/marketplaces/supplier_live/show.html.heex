@@ -2,7 +2,10 @@
   <%= gettext("Supplier") %> <%= @supplier.id %>
   <:subtitle><%= gettext("This is a supplier record from your database.") %></:subtitle>
   <:actions>
-    <.link patch={~p"/admin/marketplaces/suppliers/#{@supplier}/show/edit"} phx-click={JS.push_focus()}>
+    <.link
+      patch={~p"/admin/marketplaces/suppliers/#{@supplier}/show/edit"}
+      phx-click={JS.push_focus()}
+    >
       <.button><%= gettext("Edit supplier") %></.button>
     </.link>
   </:actions>
@@ -14,7 +17,12 @@
 
 <.back navigate={~p"/admin/marketplaces/suppliers"}><%= gettext("Back to suppliers") %></.back>
 
-<.modal :if={@live_action == :edit} id="supplier-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/suppliers/#{@supplier}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="supplier-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/marketplaces/suppliers/#{@supplier}")}
+>
   <.live_component
     module={PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent}
     id={@supplier.id}

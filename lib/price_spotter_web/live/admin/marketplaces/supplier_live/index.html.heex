@@ -15,9 +15,13 @@
   <:col :let={{_id, supplier}} label={gettext("Name")}><%= supplier.name %></:col>
   <:action :let={{_id, supplier}}>
     <div class="sr-only">
-      <.link navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}><%= gettext("Show") %></.link>
+      <.link navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}>
+        <%= gettext("Show") %>
+      </.link>
     </div>
-    <.link patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}><%= gettext("Edit") %></.link>
+    <.link patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}>
+      <%= gettext("Edit") %>
+    </.link>
   </:action>
   <:action :let={{id, supplier}}>
     <.link
@@ -29,7 +33,12 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="supplier-modal" show on_cancel={JS.patch(~p"/admin/marketplaces/suppliers")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="supplier-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/marketplaces/suppliers")}
+>
   <.live_component
     module={PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent}
     id={@supplier.id || :new}

@@ -7,6 +7,8 @@ defmodule PriceSpotter.Marketplaces.Supplier do
   schema "suppliers" do
     field :name, :string
 
+    has_many :products, PriceSpotter.Marketplaces.Product
+
     timestamps()
   end
 

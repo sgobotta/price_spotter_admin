@@ -9,7 +9,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle><%= gettext("Use this form to manage supplier records in your database.") %></:subtitle>
+        <:subtitle>
+          <%= gettext("Use this form to manage supplier records in your database.") %>
+        </:subtitle>
       </.header>
 
       <.simple_form

@@ -50,6 +50,8 @@ defmodule PriceSpotter.Marketplaces.Product do
     field :supplier_url, :string
     field :price_updated_at, :naive_datetime
 
+    belongs_to :supplier, PriceSpotter.Marketplaces.Supplier
+
     timestamps()
   end
 

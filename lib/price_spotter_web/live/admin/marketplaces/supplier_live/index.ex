@@ -33,7 +33,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
   end
 
   @impl true
-  def handle_info({PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent, {:saved, supplier}}, socket) do
+  def handle_info(
+        {PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent, {:saved, supplier}},
+        socket
+      ) do
     {:noreply, stream_insert(socket, :suppliers, supplier)}
   end
 
