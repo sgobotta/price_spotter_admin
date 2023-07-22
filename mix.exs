@@ -22,7 +22,7 @@ defmodule PriceSpotter.MixProject do
   def application do
     [
       mod: {PriceSpotter.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:ecto_enum, :logger, :runtime_tools]
     ]
   end
 
