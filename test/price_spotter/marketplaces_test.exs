@@ -1,4 +1,5 @@
 defmodule PriceSpotter.MarketplacesTest do
+  alias PriceSpotter.Marketplaces.Supplier
   use PriceSpotter.DataCase
 
   alias PriceSpotter.Marketplaces
@@ -137,6 +138,42 @@ defmodule PriceSpotter.MarketplacesTest do
       assert product.price == Decimal.new(valid_attrs.price)
       assert product.supplier_name == valid_attrs.supplier_name
       assert product.supplier_url == valid_attrs.supplier_url
+    end
+
+    test "upsert_supplier/1 creates a supplier when the supplier does not exist" do
+      # Setup
+      valid_attrs = valid_attrs()
+      cs = Marketplaces.change_product(%Product{}, valid_attrs)
+
+      # Exercise
+      result = Marketplaces.upsert_product(cs)
+
+      # Verify
+      assert {:ok, {:created, %Product{id: product_id}}} = result
+      %{supplier_name: supplier_name} = valid_attrs
+
+      assert %Supplier{id: supplier_id, name: ^supplier_name} =
+               PriceSpotter.Repo.get_by(Supplier, name: supplier_name)
+
+      assert %Product{supplier_id: ^supplier_id} = Marketplaces.get_product!(product_id)
+    end
+
+    test "upsert_supplier/1 does nothing when the supplier already exists" do
+      # Setup
+      %{supplier_name: supplier_name} = valid_attrs = valid_attrs()
+      %Supplier{} = PriceSpotter.Marketplaces.SuppliersFixtures.create(%{name: supplier_name})
+      cs = Marketplaces.change_product(%Product{}, valid_attrs)
+
+      # Exercise
+      result = Marketplaces.upsert_product(cs)
+
+      # Verify
+      assert {:ok, {:created, %Product{id: product_id}}} = result
+
+      assert %Supplier{id: supplier_id, name: ^supplier_name} =
+               PriceSpotter.Repo.get_by(Supplier, name: supplier_name)
+
+      assert %Product{supplier_id: ^supplier_id} = Marketplaces.get_product!(product_id)
     end
   end
 

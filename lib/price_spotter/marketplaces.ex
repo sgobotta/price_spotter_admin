@@ -6,7 +6,7 @@ defmodule PriceSpotter.Marketplaces do
   import Ecto.Query, warn: false
   alias PriceSpotter.Repo
 
-  alias PriceSpotter.Marketplaces.Product
+  alias PriceSpotter.Marketplaces.{Product, Supplier}
 
   require Logger
 
@@ -137,6 +137,24 @@ defmodule PriceSpotter.Marketplaces do
     Product.changeset(product, attrs)
   end
 
+  @doc """
+  Assigns a supplier id to the given product.
+
+  ## Examples
+
+      iex> update_product(product, Ecto.UUID.generate())
+      {:ok, %Product{}}
+
+      iex> update_product(product, "some invalid id")
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def assign_supplier(%Product{} = product, supplier_id) do
+    product
+    |> Product.change_supplier(supplier_id)
+    |> Repo.update()
+  end
+
   # ----------------------------------------------------------------------------
   # Product cache management
   #
@@ -174,17 +192,20 @@ defmodule PriceSpotter.Marketplaces do
 
   @doc """
   Atomically inserts or updates a product record whether an entity is persisted
-  or not.
+  or not. Then a Supplier existance is checked to finally relate the product to
+  the resulting supplier.
   """
   @spec upsert_product(Ecto.Changeset.t()) :: any()
   def upsert_product(cs) do
     internal_id = Ecto.Changeset.get_field(cs, :internal_id)
 
     Ecto.Multi.new()
+    # Checks product existance
     |> Ecto.Multi.one(:product, fn _multi ->
       from(p in Product, where: p.internal_id == ^internal_id)
     end)
-    |> Ecto.Multi.run(:op, fn
+    # Create or Update product
+    |> Ecto.Multi.run(:maybe_create_product, fn
       _repo, %{product: nil} = _multi ->
         cs =
           Ecto.Changeset.put_change(
@@ -213,16 +234,42 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, %Product{} = p} = update_product(product, changes)
         {:ok, {:updated, p}}
     end)
-    |> Ecto.Multi.run(:maybe_add_shop, fn
-      repo, multi ->
-        IO.inspect(multi, label: "multi")
-
-        {:ok, {:created_shop, %{}}}
+    # Check supplier existance
+    |> Ecto.Multi.one(:supplier, fn %{
+                                      maybe_create_product:
+                                        {product_op, %Product{supplier_name: supplier_name}}
+                                    }
+                                    when product_op in [:created, :updated] ->
+      from(s in Supplier, where: s.name == ^supplier_name)
     end)
+    # Create or update Supplier
+    |> Ecto.Multi.run(:maybe_create_supplier, fn
+      _repo,
+      %{
+        maybe_create_product: {_product_op, %Product{supplier_name: supplier_name}},
+        supplier: nil
+      } ->
+        {:ok, %Supplier{} = s} = create_supplier(%{name: supplier_name})
+        {:ok, {:created, s}}
+
+      _repo, %{supplier: %Supplier{} = s} ->
+        {:ok, {:noop, s}}
+    end)
+    # Relate supplier to a product
+    |> Ecto.Multi.run(:assoc_supplier, fn _repo,
+                                          %{
+                                            maybe_create_product: {_product_op, %Product{} = p},
+                                            maybe_create_supplier:
+                                              {_supplier_op, %Supplier{id: supplier_id}}
+                                          } ->
+      {:ok, %Product{}} = assign_supplier(p, supplier_id)
+      {:ok, {:ok, :noop}}
+    end)
+    # Submit transaction
     |> Repo.transaction()
     |> case do
       {:ok, result} ->
-        {:ok, result.op}
+        {:ok, result.maybe_create_product}
 
       error ->
         Logger.error(
@@ -234,7 +281,7 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) ::
-          {:ok, any()} | {:error, :no_product}
+          Redis.Stream.Entry.t() | list() | any()
   def fetch_last_product_entry(stream_key, _count \\ "*") do
     stream_name = get_stream_name("product-history_" <> stream_key)
 
@@ -297,8 +344,6 @@ defmodule PriceSpotter.Marketplaces do
   defp get_stream_name(stream_key), do: "#{get_stage()}_stream_#{stream_key}_v1"
 
   defp get_stage, do: PriceSpotter.Application.stage()
-
-  alias PriceSpotter.Marketplaces.Supplier
 
   @doc """
   Returns the list of suppliers.
