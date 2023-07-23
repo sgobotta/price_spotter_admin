@@ -9,6 +9,11 @@ defmodule PriceSpotter.Marketplaces.Supplier do
 
     has_many :products, PriceSpotter.Marketplaces.Product
 
+    many_to_many :users, PriceSpotter.Accounts.User,
+      join_through: PriceSpotter.Marketplaces.Relations.UserSupplier,
+      on_replace: :delete,
+      on_delete: :delete_all
+
     timestamps()
   end
 

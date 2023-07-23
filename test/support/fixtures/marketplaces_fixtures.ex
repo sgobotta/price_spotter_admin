@@ -7,6 +7,8 @@ defmodule PriceSpotter.MarketplacesFixtures do
   alias PriceSpotter.Marketplaces.Supplier
   alias PriceSpotter.Marketplaces.SuppliersFixtures
 
+  import PriceSpotter.Fixtures
+
   @valid_attrs %{
     category: "some category",
     img_url: "some img_url",
@@ -52,28 +54,16 @@ defmodule PriceSpotter.MarketplacesFixtures do
     do: maybe_assign(attrs, :supplier_id, Supplier, SuppliersFixtures)
 
   @doc """
-  Convenience function to assigning attributes for fixture creation. Whenever
-  the desired attribute does not exist, a new fixture is created in order to
-  satisfy the needed relationship.
-
-  ## Examples:
-
-      iex> maybe_assign(%{shop_id: "some id"}, :shop_id, Shop, ShopFixtures)
-      %{shop_id: "some id"}
-
-      iex> maybe_assign(%{}, :shop_id, Shop, ShopFixtures)
-      %{shop_id: "some new id"}
-
+  Generate a user_supplier.
   """
-  @spec maybe_assign(map(), atom(), module(), module(), atom()) :: map()
-  def maybe_assign(attrs, attr, struct_type, fixtures_module, action \\ :create) do
-    case Map.has_key?(attrs, attr) do
-      false ->
-        %^struct_type{id: id} = apply(fixtures_module, action, [attrs])
-        Map.merge(attrs, %{attr => id})
+  def user_supplier_fixture(attrs \\ %{}) do
+    {:ok, user_supplier} =
+      attrs
+      |> Enum.into(%{
+        role: :maintainer
+      })
+      |> PriceSpotter.Marketplaces.create_user_supplier()
 
-      true ->
-        attrs
-    end
+    user_supplier
   end
 end

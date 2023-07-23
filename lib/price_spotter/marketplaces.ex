@@ -438,4 +438,100 @@ defmodule PriceSpotter.Marketplaces do
   def change_supplier(%Supplier{} = supplier, attrs \\ %{}) do
     Supplier.changeset(supplier, attrs)
   end
+
+  alias PriceSpotter.Marketplaces.Relations.UserSupplier
+
+  @doc """
+  Returns the list of users_suppliers.
+
+  ## Examples
+
+      iex> list_users_suppliers()
+      [%UserSupplier{}, ...]
+
+  """
+  def list_users_suppliers do
+    Repo.all(UserSupplier)
+  end
+
+  @doc """
+  Gets a single user_supplier.
+
+  Raises `Ecto.NoResultsError` if the User supplier does not exist.
+
+  ## Examples
+
+      iex> get_user_supplier!(123)
+      %UserSupplier{}
+
+      iex> get_user_supplier!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_supplier!(id), do: Repo.get!(UserSupplier, id)
+
+  @doc """
+  Creates a user_supplier.
+
+  ## Examples
+
+      iex> create_user_supplier(%{field: value})
+      {:ok, %UserSupplier{}}
+
+      iex> create_user_supplier(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_supplier(attrs \\ %{}) do
+    %UserSupplier{}
+    |> UserSupplier.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_supplier.
+
+  ## Examples
+
+      iex> update_user_supplier(user_supplier, %{field: new_value})
+      {:ok, %UserSupplier{}}
+
+      iex> update_user_supplier(user_supplier, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_supplier(%UserSupplier{} = user_supplier, attrs) do
+    user_supplier
+    |> UserSupplier.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a user_supplier.
+
+  ## Examples
+
+      iex> delete_user_supplier(user_supplier)
+      {:ok, %UserSupplier{}}
+
+      iex> delete_user_supplier(user_supplier)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_supplier(%UserSupplier{} = user_supplier) do
+    Repo.delete(user_supplier)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_supplier changes.
+
+  ## Examples
+
+      iex> change_user_supplier(user_supplier)
+      %Ecto.Changeset{data: %UserSupplier{}}
+
+  """
+  def change_user_supplier(%UserSupplier{} = user_supplier, attrs \\ %{}) do
+    UserSupplier.changeset(user_supplier, attrs)
+  end
 end

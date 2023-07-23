@@ -230,4 +230,78 @@ defmodule PriceSpotter.MarketplacesTest do
       assert %Ecto.Changeset{} = Marketplaces.change_supplier(supplier)
     end
   end
+
+  describe "users_suppliers" do
+    alias PriceSpotter.Marketplaces.Relations.UserSupplier
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+
+    import PriceSpotter.MarketplacesFixtures
+
+    test "list_users_suppliers/0 returns all users_suppliers" do
+      user_supplier = UsersSuppliersFixtures.create()
+      assert Marketplaces.list_users_suppliers() == [user_supplier]
+    end
+
+    test "get_user_supplier!/1 returns the user_supplier with given id" do
+      user_supplier = UsersSuppliersFixtures.create()
+      assert Marketplaces.get_user_supplier!(user_supplier.id) == user_supplier
+    end
+
+    test "create_user_supplier/1 with valid data creates a user_supplier" do
+      %PriceSpotter.Accounts.User{id: user_id} = PriceSpotter.AccountsFixtures.user_fixture()
+
+      %PriceSpotter.Marketplaces.Supplier{id: supplier_id} =
+        PriceSpotter.Marketplaces.SuppliersFixtures.create()
+
+      valid_attrs =
+        UsersSuppliersFixtures.valid_attrs(%{
+          user_id: user_id,
+          supplier_id: supplier_id
+        })
+
+      assert {:ok, %UserSupplier{} = user_supplier} =
+               Marketplaces.create_user_supplier(valid_attrs)
+
+      assert user_supplier.role == valid_attrs.role
+    end
+
+    test "create_user_supplier/1 with invalid data returns error changeset" do
+      invalid_attrs = UsersSuppliersFixtures.invalid_attrs()
+      assert {:error, %Ecto.Changeset{}} = Marketplaces.create_user_supplier(invalid_attrs)
+    end
+
+    test "update_user_supplier/2 with valid data updates the user_supplier" do
+      user_supplier = UsersSuppliersFixtures.create()
+      update_attrs = UsersSuppliersFixtures.update_attrs()
+
+      assert {:ok, %UserSupplier{} = user_supplier} =
+               Marketplaces.update_user_supplier(user_supplier, update_attrs)
+
+      assert user_supplier.role == update_attrs.role
+    end
+
+    test "update_user_supplier/2 with invalid data returns error changeset" do
+      user_supplier = UsersSuppliersFixtures.create()
+      invalid_attrs = UsersSuppliersFixtures.invalid_attrs()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Marketplaces.update_user_supplier(user_supplier, invalid_attrs)
+
+      assert user_supplier == Marketplaces.get_user_supplier!(user_supplier.id)
+    end
+
+    test "delete_user_supplier/1 deletes the user_supplier" do
+      user_supplier = UsersSuppliersFixtures.create()
+      assert {:ok, %UserSupplier{}} = Marketplaces.delete_user_supplier(user_supplier)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_user_supplier!(user_supplier.id)
+      end
+    end
+
+    test "change_user_supplier/1 returns a user_supplier changeset" do
+      user_supplier = UsersSuppliersFixtures.create()
+      assert %Ecto.Changeset{} = Marketplaces.change_user_supplier(user_supplier)
+    end
+  end
 end
