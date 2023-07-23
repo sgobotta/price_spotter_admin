@@ -48,7 +48,7 @@ defmodule Redis.Client do
     end
   end
 
-  @spec fetch_history(binary, binary | non_neg_integer()) ::
+  @spec fetch_history(binary, :all | binary | non_neg_integer()) ::
           {:ok, binary} | {:error, :no_result}
   def fetch_history(stream_name, :all) do
     opts = parse_opts(command: :asc)
