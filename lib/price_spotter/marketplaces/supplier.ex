@@ -17,5 +17,6 @@ defmodule PriceSpotter.Marketplaces.Supplier do
     supplier
     |> cast(attrs, [:name])
     |> validate_required([:name])
+    |> unique_constraint(:name)
   end
 end
