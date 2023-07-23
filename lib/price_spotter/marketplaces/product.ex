@@ -81,6 +81,12 @@ defmodule PriceSpotter.Marketplaces.Product do
     |> unique_constraint(:internal_id)
   end
 
+  def change_supplier(product, supplier_id) do
+    product
+    |> cast(%{supplier_id: supplier_id}, [:supplier_id])
+    |> validate_required([:supplier_id])
+  end
+
   @spec from_entry!(Redis.Stream.Entry.t()) :: Ecto.Changeset.t()
   def from_entry!(%Redis.Stream.Entry{values: product}) do
     changeset(
