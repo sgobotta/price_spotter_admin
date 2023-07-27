@@ -48,6 +48,13 @@ defmodule PriceSpotterWeb.Router do
 
       live "/suppliers/:id", SupplierLive.Show, :show
       live "/suppliers/:id/show/edit", SupplierLive.Show, :edit
+
+      live "/users_suppliers", UserSupplierLive.Index, :index
+      live "/users_suppliers/new", UserSupplierLive.Index, :new
+      live "/users_suppliers/:id/edit", UserSupplierLive.Index, :edit
+
+      live "/users_suppliers/:id", UserSupplierLive.Show, :show
+      live "/users_suppliers/:id/show/edit", UserSupplierLive.Show, :edit
     end
 
     scope "/admin/accounts", Admin.Accounts do
