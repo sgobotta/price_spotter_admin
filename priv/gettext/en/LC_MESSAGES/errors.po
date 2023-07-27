@@ -11,15 +11,15 @@ msgstr ""
 "Language: en\n"
 
 ## From Ecto.Changeset.cast/4
-#: lib/price_spotter/accounts/user.ex:85
-#: lib/price_spotter/accounts/user.ex:104
+#: lib/price_spotter/accounts/user.ex:91
+#: lib/price_spotter/accounts/user.ex:110
 #, elixir-autogen
 msgid "can't be blank"
 msgstr ""
 
 ## From Ecto.Changeset.unique_constraint/3
-#: lib/price_spotter/accounts/user.ex:143
-#: lib/price_spotter/accounts/user.ex:145
+#: lib/price_spotter/accounts/user.ex:149
+#: lib/price_spotter/accounts/user.ex:151
 #, elixir-autogen
 msgid "has already been taken"
 msgstr ""
@@ -117,30 +117,30 @@ msgstr ""
 msgid "must be equal to %{number}"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:92
+#: lib/price_spotter/accounts/user.ex:98
 #, elixir-autogen, elixir-format, fuzzy
 msgid "should have at most %{count} caracters(s)"
 msgid_plural "should have at most %{count} caracters(s)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/price_spotter/accounts/user.ex:87
+#: lib/price_spotter/accounts/user.ex:93
 #, elixir-autogen, elixir-format
 msgid "must have the @ sign and no spaces"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:109
+#: lib/price_spotter/accounts/user.ex:115
 #, elixir-autogen, elixir-format
 msgid "should be between %{min} and %{max} characters"
 msgstr ""
 
-#: lib/price_spotter/accounts/user.ex:128
+#: lib/price_spotter/accounts/user.ex:134
 #, elixir-autogen, elixir-format, fuzzy
 msgid "should be at most %{count} byte(s)"
 msgstr ""
 
 ## From Ecto.Changeset.put_change/3
-#: lib/price_spotter/accounts/user.ex:216
+#: lib/price_spotter/accounts/user.ex:222
 #, elixir-autogen, elixir-format, fuzzy
 msgid "is not valid"
 msgstr ""
