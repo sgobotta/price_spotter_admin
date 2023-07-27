@@ -27,7 +27,7 @@ nav.pagination .pagination-next {
 }
 
 nav.pagination .pagination-list {
-  @apply order-2;
+  @apply order-2 gap-4;
 }
 
 .pagination-list {
