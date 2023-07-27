@@ -2,6 +2,8 @@ defmodule PriceSpotter.Marketplaces.Relations.UserSupplier do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{}
+
   @fields [:role]
   @foreign_fields [:user_id, :supplier_id]
 
@@ -23,5 +25,6 @@ defmodule PriceSpotter.Marketplaces.Relations.UserSupplier do
     |> cast_assoc(:user)
     |> cast_assoc(:supplier)
     |> validate_required(@fields ++ @foreign_fields)
+    |> unique_constraint([:user_id, :supplier_id])
   end
 end
