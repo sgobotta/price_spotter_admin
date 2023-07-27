@@ -60,7 +60,7 @@
         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
           <a
             href={~p"/admin/marketplaces/products"}
-            class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6"
+            class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
           >
             <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
             </span>
@@ -72,13 +72,35 @@
           <%= if @current_user && @current_user.role in [:admin] do %>
             <a
               href={~p"/admin/accounts/users"}
-              class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6"
+              class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
             >
               <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
               </span>
               <span class="relative flex items-center gap-4 sm:flex-col">
                 <.icon name="hero-user-solid" class="h-7 w-7" />
                 <%= gettext("Users") %>
+              </span>
+            </a>
+            <a
+              href={~p"/admin/marketplaces/suppliers"}
+              class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
+            >
+              <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
+              </span>
+              <span class="relative flex items-center gap-4 sm:flex-col">
+                <.icon name="hero-building-storefront-solid" class="h-7 w-7" />
+                <%= gettext("Suppliers") %>
+              </span>
+            </a>
+            <a
+              href={~p"/admin/marketplaces/users_suppliers"}
+              class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
+            >
+              <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
+              </span>
+              <span class="relative flex items-center gap-4 sm:flex-col">
+                <.icon name="hero-lock-open-solid" class="h-7 w-7" />
+                <%= gettext("Users Suppliers") %>
               </span>
             </a>
           <% end %>

@@ -27,7 +27,7 @@ nav.pagination .pagination-next {
 }
 
 nav.pagination .pagination-list {
-  @apply order-2;
+  @apply order-2 gap-4;
 }
 
 .pagination-list {
@@ -91,7 +91,7 @@ input {
 }
 
 input, select {
-  @apply focus:ring-2 focus:ring-sky-500 bg-zinc-50 shadow-inner-lg h-10 focus:shadow-2xl active:shadow-2xl focus:bg-zinc-100 active:bg-zinc-100 !important;
+  @apply focus:ring-1 focus:ring-sky-500 bg-zinc-50 shadow-inner-lg h-10 focus:shadow-2xl active:shadow-2xl focus:bg-zinc-100 active:bg-zinc-100 !important;
 }
 
 .shadow-inner-lg {

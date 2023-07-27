@@ -6,7 +6,7 @@ defmodule PriceSpotter.Marketplaces do
   import Ecto.Query, warn: false
   alias PriceSpotter.Repo
 
-  alias PriceSpotter.Marketplaces.Product
+  alias PriceSpotter.Marketplaces.{Product, Supplier}
 
   require Logger
 
@@ -137,6 +137,24 @@ defmodule PriceSpotter.Marketplaces do
     Product.changeset(product, attrs)
   end
 
+  @doc """
+  Assigns a supplier id to the given product.
+
+  ## Examples
+
+      iex> update_product(product, Ecto.UUID.generate())
+      {:ok, %Product{}}
+
+      iex> update_product(product, "some invalid id")
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def assign_supplier(%Product{} = product, supplier_id) do
+    product
+    |> Product.change_supplier(supplier_id)
+    |> Repo.update()
+  end
+
   # ----------------------------------------------------------------------------
   # Product cache management
   #
@@ -174,17 +192,20 @@ defmodule PriceSpotter.Marketplaces do
 
   @doc """
   Atomically inserts or updates a product record whether an entity is persisted
-  or not.
+  or not. Then a Supplier existance is checked to finally relate the product to
+  the resulting supplier.
   """
   @spec upsert_product(Ecto.Changeset.t()) :: any()
   def upsert_product(cs) do
-    internal_id = cs.changes.internal_id
+    internal_id = Ecto.Changeset.get_field(cs, :internal_id)
 
     Ecto.Multi.new()
+    # Checks product existance
     |> Ecto.Multi.one(:product, fn _multi ->
       from(p in Product, where: p.internal_id == ^internal_id)
     end)
-    |> Ecto.Multi.run(:op, fn
+    # Create or Update product
+    |> Ecto.Multi.run(:maybe_create_product, fn
       _repo, %{product: nil} = _multi ->
         cs =
           Ecto.Changeset.put_change(
@@ -213,10 +234,42 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, %Product{} = p} = update_product(product, changes)
         {:ok, {:updated, p}}
     end)
+    # Check supplier existance
+    |> Ecto.Multi.one(:supplier, fn %{
+                                      maybe_create_product:
+                                        {product_op, %Product{supplier_name: supplier_name}}
+                                    }
+                                    when product_op in [:created, :updated] ->
+      from(s in Supplier, where: s.name == ^supplier_name)
+    end)
+    # Create or update Supplier
+    |> Ecto.Multi.run(:maybe_create_supplier, fn
+      _repo,
+      %{
+        maybe_create_product: {_product_op, %Product{supplier_name: supplier_name}},
+        supplier: nil
+      } ->
+        {:ok, %Supplier{} = s} = create_supplier(%{name: supplier_name})
+        {:ok, {:created, s}}
+
+      _repo, %{supplier: %Supplier{} = s} ->
+        {:ok, {:noop, s}}
+    end)
+    # Relate supplier to a product
+    |> Ecto.Multi.run(:assoc_supplier, fn _repo,
+                                          %{
+                                            maybe_create_product: {_product_op, %Product{} = p},
+                                            maybe_create_supplier:
+                                              {_supplier_op, %Supplier{id: supplier_id}}
+                                          } ->
+      {:ok, %Product{}} = assign_supplier(p, supplier_id)
+      {:ok, {:ok, :noop}}
+    end)
+    # Submit transaction
     |> Repo.transaction()
     |> case do
       {:ok, result} ->
-        {:ok, result.op}
+        {:ok, result.maybe_create_product}
 
       error ->
         Logger.error(
@@ -228,7 +281,7 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) ::
-          {:ok, any()} | {:error, :no_product}
+          Redis.Stream.Entry.t() | list() | any()
   def fetch_last_product_entry(stream_key, _count \\ "*") do
     stream_name = get_stream_name("product-history_" <> stream_key)
 
@@ -255,7 +308,7 @@ defmodule PriceSpotter.Marketplaces do
   def fetch_product_history(supplier_name, internal_id) do
     stream_name = get_stream_name("product-history_" <> supplier_name <> "_" <> internal_id)
 
-    with {:ok, entries} <- Redis.Client.fetch_history(stream_name, :all),
+    with {:ok, entries} <- Redis.Client.fetch_history(stream_name, 30),
          history <- map_product_history(entries) do
       {:ok, history}
     else
@@ -291,4 +344,194 @@ defmodule PriceSpotter.Marketplaces do
   defp get_stream_name(stream_key), do: "#{get_stage()}_stream_#{stream_key}_v1"
 
   defp get_stage, do: PriceSpotter.Application.stage()
+
+  @doc """
+  Returns the list of suppliers.
+
+  ## Examples
+
+      iex> list_suppliers()
+      [%Supplier{}, ...]
+
+  """
+  def list_suppliers do
+    Repo.all(Supplier)
+  end
+
+  @doc """
+  Gets a single supplier.
+
+  Raises `Ecto.NoResultsError` if the Supplier does not exist.
+
+  ## Examples
+
+      iex> get_supplier!(123)
+      %Supplier{}
+
+      iex> get_supplier!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_supplier!(id), do: Repo.get!(Supplier, id)
+
+  @doc """
+  Creates a supplier.
+
+  ## Examples
+
+      iex> create_supplier(%{field: value})
+      {:ok, %Supplier{}}
+
+      iex> create_supplier(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_supplier(attrs \\ %{}) do
+    %Supplier{}
+    |> Supplier.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a supplier.
+
+  ## Examples
+
+      iex> update_supplier(supplier, %{field: new_value})
+      {:ok, %Supplier{}}
+
+      iex> update_supplier(supplier, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_supplier(%Supplier{} = supplier, attrs) do
+    supplier
+    |> Supplier.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a supplier.
+
+  ## Examples
+
+      iex> delete_supplier(supplier)
+      {:ok, %Supplier{}}
+
+      iex> delete_supplier(supplier)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_supplier(%Supplier{} = supplier) do
+    Repo.delete(supplier)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking supplier changes.
+
+  ## Examples
+
+      iex> change_supplier(supplier)
+      %Ecto.Changeset{data: %Supplier{}}
+
+  """
+  def change_supplier(%Supplier{} = supplier, attrs \\ %{}) do
+    Supplier.changeset(supplier, attrs)
+  end
+
+  alias PriceSpotter.Marketplaces.Relations.UserSupplier
+
+  @doc """
+  Returns the list of users_suppliers.
+
+  ## Examples
+
+      iex> list_users_suppliers()
+      [%UserSupplier{}, ...]
+
+  """
+  def list_users_suppliers do
+    Repo.all(UserSupplier)
+  end
+
+  @doc """
+  Gets a single user_supplier.
+
+  Raises `Ecto.NoResultsError` if the User supplier does not exist.
+
+  ## Examples
+
+      iex> get_user_supplier!(123)
+      %UserSupplier{}
+
+      iex> get_user_supplier!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_supplier!(id), do: Repo.get!(UserSupplier, id)
+
+  @doc """
+  Creates a user_supplier.
+
+  ## Examples
+
+      iex> create_user_supplier(%{field: value})
+      {:ok, %UserSupplier{}}
+
+      iex> create_user_supplier(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_supplier(attrs \\ %{}) do
+    %UserSupplier{}
+    |> UserSupplier.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_supplier.
+
+  ## Examples
+
+      iex> update_user_supplier(user_supplier, %{field: new_value})
+      {:ok, %UserSupplier{}}
+
+      iex> update_user_supplier(user_supplier, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_supplier(%UserSupplier{} = user_supplier, attrs) do
+    user_supplier
+    |> UserSupplier.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a user_supplier.
+
+  ## Examples
+
+      iex> delete_user_supplier(user_supplier)
+      {:ok, %UserSupplier{}}
+
+      iex> delete_user_supplier(user_supplier)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_supplier(%UserSupplier{} = user_supplier) do
+    Repo.delete(user_supplier)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_supplier changes.
+
+  ## Examples
+
+      iex> change_user_supplier(user_supplier)
+      %Ecto.Changeset{data: %UserSupplier{}}
+
+  """
+  def change_user_supplier(%UserSupplier{} = user_supplier, attrs \\ %{}) do
+    UserSupplier.changeset(user_supplier, attrs)
+  end
 end

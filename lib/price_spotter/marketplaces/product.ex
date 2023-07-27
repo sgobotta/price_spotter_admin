@@ -43,12 +43,14 @@ defmodule PriceSpotter.Marketplaces.Product do
     field :category, :string
     field :img_url, :string
     field :internal_id, :string
-    field :meta, :map
+    field :meta, :map, default: %{}
     field :name, :string
     field :price, :decimal
     field :supplier_name, :string
     field :supplier_url, :string
     field :price_updated_at, :naive_datetime
+
+    belongs_to :supplier, PriceSpotter.Marketplaces.Supplier
 
     timestamps()
   end
@@ -77,6 +79,12 @@ defmodule PriceSpotter.Marketplaces.Product do
       :supplier_url
     ])
     |> unique_constraint(:internal_id)
+  end
+
+  def change_supplier(product, supplier_id) do
+    product
+    |> cast(%{supplier_id: supplier_id}, [:supplier_id])
+    |> validate_required([:supplier_id])
   end
 
   @spec from_entry!(Redis.Stream.Entry.t()) :: Ecto.Changeset.t()

@@ -4,7 +4,7 @@ defmodule PriceSpotter.MixProject do
   def project do
     [
       app: :price_spotter,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -22,7 +22,7 @@ defmodule PriceSpotter.MixProject do
   def application do
     [
       mod: {PriceSpotter.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:ecto_enum, :logger, :runtime_tools]
     ]
   end
 
@@ -42,9 +42,9 @@ defmodule PriceSpotter.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.18.16"},
+      {:phoenix_live_view, "~> 0.19.5"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.7.2"},
+      {:phoenix_live_dashboard, "~> 0.8.0"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
@@ -56,7 +56,7 @@ defmodule PriceSpotter.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:decimal, "~> 2.0"},
       {:off_broadway_redis_stream, "~> 0.5.0"},
-      {:flop_phoenix, "~> 0.18.2"},
+      {:flop_phoenix, "~> 0.21.0"},
       {:csv, "~> 2.4"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"}

@@ -281,6 +281,7 @@ defmodule PriceSpotterWeb.CoreComponents do
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+  attr :container_class, :string, default: "", doc: "classes for the div container"
 
   attr :rest, :global,
     include: ~w(autocomplete cols disabled form list max maxlength min minlength
@@ -324,7 +325,7 @@ defmodule PriceSpotterWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div phx-feedback-for={@name} class={@container_class}>
       <.label for={@id}><%= @label %></.label>
       <select
         id={@id}
