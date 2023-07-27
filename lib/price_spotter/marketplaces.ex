@@ -308,7 +308,7 @@ defmodule PriceSpotter.Marketplaces do
   def fetch_product_history(supplier_name, internal_id) do
     stream_name = get_stream_name("product-history_" <> supplier_name <> "_" <> internal_id)
 
-    with {:ok, entries} <- Redis.Client.fetch_history(stream_name, :all),
+    with {:ok, entries} <- Redis.Client.fetch_history(stream_name, 30),
          history <- map_product_history(entries) do
       {:ok, history}
     else
