@@ -19,16 +19,24 @@
         <%= gettext("Show") %>
       </.link>
     </div>
-    <.link patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}>
-      <%= gettext("Edit") %>
+  </:action>
+  <:action :let={{_id, supplier}}>
+    <.link
+      id={"suppliers-edit-#{supplier.id}"}
+      patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
+      class="hover:text-teal-500"
+    >
+      <.icon name="hero-pencil-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
     </.link>
   </:action>
-  <:action :let={{id, supplier}}>
+  <:action :let={{_id, supplier}}>
     <.link
-      phx-click={JS.push("delete", value: %{id: supplier.id}) |> hide("##{id}")}
+      id={"suppliers-delete-#{supplier.id}"}
+      phx-click={JS.push("delete", value: %{id: supplier.id}) |> hide("##{supplier.id}")}
       data-confirm={gettext("Delete supplier \"%{name}\"?", name: supplier.name)}
+      class="hover:text-rose-500"
     >
-      <%= gettext("Delete") %>
+      <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
     </.link>
   </:action>
 </.table>

@@ -38,7 +38,9 @@
   <:action :let={{_id, user_supplier}}>
     <.link
       id={"users_suppliers-delete-#{user_supplier.id}"}
-      phx-click={JS.push("delete", value: %{id: user_supplier.id}) |> hide("##{user_supplier.id}")}
+      phx-click={
+        JS.push("delete", value: %{id: user_supplier.id}) |> hide("##{user_supplier.id}")
+      }
       data-confirm={
         gettext("Delete \"%{email}\" access to \"%{supplier}\" registries?",
           email: user_supplier.user.email,
