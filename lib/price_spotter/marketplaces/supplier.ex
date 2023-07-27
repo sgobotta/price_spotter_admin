@@ -12,7 +12,8 @@ defmodule PriceSpotter.Marketplaces.Supplier do
     many_to_many :users, PriceSpotter.Accounts.User,
       join_through: PriceSpotter.Marketplaces.Relations.UserSupplier,
       on_replace: :delete,
-      on_delete: :delete_all
+      on_delete: :delete_all,
+      unique: true
 
     timestamps()
   end

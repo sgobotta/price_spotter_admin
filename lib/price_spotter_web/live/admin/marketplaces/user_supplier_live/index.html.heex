@@ -1,0 +1,59 @@
+<.header>
+  <%= gettext("Listing Users suppliers") %>
+  <:actions>
+    <.link patch={~p"/admin/marketplaces/users_suppliers/new"}>
+      <.button><%= gettext("New User supplier") %></.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="users_suppliers"
+  rows={@streams.users_suppliers}
+  row_click={
+    fn {_id, user_supplier} ->
+      JS.navigate(~p"/admin/marketplaces/users_suppliers/#{user_supplier}")
+    end
+  }
+>
+  <:col :let={{_id, user_supplier}} label={gettext("Supplier")}>
+    <%= user_supplier.supplier.name %>
+  </:col>
+  <:col :let={{_id, user_supplier}} label={gettext("User")}><%= user_supplier.user.email %></:col>
+  <:col :let={{_id, user_supplier}} label={gettext("Role")}><%= user_supplier.role %></:col>
+  <:action :let={{_id, user_supplier}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/marketplaces/users_suppliers/#{user_supplier}"}>Show</.link>
+    </div>
+    <.link patch={~p"/admin/marketplaces/users_suppliers/#{user_supplier}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, user_supplier}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: user_supplier.id}) |> hide("##{id}")}
+      data-confirm={
+        gettext("Delete \"%{email}\" access to \"%{supplier}\" registries?",
+          email: user_supplier.user.email,
+          supplier: user_supplier.supplier.name
+        )
+      }
+    >
+      <%= gettext("Delete") %>
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="user_supplier-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/marketplaces/users_suppliers")}
+>
+  <.live_component
+    module={PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent}
+    id={@user_supplier.id || :new}
+    title={@page_title}
+    action={@live_action}
+    user_supplier={@user_supplier}
+    patch={~p"/admin/marketplaces/users_suppliers"}
+  />
+</.modal>
