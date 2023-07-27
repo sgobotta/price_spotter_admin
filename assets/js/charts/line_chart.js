@@ -44,9 +44,9 @@ export default class {
     this.chart = new Chart(ctx, config)
   }
 
-  addPoint(data_label, label, value) {   
+  addPoint(data_label, label, value, backgroundColor, borderColor) {   
     this.chart.config.data.labels.push(data_label)
-    const dataset = this._findDataset(label) || this._createDataset(label)
+    const dataset = this._findDataset(label) || this._createDataset(label, backgroundColor, borderColor)
     dataset.data.push({x: Date.now(), y: value})
     this.chart.update()
   }
@@ -59,8 +59,8 @@ export default class {
     return this.chart.data.datasets.find((dataset) => dataset.label === label)
   }
 
-  _createDataset(label) {
-    const newDataset = {label, data: [], borderColor: this.colors.pop(), fill: 'origin', backgroundColor: 'rgba(74, 222, 128, 0.1)'}
+  _createDataset(label, backgroundColor, borderColor) {
+    const newDataset = {label, data: [], borderColor: borderColor, fill: 'origin', backgroundColor: backgroundColor}
     this.chart.data.datasets.push(newDataset)
     return newDataset
   }

@@ -73,8 +73,23 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @spec build_dataset(String.t(), [{NaiveDateTime.t(), Marketplaces.Product.t()}]) :: [map()]
   defp build_dataset(product_name, product_history) do
+    dataset_trend =
+      product_history
+      |> Enum.map(fn {_ts, %Marketplaces.Product{price: price}} -> price end)
+      |> Enum.reverse()
+      |> get_dataset_trend
+      |> IO.inspect()
+
+    {background_color, border_color} = get_chart_colors(dataset_trend)
+
     Enum.map(product_history, fn {datetime, %Marketplaces.Product{price: price}} ->
-      %{data_label: get_datetime_label(datetime), label: product_name, value: price}
+      %{
+        data_label: get_datetime_label(datetime),
+        label: product_name,
+        value: price,
+        background_color: background_color,
+        border_color: border_color
+      }
     end)
   end
 
@@ -88,4 +103,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     minute = if minute < 10, do: "0#{minute}", else: minute
     "#{day}/#{month}/#{year} #{hour}:#{minute}hs"
   end
+
+  defp get_dataset_trend([]), do: :bullish
+  defp get_dataset_trend([_price]), do: :bullish
+
+  defp get_dataset_trend([last_price, price | _rest] = l) when last_price == price do
+    IO.inspect(l, label: "list")
+    :notrend
+  end
+
+  defp get_dataset_trend([last_price, price | _rest]) when last_price > price, do: :bullish
+  defp get_dataset_trend(_price_history), do: :bearish
+
+  defp get_chart_colors(:notrend), do: {"rgba(203, 213, 225, 1)", "rgba(100, 116, 139, 1)"}
+  defp get_chart_colors(:bullish), do: {"rgba(167, 243, 208, 1)", "rgba(16, 185, 129, 1)"}
+  defp get_chart_colors(:bearish), do: {"rgba(253, 164, 175, 1)", "rgba(244, 63, 94, 1)"}
 end
