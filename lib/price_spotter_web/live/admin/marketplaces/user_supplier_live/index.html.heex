@@ -25,19 +25,29 @@
     <div class="sr-only">
       <.link navigate={~p"/admin/marketplaces/users_suppliers/#{user_supplier}"}>Show</.link>
     </div>
-    <.link patch={~p"/admin/marketplaces/users_suppliers/#{user_supplier}/edit"}>Edit</.link>
   </:action>
-  <:action :let={{id, user_supplier}}>
+  <:action :let={{_id, user_supplier}}>
     <.link
-      phx-click={JS.push("delete", value: %{id: user_supplier.id}) |> hide("##{id}")}
+      id={"users_suppliers-edit-#{user_supplier.id}"}
+      patch={~p"/admin/marketplaces/users_suppliers/#{user_supplier}/edit"}
+      class="hover:text-teal-500"
+    >
+      <.icon name="hero-pencil-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
+    </.link>
+  </:action>
+  <:action :let={{_id, user_supplier}}>
+    <.link
+      id={"users_suppliers-delete-#{user_supplier.id}"}
+      phx-click={JS.push("delete", value: %{id: user_supplier.id}) |> hide("##{user_supplier.id}")}
       data-confirm={
         gettext("Delete \"%{email}\" access to \"%{supplier}\" registries?",
           email: user_supplier.user.email,
           supplier: user_supplier.supplier.name
         )
       }
+      class="hover:text-rose-500"
     >
-      <%= gettext("Delete") %>
+      <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
     </.link>
   </:action>
 </.table>

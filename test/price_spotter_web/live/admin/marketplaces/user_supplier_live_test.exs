@@ -59,7 +59,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/users_suppliers")
 
       assert index_live
-             |> element("#users_suppliers-#{user_supplier.id} a", "Edit")
+             |> element("a#users_suppliers-edit-#{user_supplier.id}")
              |> render_click() =~
                gettext("Edit User supplier")
 
@@ -83,7 +83,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/users_suppliers")
 
       assert index_live
-             |> element("#users_suppliers-#{user_supplier.id} a", gettext("Delete"))
+             |> element("a#users_suppliers-delete-#{user_supplier.id}")
              |> render_click()
 
       refute has_element?(index_live, "#users_suppliers-#{user_supplier.id}")
