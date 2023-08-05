@@ -58,9 +58,9 @@ defmodule Redis.Client do
   end
 
   def fetch_history(stream_name, count) do
-    opts = parse_opts(count: count, command: :asc)
+    opts = parse_opts(count: count, command: :desc)
 
-    Redix.command(:redix, [opts[:command], stream_name, "-", "+", "COUNT", opts[:count]])
+    Redix.command(:redix, [opts[:command], stream_name, "+", "-", "COUNT", opts[:count]])
     |> parse_stream_reply()
   end
 
