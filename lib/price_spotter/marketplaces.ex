@@ -224,6 +224,10 @@ defmodule PriceSpotter.Marketplaces do
           if product.price == changes.price do
             changes
           else
+            Logger.debug(
+              "Updating product with id=#{product.id} with price from old_price=#{inspect(product.price)} to new_price=#{inspect(changes.price)}"
+            )
+
             Map.put(
               changes,
               :price_updated_at,
@@ -232,6 +236,7 @@ defmodule PriceSpotter.Marketplaces do
           end
 
         {:ok, %Product{} = p} = update_product(product, changes)
+        Logger.debug("Updated product with id=#{p.id} product=#{inspect(p)}")
         {:ok, {:updated, p}}
     end)
     # Check supplier existance
