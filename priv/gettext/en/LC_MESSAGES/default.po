@@ -808,20 +808,9 @@ msgstr ""
 msgid "Back to suppliers"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:31
-#: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:40
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Delete"
-msgstr ""
-
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:29
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:36
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Delete supplier \"%{name}\"?"
-msgstr ""
-
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:23
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Edit"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:9
@@ -846,7 +835,7 @@ msgstr ""
 msgid "Choose a value"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:34
+#: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:45
 #, elixir-autogen, elixir-format
 msgid "Delete \"%{email}\" access to \"%{supplier}\" registries?"
 msgstr ""

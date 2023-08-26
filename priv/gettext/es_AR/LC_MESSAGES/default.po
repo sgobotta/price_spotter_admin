@@ -631,7 +631,7 @@ msgstr "no cambió"
 #: lib/price_spotter/accounts/user.ex:187
 #, elixir-autogen, elixir-format
 msgid "does not match password"
-msgstr "la contrasena no coincide"
+msgstr "la contraseña no coincide"
 
 #: lib/price_spotter_web/live/user_login_live.ex:10
 #, elixir-autogen, elixir-format
@@ -763,7 +763,7 @@ msgstr "Usuario confirmado con éxito."
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:93
 #, elixir-autogen, elixir-format, fuzzy
 msgid "User updated successfully"
-msgstr "Producto creado"
+msgstr "Usuario actualizado"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:19
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:28
@@ -808,21 +808,10 @@ msgstr "Utiliza este formulario para administrar los registros de la base."
 msgid "Back to suppliers"
 msgstr "Volver a proveedores"
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:31
-#: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:40
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Delete"
-msgstr "Borrar"
-
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:29
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:36
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Delete supplier \"%{name}\"?"
 msgstr "Borrar proveedor \"%{name}\"?"
-
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:23
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Edit"
-msgstr "Editar"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:9
 #, elixir-autogen, elixir-format, fuzzy
@@ -846,7 +835,7 @@ msgstr "Este es un registro de la base de datos."
 msgid "Choose a value"
 msgstr "Elige un rol de usuari@"
 
-#: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:34
+#: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:45
 #, elixir-autogen, elixir-format
 msgid "Delete \"%{email}\" access to \"%{supplier}\" registries?"
 msgstr "Desea desactivar el acceso de \"%{email}\" para los registros de \"%{supplier}\"?"
