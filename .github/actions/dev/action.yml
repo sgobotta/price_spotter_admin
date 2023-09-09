@@ -22,6 +22,9 @@ inputs:
   POSTGRES_USER:
     description: Postgres database user
     required: true
+  REDIS_HOST:
+    description: The Redis host
+    required: true
   STAGE:
     default: local
     description: The production environment
@@ -89,6 +92,7 @@ runs:
       run: |
         mix ecto.reset
       env:
+        STAGE: ${{ inputs.STAGE }}
         MIX_ENV: ${{ inputs.MIX_ENV }}
 
     # Setup the Phoenix Client -------------------------------------------------

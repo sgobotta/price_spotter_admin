@@ -26,7 +26,7 @@ inputs:
     description: Postgres database user
     required: true
   REDIS_HOST:
-    description: Redis host
+    description: The Redis host
     required: true
   STAGE:
     default: local

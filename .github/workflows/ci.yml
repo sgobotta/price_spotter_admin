@@ -52,6 +52,7 @@ jobs:
           OTP_VERSION: ${{ env.OTP_VERSION }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          REDIS_HOST: ${{ env.REDIS_HOST }}
           UPLOADS_PATH: ${{ env.UPLOADS_PATH }}
 
   test:
@@ -80,6 +81,7 @@ jobs:
           OTP_VERSION: ${{ env.OTP_VERSION }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          REDIS_HOST: ${{ env.REDIS_HOST }}
           UPLOADS_PATH: priv/static/uploads/
 
   prod:
@@ -109,4 +111,5 @@ jobs:
           POSTGRES_HOSTNAME: ${{ env.POSTGRES_HOSTNAME }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          REDIS_HOST: ${{ env.REDIS_HOST }}
           UPLOADS_PATH: priv/static/uploads/
