@@ -112,12 +112,12 @@ runs:
     #   run: |
     #       mix check.credo
     # Run dialyxir -------------------------------------------------------------
-    # - name: Run the discrepancy analyzer
-    #   shell: bash
-    #   env:
-    #     # General env
-    #     MIX_ENV: ${{ inputs.MIX_ENV }}
-    #     # Misc env
-    #     UPLOADS_PATH: ${{ inputs.UPLOADS_PATH }}
-    #   run: |
-    #       mix check.credo
+    - name: Run the discrepancy analyzer
+      shell: bash
+      env:
+        # General env
+        MIX_ENV: ${{ inputs.MIX_ENV }}
+        # Misc env
+        UPLOADS_PATH: ${{ inputs.UPLOADS_PATH }}
+      run: |
+          mix check.credo
