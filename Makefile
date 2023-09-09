@@ -17,6 +17,20 @@ export NOFORMAT=\033[0m
 
 default: help
 
+#🔍 check: @ Runs all code verifications
+check: check.lint check.dialyzer test
+
+#🔍 check.dialyzer: @ Runs a static code analysis
+check.dialyzer: SHELL:=/bin/bash
+check.dialyzer:
+	@mix check.dialyzer
+
+#🔍 check.lint: @ Strictly runs a code formatter
+check.lint: SHELL:=/bin/bash
+check.lint:
+	@mix check.format
+	@mix check.credo
+
 #🐳 docker.build: @ Build the price_spotter_app docker image
 docker.build:
 	@cp ./devops/builder/Dockerfile ./
@@ -48,6 +62,13 @@ docker.release: docker.stop docker.delete docker.build docker.run
 help: SHELL:=/bin/bash
 help:
 	@grep -E '[a-zA-Z\.\-]+:.*?@ .*$$' $(firstword $(MAKEFILE_LIST))| tr -d '#'  | awk 'BEGIN {FS = ":.*?@ "}; {printf "${GREEN}%-30s${NOFORMAT} %s\n", $$1, $$2}'
+
+#💻 lint: @ Formats code
+lint: SHELL:=/bin/bash
+lint: MIX_ENV=dev
+lint:
+	@mix format
+	@mix check.credo
 
 #💻 server: @ Starts a server with an interactive elixir shell.
 server: SHELL:=/bin/bash
