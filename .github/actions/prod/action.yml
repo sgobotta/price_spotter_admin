@@ -28,6 +28,9 @@ inputs:
   REDIS_HOST:
     description: The Redis host
     required: true
+  REDIS_PASS:
+    description: The Redis host
+    required: true
   STAGE:
     default: local
     description: The production environment
