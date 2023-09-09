@@ -10,6 +10,13 @@ defmodule PriceSpotter.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       preferred_cli_env: [
         "test.watch": :test
       ]
@@ -38,7 +45,7 @@ defmodule PriceSpotter.MixProject do
       # Code quality and Testing
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.16", only: [:test]},
+      {:excoveralls, "~> 0.17.1", only: [:test]},
       # Phoenix default apps
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.7.2"},

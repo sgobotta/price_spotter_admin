@@ -39,5 +39,11 @@ npm-debug.log
 .env
 .env.prod
 
+# Coverage
+/coverage/report/
+
+# Elixir ls
+.elixir_ls/
+
 # Elxiir
 .iex.exs
