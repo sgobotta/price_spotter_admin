@@ -35,6 +35,11 @@ defmodule PriceSpotter.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      # Code quality and Testing
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+      {:excoveralls, "~> 0.16", only: [:test]},
+      # Phoenix default apps
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.7.2"},
       {:phoenix_ecto, "~> 4.4"},
@@ -73,7 +78,15 @@ defmodule PriceSpotter.MixProject do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "setup.web": ["assets.deploy"],
+      # Run code checks
+      check: [
+        "check.format",
+        "check.credo",
+        "check.dialyzer"
+      ],
       "check.format": ["format --check-formatted"],
+      "check.credo": ["credo --strict"],
+      "check.dialyzer": ["dialyzer --format dialyxir"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
