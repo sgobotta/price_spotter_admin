@@ -325,13 +325,9 @@ defmodule PriceSpotter.Accounts do
     Ecto.Multi.new()
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["session"]))
     |> Ecto.Multi.run(:session, fn _repo, _ctx ->
-      case UserToken.build_session_token(user) do
-        {_token, %UserToken{}} = session ->
-          {:ok, session}
+      {_token, %UserToken{}} = session = UserToken.build_session_token(user)
 
-        _else ->
-          {:error, :no_session_token}
-      end
+      {:ok, session}
     end)
     |> Ecto.Multi.insert(:token, fn %{session: {_token, %UserToken{} = user_token}} ->
       user_token

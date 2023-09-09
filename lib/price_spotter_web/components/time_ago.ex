@@ -11,7 +11,7 @@ defmodule TimeAgo do
       _diff when time_diff < 30 -> gettext("just now")
       _diff when time_diff < 60 -> gettext("less than a minute ago")
       _diff when time_diff < 3600 -> format_minutes(time_diff)
-      _diff when time_diff < 86400 -> format_hours(time_diff)
+      _diff when time_diff < 86_400 -> format_hours(time_diff)
       _diff when time_diff < 2_592_000 -> format_days(time_diff)
       _diff when time_diff < 31_104_000 -> format_months(time_diff)
       _diff -> format_years(time_diff)
@@ -33,7 +33,7 @@ defmodule TimeAgo do
   end
 
   defp format_days(seconds) do
-    days = div(seconds, 86400)
+    days = div(seconds, 86_400)
 
     ngettext("%{days} day ago", "%{days} days ago", days, days: days)
     |> String.downcase()

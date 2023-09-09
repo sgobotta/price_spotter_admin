@@ -78,7 +78,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
       |> Enum.map(fn {_ts, %Marketplaces.Product{price: price}} -> price end)
       |> Enum.reverse()
       |> get_dataset_trend
-      |> IO.inspect()
 
     {background_color, border_color} = get_chart_colors(dataset_trend)
 
@@ -108,7 +107,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   defp get_dataset_trend([_price]), do: :bullish
 
   defp get_dataset_trend([last_price, price | _rest] = l) when last_price == price do
-    IO.inspect(l, label: "list")
     :notrend
   end
 

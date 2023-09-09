@@ -49,7 +49,7 @@ defmodule Redis.Client do
   end
 
   @spec fetch_history(binary, :all | binary | non_neg_integer()) ::
-          {:ok, binary} | {:error, :no_result}
+          {:ok, any} | {:error, :no_result}
   def fetch_history(stream_name, :all) do
     opts = parse_opts(command: :asc)
 
@@ -100,7 +100,7 @@ defmodule Redis.Client do
     end
   end
 
-  @spec parse_reply({atom, list | binary} | any) :: {:error, :no_result} | {:ok, binary} | any
+  @spec parse_reply({atom, list | binary} | any) :: {:error, :no_result} | {:ok, any} | any
   defp parse_reply({:ok, []}), do: {:error, :no_result}
   defp parse_reply({:ok, _result} = result), do: result
 
