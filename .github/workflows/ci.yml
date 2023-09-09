@@ -20,6 +20,8 @@ env:
   POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
   POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
   POSTGRES_HOSTNAME: localhost
+  # Redis env
+  REDIS_HOSTNAME: localhost
   # Misc env
   UPLOADS_PATH: priv/static/uploads/
 

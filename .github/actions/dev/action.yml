@@ -22,6 +22,10 @@ inputs:
   POSTGRES_USER:
     description: Postgres database user
     required: true
+  STAGE:
+    default: local
+    description: The production environment
+    required: false
   UPLOADS_PATH:
     description: The uploads path
     required: true
