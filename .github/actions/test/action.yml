@@ -123,4 +123,4 @@ runs:
         STAGE: ${{ inputs.STAGE }}
       run: >
         GITHUB_TOKEN=${GITHUB_TOKEN}
-        mix coveralls.github -u
+        mix coveralls
