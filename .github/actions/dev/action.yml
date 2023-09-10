@@ -88,6 +88,9 @@ runs:
         mix do deps.get, deps.compile, compile
       env:
         MIX_ENV: ${{ inputs.MIX_ENV }}
+        # Postgres env
+        POSTGRES_USER: ${{ inputs.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ inputs.POSTGRES_PASSWORD }}
 
     # Setup Postgres -----------------------------------------------------------
     - name: Setup Database
