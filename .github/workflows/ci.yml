@@ -21,7 +21,8 @@ env:
   POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
   POSTGRES_HOSTNAME: localhost
   # Redis env
-  REDIS_HOSTNAME: localhost
+  REDIS_HOST: localhost
+  REDIS_PORT: 6379
   REDIS_PASS: ${{ secrets.REDIS_PASS }}
   # Misc env
   UPLOADS_PATH: priv/static/uploads/
@@ -42,17 +43,21 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      redis:
-        # Docker Hub image
-        image: redis
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
+      # Setup & run Redis -----------------------------------------------------
+      - name: Run redis with a password
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --name redis \
+            -p ${{ env.REDIS_PORT }}:6379 \
+            -d redis:6-alpine redis-server \
+            --appendonly yes \
+            --requirepass ${{ env.REDIS_PASS }} \
+            --port ${{ env.REDIS_PORT }}
+
+      # Run the dev action ----------------------------------------------------
       - uses: actions/checkout@v2.3.4
       - name: Run Development Checks
         uses: ./.github/actions/dev
@@ -83,6 +88,20 @@ jobs:
           --health-retries 5
 
     steps:
+      # Setup & run Redis -----------------------------------------------------
+      - name: Run redis with a password
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --name redis \
+            -p ${{ env.REDIS_PORT }}:6379 \
+            -d redis:6-alpine redis-server \
+            --appendonly yes \
+            --requirepass ${{ env.REDIS_PASS }} \
+            --port ${{ env.REDIS_PORT }}
+
+      # Run the test action ---------------------------------------------------
       - uses: actions/checkout@v2.3.4
       - name: Run Unit Tests
         uses: ./.github/actions/test
