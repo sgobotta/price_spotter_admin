@@ -134,4 +134,4 @@ runs:
         # Misc env
         UPLOADS_PATH: ${{ inputs.UPLOADS_PATH }}
       run: |
-          mix check.credo
+          mix check.dialyzer
