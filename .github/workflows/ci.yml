@@ -35,8 +35,8 @@ jobs:
         image: postgres
         ports: ['5432:5432']
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -66,8 +66,8 @@ jobs:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
           MIX_ENV: dev
           OTP_VERSION: ${{ env.OTP_VERSION }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
           REDIS_HOST: ${{ env.REDIS_HOST }}
           REDIS_PASS: ${{ env.REDIS_PASS }}
           UPLOADS_PATH: ${{ env.UPLOADS_PATH }}
@@ -79,8 +79,8 @@ jobs:
         image: postgres
         ports: ['5432:5432']
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -110,8 +110,8 @@ jobs:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
           MIX_ENV: test
           OTP_VERSION: ${{ env.OTP_VERSION }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
           REDIS_HOST: ${{ env.REDIS_HOST }}
           REDIS_PASS: ${{ env.REDIS_PASS }}
           UPLOADS_PATH: priv/static/uploads/
