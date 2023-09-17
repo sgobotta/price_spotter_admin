@@ -35,7 +35,7 @@ env:
 
 jobs:
   dev:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       db:
         image: postgres
@@ -79,7 +79,7 @@ jobs:
           UPLOADS_PATH: ${{ env.UPLOADS_PATH }}
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       db:
         image: postgres
@@ -123,7 +123,7 @@ jobs:
           UPLOADS_PATH: priv/static/uploads/
 
   prod:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       db:
         image: postgres
