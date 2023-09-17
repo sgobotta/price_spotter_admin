@@ -51,6 +51,7 @@ defmodule PriceSpotter.Release do
   """
   def seed(filename \\ "seeds.exs") do
     :ok = load_app()
+    {:ok, _apps} = Application.ensure_all_started(:ssl)
 
     for repo <- repos() do
       {:ok, _a, _b} =
