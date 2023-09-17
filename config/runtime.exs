@@ -77,7 +77,8 @@ if config_env() == :prod do
 
       config :price_spotter, PriceSpotter.Repo,
         ssl: true,
-        url: database_url
+        url: database_url,
+        database: Enum.at(String.split(database_url, "/"), -1)
 
       config :price_spotter, PriceSpotterWeb.Endpoint,
         http: [
