@@ -47,7 +47,8 @@ ul.pagination-list li a.pagination-link.is-current {
 }
 
 div.table-container {
-  @apply border-1 border-zinc-400 rounded-sm;
+  /* @apply border-1 border-zinc-400 rounded-sm; */
+  @apply border-0;
 }
 
 table.table {
@@ -55,23 +56,39 @@ table.table {
 }
 
 table.table thead {
-  @apply border-b-1 border-zinc-400 text-base h-14 bg-zinc-100 text-zinc-500;
+  @apply text-base h-14 text-black font-medium !important;
+}
+
+table.table thead.thead-container {
+  @apply border-0;
+}
+
+table.table thead tr th {
+  @apply font-medium;
 }
 
 table.table tbody tr {
-  @apply h-16 cursor-pointer;
+  @apply px-4 h-16 cursor-pointer border-b-1 border-dashed border-zinc-200 hover:shadow-lg transition duration-200 hover:scale-102 rounded-lg hover:text-zinc-50;
 }
 
 table.table tbody tr:nth-child(odd) {
-  @apply bg-zinc-100 px-2 transition duration-200 hover:bg-zinc-300;
+  /* @apply bg-zinc-100 px-2 transition duration-200 hover:bg-zinc-300; */
 }
 
 table.table tbody tr:nth-child(even) {
-  @apply bg-zinc-200 px-2 duration-200 hover:bg-zinc-300;
+  /* @apply bg-zinc-200 px-2 duration-200 hover:bg-zinc-300; */
 }
 
 table.table tbody tr td {
-  @apply p-1 text-zinc-700;
+  @apply p-1 text-zinc-700 border-0;
+}
+
+table.table tbody tr td:first-child {
+  @apply rounded-l-lg;
+}
+
+table.table tbody tr td:last-child {
+  @apply rounded-r-lg;
 }
 
 table.table tfoot {
