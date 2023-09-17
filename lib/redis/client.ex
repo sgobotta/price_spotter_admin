@@ -18,7 +18,8 @@ defmodule Redis.Client do
   @spec set(binary, map) ::
           {:ok, Redix.Protocol.redis_value()}
           | {:error, atom | Redix.Error.t() | Redix.ConnectionError.t()}
-  def set(key, value), do: Redix.command(:redix, ["SET", key, Jason.encode!(value)])
+  def set(key, value),
+    do: Redix.command(:redix, ["SET", key, Jason.encode!(value)])
 
   @doc """
   Given a stream name and options, calls the redix module to fetch a stream in
@@ -60,7 +61,14 @@ defmodule Redis.Client do
   def fetch_history(stream_name, count) do
     opts = parse_opts(count: count, command: :desc)
 
-    Redix.command(:redix, [opts[:command], stream_name, "+", "-", "COUNT", opts[:count]])
+    Redix.command(:redix, [
+      opts[:command],
+      stream_name,
+      "+",
+      "-",
+      "COUNT",
+      opts[:count]
+    ])
     |> parse_stream_reply()
   end
 
@@ -100,7 +108,8 @@ defmodule Redis.Client do
     end
   end
 
-  @spec parse_reply({atom, list | binary} | any) :: {:error, :no_result} | {:ok, any} | any
+  @spec parse_reply({atom, list | binary} | any) ::
+          {:error, :no_result} | {:ok, any} | any
   defp parse_reply({:ok, []}), do: {:error, :no_result}
   defp parse_reply({:ok, _result} = result), do: result
 
@@ -122,7 +131,8 @@ defmodule Redis.Client do
     do: Redis.Stream.Entry.from_raw_entry(entry)
 
   @spec parse_stream_entries([any()]) :: [map()]
-  defp parse_stream_entries(entries), do: entries |> Enum.map(&parse_stream_entry/1)
+  defp parse_stream_entries(entries),
+    do: entries |> Enum.map(&parse_stream_entry/1)
 end
 
 defmodule Redis.Stream.Entry do
@@ -141,7 +151,8 @@ defmodule Redis.Stream.Entry do
   def from_raw_entry([entry_id, entry]) do
     datetime = parse_stream_entry_id(entry_id)
 
-    Enum.reduce(Enum.with_index(entry), {[], []}, fn {value, index}, {keys, values} ->
+    Enum.reduce(Enum.with_index(entry), {[], []}, fn {value, index},
+                                                     {keys, values} ->
       case Integer.is_even(index) do
         true ->
           {keys ++ [value], values}
@@ -152,7 +163,9 @@ defmodule Redis.Stream.Entry do
     end)
     |> then(fn {keys, values} -> Enum.zip(keys, values) end)
     |> Enum.into(%{})
-    |> then(fn values -> %__MODULE__{id: entry_id, values: values, datetime: datetime} end)
+    |> then(fn values ->
+      %__MODULE__{id: entry_id, values: values, datetime: datetime}
+    end)
   end
 
   @spec parse_stream_entry_id(String.t()) :: NaiveDateTime.t()

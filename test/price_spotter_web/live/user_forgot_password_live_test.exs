@@ -14,8 +14,18 @@ defmodule PriceSpotterWeb.UserForgotPasswordLiveTest do
       {:ok, lv, html} = live(conn, ~p"/users/reset_password")
 
       assert html =~ gettext("Forgot your password?")
-      assert has_element?(lv, ~s|a[href="#{~p"/users/register"}"]|, gettext("Register"))
-      assert has_element?(lv, ~s|a[href="#{~p"/users/log_in"}"]|, gettext("Log in"))
+
+      assert has_element?(
+               lv,
+               ~s|a[href="#{~p"/users/register"}"]|,
+               gettext("Register")
+             )
+
+      assert has_element?(
+               lv,
+               ~s|a[href="#{~p"/users/log_in"}"]|,
+               gettext("Log in")
+             )
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -57,7 +67,9 @@ defmodule PriceSpotterWeb.UserForgotPasswordLiveTest do
 
       {:ok, conn} =
         lv
-        |> form("#reset_password_form", user: %{"email" => "unknown@example.com"})
+        |> form("#reset_password_form",
+          user: %{"email" => "unknown@example.com"}
+        )
         |> render_submit()
         |> follow_redirect(conn, "/")
 

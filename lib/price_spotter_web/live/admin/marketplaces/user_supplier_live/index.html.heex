@@ -19,11 +19,17 @@
   <:col :let={{_id, user_supplier}} label={gettext("Supplier")}>
     <%= user_supplier.supplier.name %>
   </:col>
-  <:col :let={{_id, user_supplier}} label={gettext("User")}><%= user_supplier.user.email %></:col>
-  <:col :let={{_id, user_supplier}} label={gettext("Role")}><%= user_supplier.role %></:col>
+  <:col :let={{_id, user_supplier}} label={gettext("User")}>
+    <%= user_supplier.user.email %>
+  </:col>
+  <:col :let={{_id, user_supplier}} label={gettext("Role")}>
+    <%= user_supplier.role %>
+  </:col>
   <:action :let={{_id, user_supplier}}>
     <div class="sr-only">
-      <.link navigate={~p"/admin/marketplaces/users_suppliers/#{user_supplier}"}>Show</.link>
+      <.link navigate={~p"/admin/marketplaces/users_suppliers/#{user_supplier}"}>
+        Show
+      </.link>
     </div>
   </:action>
   <:action :let={{_id, user_supplier}}>
@@ -39,7 +45,8 @@
     <.link
       id={"users_suppliers-delete-#{user_supplier.id}"}
       phx-click={
-        JS.push("delete", value: %{id: user_supplier.id}) |> hide("##{user_supplier.id}")
+        JS.push("delete", value: %{id: user_supplier.id})
+        |> hide("##{user_supplier.id}")
       }
       data-confirm={
         gettext("Delete \"%{email}\" access to \"%{supplier}\" registries?",

@@ -17,26 +17,37 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
     setup [:create_user_supplier, :register_and_log_in_admin]
 
     test "lists all users_suppliers", %{conn: conn} do
-      {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/users_suppliers")
+      {:ok, _index_live, html} =
+        live(conn, ~p"/admin/marketplaces/users_suppliers")
 
       assert html =~ gettext("Listing Users suppliers")
     end
 
     test "saves new user_supplier", %{conn: conn} do
-      %PriceSpotter.Accounts.User{id: user_id} = PriceSpotter.AccountsFixtures.user_fixture()
+      %PriceSpotter.Accounts.User{id: user_id} =
+        PriceSpotter.AccountsFixtures.user_fixture()
 
       %PriceSpotter.Marketplaces.Supplier{id: supplier_id} =
         PriceSpotter.Marketplaces.SuppliersFixtures.create()
 
       create_attrs =
-        UsersSuppliersFixtures.valid_attrs(%{user_id: user_id, supplier_id: supplier_id})
+        UsersSuppliersFixtures.valid_attrs(%{
+          user_id: user_id,
+          supplier_id: supplier_id
+        })
 
       invalid_attrs =
-        UsersSuppliersFixtures.invalid_attrs(%{user_id: user_id, supplier_id: supplier_id})
+        UsersSuppliersFixtures.invalid_attrs(%{
+          user_id: user_id,
+          supplier_id: supplier_id
+        })
 
-      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/users_suppliers")
+      {:ok, index_live, _html} =
+        live(conn, ~p"/admin/marketplaces/users_suppliers")
 
-      assert index_live |> element("a", gettext("New User supplier")) |> render_click() =~
+      assert index_live
+             |> element("a", gettext("New User supplier"))
+             |> render_click() =~
                gettext("New User supplier")
 
       assert_patch(index_live, ~p"/admin/marketplaces/users_suppliers/new")
@@ -55,15 +66,22 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
       assert html =~ gettext("User supplier created successfully")
     end
 
-    test "updates user_supplier in listing", %{conn: conn, user_supplier: user_supplier} do
-      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/users_suppliers")
+    test "updates user_supplier in listing", %{
+      conn: conn,
+      user_supplier: user_supplier
+    } do
+      {:ok, index_live, _html} =
+        live(conn, ~p"/admin/marketplaces/users_suppliers")
 
       assert index_live
              |> element("a#users_suppliers-edit-#{user_supplier.id}")
              |> render_click() =~
                gettext("Edit User supplier")
 
-      assert_patch(index_live, ~p"/admin/marketplaces/users_suppliers/#{user_supplier}/edit")
+      assert_patch(
+        index_live,
+        ~p"/admin/marketplaces/users_suppliers/#{user_supplier}/edit"
+      )
 
       assert index_live
              |> form("#user_supplier-form", user_supplier: @invalid_attrs)
@@ -79,8 +97,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
       assert html =~ gettext("User supplier updated successfully")
     end
 
-    test "deletes user_supplier in listing", %{conn: conn, user_supplier: user_supplier} do
-      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/users_suppliers")
+    test "deletes user_supplier in listing", %{
+      conn: conn,
+      user_supplier: user_supplier
+    } do
+      {:ok, index_live, _html} =
+        live(conn, ~p"/admin/marketplaces/users_suppliers")
 
       assert index_live
              |> element("a#users_suppliers-delete-#{user_supplier.id}")
@@ -100,14 +122,20 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
       assert html =~ gettext("Show User supplier")
     end
 
-    test "updates user_supplier within modal", %{conn: conn, user_supplier: user_supplier} do
+    test "updates user_supplier within modal", %{
+      conn: conn,
+      user_supplier: user_supplier
+    } do
       {:ok, show_live, _html} =
         live(conn, ~p"/admin/marketplaces/users_suppliers/#{user_supplier}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~
                gettext("Edit User supplier")
 
-      assert_patch(show_live, ~p"/admin/marketplaces/users_suppliers/#{user_supplier}/show/edit")
+      assert_patch(
+        show_live,
+        ~p"/admin/marketplaces/users_suppliers/#{user_supplier}/show/edit"
+      )
 
       assert show_live
              |> form("#user_supplier-form", user_supplier: @invalid_attrs)
@@ -117,7 +145,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
              |> form("#user_supplier-form", user_supplier: @update_attrs)
              |> render_submit()
 
-      assert_patch(show_live, ~p"/admin/marketplaces/users_suppliers/#{user_supplier}")
+      assert_patch(
+        show_live,
+        ~p"/admin/marketplaces/users_suppliers/#{user_supplier}"
+      )
 
       html = render(show_live)
       assert html =~ gettext("User supplier updated successfully")

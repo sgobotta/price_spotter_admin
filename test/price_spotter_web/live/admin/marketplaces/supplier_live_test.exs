@@ -28,7 +28,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
     test "saves new supplier", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
-      assert index_live |> element("a", gettext("New Supplier")) |> render_click() =~
+      assert index_live
+             |> element("a", gettext("New Supplier"))
+             |> render_click() =~
                gettext("New Supplier")
 
       assert_patch(index_live, ~p"/admin/marketplaces/suppliers/new")
@@ -56,7 +58,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
              |> render_click() =~
                gettext("Edit Supplier")
 
-      assert_patch(index_live, ~p"/admin/marketplaces/suppliers/#{supplier}/edit")
+      assert_patch(
+        index_live,
+        ~p"/admin/marketplaces/suppliers/#{supplier}/edit"
+      )
 
       assert index_live
              |> form("#supplier-form", supplier: @invalid_attrs)
@@ -88,19 +93,24 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
     setup [:create_supplier, :register_and_log_in_admin]
 
     test "displays supplier", %{conn: conn, supplier: supplier} do
-      {:ok, _show_live, html} = live(conn, ~p"/admin/marketplaces/suppliers/#{supplier}")
+      {:ok, _show_live, html} =
+        live(conn, ~p"/admin/marketplaces/suppliers/#{supplier}")
 
       assert html =~ gettext("Show Supplier")
       assert html =~ supplier.name
     end
 
     test "updates supplier within modal", %{conn: conn, supplier: supplier} do
-      {:ok, show_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers/#{supplier}")
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/suppliers/#{supplier}")
 
       assert show_live |> element("a", gettext("Edit")) |> render_click() =~
                gettext("Edit Supplier")
 
-      assert_patch(show_live, ~p"/admin/marketplaces/suppliers/#{supplier}/show/edit")
+      assert_patch(
+        show_live,
+        ~p"/admin/marketplaces/suppliers/#{supplier}/show/edit"
+      )
 
       assert show_live
              |> form("#supplier-form", supplier: @invalid_attrs)

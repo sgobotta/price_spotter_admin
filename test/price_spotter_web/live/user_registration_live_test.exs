@@ -32,13 +32,17 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
       result =
         lv
         |> element("#registration_form")
-        |> render_change(user: %{"email" => "with spaces", "password" => "too short"})
+        |> render_change(
+          user: %{"email" => "with spaces", "password" => "too short"}
+        )
 
       assert result =~ gettext("Register for an account")
       assert result =~ dgettext("errors", "must have the @ sign and no spaces")
 
       assert result =~
-               dgettext("errors", "should be between %{min} and %{max} characters",
+               dgettext(
+                 "errors",
+                 "should be between %{min} and %{max} characters",
                  min: 12,
                  max: 72
                )
@@ -51,7 +55,10 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
       email = unique_user_email()
-      form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
+
+      form =
+        form(lv, "#registration_form", user: valid_user_attributes(email: email))
+
       render_submit(form)
       conn = follow_trigger_action(form, conn)
 
@@ -84,7 +91,9 @@ defmodule PriceSpotterWeb.UserRegistrationLiveTest do
 
   describe "registration navigation" do
     @tag :skip
-    test "redirects to login page when the Log in button is clicked", %{conn: conn} do
+    test "redirects to login page when the Log in button is clicked", %{
+      conn: conn
+    } do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
       msg = gettext("Sign in")

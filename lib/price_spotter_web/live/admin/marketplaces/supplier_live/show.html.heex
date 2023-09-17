@@ -1,6 +1,8 @@
 <.header>
   <%= gettext("Supplier") %> <%= @supplier.id %>
-  <:subtitle><%= gettext("This is a supplier record from your database.") %></:subtitle>
+  <:subtitle>
+    <%= gettext("This is a supplier record from your database.") %>
+  </:subtitle>
   <:actions>
     <.link
       patch={~p"/admin/marketplaces/suppliers/#{@supplier}/show/edit"}
@@ -15,7 +17,9 @@
   <:item title={gettext("Name")}><%= @supplier.name %></:item>
 </.list>
 
-<.back navigate={~p"/admin/marketplaces/suppliers"}><%= gettext("Back to suppliers") %></.back>
+<.back navigate={~p"/admin/marketplaces/suppliers"}>
+  <%= gettext("Back to suppliers") %>
+</.back>
 
 <.modal
   :if={@live_action == :edit}

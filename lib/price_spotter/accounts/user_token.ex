@@ -118,7 +118,9 @@ defmodule PriceSpotter.Accounts.UserToken do
         query =
           from token in token_and_context_query(hashed_token, context),
             join: user in assoc(token, :user),
-            where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
+            where:
+              token.inserted_at > ago(^days, "day") and
+                token.sent_to == user.email,
             select: user
 
         {:ok, query}
@@ -152,7 +154,8 @@ defmodule PriceSpotter.Accounts.UserToken do
 
         query =
           from token in token_and_context_query(hashed_token, context),
-            where: token.inserted_at > ago(@change_email_validity_in_days, "day")
+            where:
+              token.inserted_at > ago(@change_email_validity_in_days, "day")
 
         {:ok, query}
 
@@ -176,6 +179,8 @@ defmodule PriceSpotter.Accounts.UserToken do
   end
 
   def user_and_contexts_query(user, [_ | _] = contexts) do
-    from t in UserToken, where: t.user_id == ^user.id and t.context in ^contexts, select: t
+    from t in UserToken,
+      where: t.user_id == ^user.id and t.context in ^contexts,
+      select: t
   end
 end

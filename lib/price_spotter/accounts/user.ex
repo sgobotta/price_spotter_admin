@@ -107,12 +107,17 @@ defmodule PriceSpotter.Accounts.User do
 
   defp validate_password(changeset, opts) do
     changeset
-    |> validate_required([:password], message: dgettext("errors", "can't be blank"))
+    |> validate_required([:password],
+      message: dgettext("errors", "can't be blank")
+    )
     |> validate_length(:password,
       min: 12,
       max: 72,
       message:
-        dgettext("errors", "should be between %{min} and %{max} characters", min: 12, max: 72)
+        dgettext("errors", "should be between %{min} and %{max} characters",
+          min: 12,
+          max: 72
+        )
     )
     # Examples of additional password validation:
     # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
@@ -131,7 +136,8 @@ defmodule PriceSpotter.Accounts.User do
       |> validate_length(:password,
         max: 72,
         count: :bytes,
-        message: dgettext("errors", "should be at most %{count} byte(s)", count: 72)
+        message:
+          dgettext("errors", "should be at most %{count} byte(s)", count: 72)
       )
       # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
       # would keep the database transaction open longer and hurt performance.
@@ -148,7 +154,9 @@ defmodule PriceSpotter.Accounts.User do
       |> unsafe_validate_unique(:email, PriceSpotter.Repo,
         message: dgettext("errors", "has already been taken")
       )
-      |> unique_constraint(:email, message: dgettext("errors", "has already been taken"))
+      |> unique_constraint(:email,
+        message: dgettext("errors", "has already been taken")
+      )
     else
       changeset
     end
@@ -184,7 +192,9 @@ defmodule PriceSpotter.Accounts.User do
   def password_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: gettext("does not match password"))
+    |> validate_confirmation(:password,
+      message: gettext("does not match password")
+    )
     |> validate_password(opts)
   end
 
@@ -202,7 +212,10 @@ defmodule PriceSpotter.Accounts.User do
   If there is no user or the user doesn't have a password, we call
   `Bcrypt.no_user_verify/0` to avoid timing attacks.
   """
-  def valid_password?(%PriceSpotter.Accounts.User{hashed_password: hashed_password}, password)
+  def valid_password?(
+        %PriceSpotter.Accounts.User{hashed_password: hashed_password},
+        password
+      )
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Bcrypt.verify_pass(password, hashed_password)
   end
@@ -219,7 +232,11 @@ defmodule PriceSpotter.Accounts.User do
     if valid_password?(changeset.data, password) do
       changeset
     else
-      add_error(changeset, :current_password, dgettext("errors", "is not valid"))
+      add_error(
+        changeset,
+        :current_password,
+        dgettext("errors", "is not valid")
+      )
     end
   end
 end

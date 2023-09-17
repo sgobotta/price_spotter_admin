@@ -8,10 +8,16 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLive do
     <div class="mx-auto max-w-sm">
       <.header class="text-center">
         <%= gettext("No confirmation instructions received?") %>
-        <:subtitle><%= gettext("We'll send a new confirmation link to your inbox") %></:subtitle>
+        <:subtitle>
+          <%= gettext("We'll send a new confirmation link to your inbox") %>
+        </:subtitle>
       </.header>
 
-      <.simple_form for={@form} id="resend_confirmation_form" phx-submit="send_instructions">
+      <.simple_form
+        for={@form}
+        id="resend_confirmation_form"
+        phx-submit="send_instructions"
+      >
         <.input field={@form[:email]} type="email" placeholder="Email" required />
         <:actions>
           <.button phx-disable-with="Sending..." class="w-full">
@@ -35,7 +41,11 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLive do
      |> assign(form: to_form(%{}, as: "user"))}
   end
 
-  def handle_event("send_instructions", %{"user" => %{"email" => email}}, socket) do
+  def handle_event(
+        "send_instructions",
+        %{"user" => %{"email" => email}},
+        socket
+      ) do
     if user = Accounts.get_user_by_email(email) do
       Accounts.deliver_user_confirmation_instructions(
         user,

@@ -6,7 +6,11 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
   import PriceSpotterWeb.Gettext
 
   @create_attrs %{email: "some@email", password: "some password", role: :user}
-  @update_attrs %{email: "some_updated@email", password: "some updated password", role: :admin}
+  @update_attrs %{
+    email: "some_updated@email",
+    password: "some updated password",
+    role: :admin
+  }
   @invalid_attrs %{email: nil, password: nil, role: nil}
 
   defp create_user(_) do
@@ -73,7 +77,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
     test "deletes user in listing", %{conn: conn, user: user} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
-      assert index_live |> element("a#users-delete-#{user.id}") |> render_click()
+      assert index_live
+             |> element("a#users-delete-#{user.id}")
+             |> render_click()
+
       refute has_element?(index_live, "#users-#{user.id}")
     end
   end

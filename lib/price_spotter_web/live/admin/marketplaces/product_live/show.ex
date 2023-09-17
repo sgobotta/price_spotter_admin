@@ -22,7 +22,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_info(
-        {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}},
+        {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent,
+         {:saved, _product}},
         socket
       ) do
     {:noreply, socket}
@@ -35,9 +36,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
            name: product_name,
            supplier_name: supplier_name
          } <- socket.assigns.product,
-         {:ok, history} <- Marketplaces.fetch_product_history(supplier_name, internal_id) do
+         {:ok, history} <-
+           Marketplaces.fetch_product_history(supplier_name, internal_id) do
       socket =
-        Enum.reduce(build_dataset(product_name, history), socket, fn data, acc ->
+        Enum.reduce(build_dataset(product_name, history), socket, fn data,
+                                                                     acc ->
           push_event(acc, "new-point", data)
         end)
 
@@ -51,7 +54,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
            label: socket.assigns.product.name,
            value: 0
          })
-         |> put_flash(:error, gettext("There was an error loading the price chart"))}
+         |> put_flash(
+           :error,
+           gettext("There was an error loading the price chart")
+         )}
     end
   end
 
@@ -67,11 +73,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp render_chart(assigns) do
     ~H"""
-    <canvas id="chart-canvas" phx-update="ignore" phx-hook="LineChart" height="200" width="300" />
+    <canvas
+      id="chart-canvas"
+      phx-update="ignore"
+      phx-hook="LineChart"
+      height="200"
+      width="300"
+    />
     """
   end
 
-  @spec build_dataset(String.t(), [{NaiveDateTime.t(), Marketplaces.Product.t()}]) :: [map()]
+  @spec build_dataset(String.t(), [
+          {NaiveDateTime.t(), Marketplaces.Product.t()}
+        ]) :: [map()]
   defp build_dataset(product_name, product_history) do
     dataset_trend =
       product_history
@@ -106,14 +120,22 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   defp get_dataset_trend([]), do: :bullish
   defp get_dataset_trend([_price]), do: :bullish
 
-  defp get_dataset_trend([last_price, price | _rest] = l) when last_price == price do
+  defp get_dataset_trend([last_price, price | _rest] = l)
+       when last_price == price do
     :notrend
   end
 
-  defp get_dataset_trend([last_price, price | _rest]) when last_price > price, do: :bullish
+  defp get_dataset_trend([last_price, price | _rest]) when last_price > price,
+    do: :bullish
+
   defp get_dataset_trend(_price_history), do: :bearish
 
-  defp get_chart_colors(:notrend), do: {"rgba(203, 213, 225, 1)", "rgba(100, 116, 139, 1)"}
-  defp get_chart_colors(:bullish), do: {"rgba(167, 243, 208, 1)", "rgba(16, 185, 129, 1)"}
-  defp get_chart_colors(:bearish), do: {"rgba(253, 164, 175, 1)", "rgba(244, 63, 94, 1)"}
+  defp get_chart_colors(:notrend),
+    do: {"rgba(203, 213, 225, 1)", "rgba(100, 116, 139, 1)"}
+
+  defp get_chart_colors(:bullish),
+    do: {"rgba(167, 243, 208, 1)", "rgba(16, 185, 129, 1)"}
+
+  defp get_chart_colors(:bearish),
+    do: {"rgba(253, 164, 175, 1)", "rgba(244, 63, 94, 1)"}
 end

@@ -47,7 +47,9 @@
                     />
 
                     <div class="border-b-1 border-zinc-300 mb-2">
-                      <h3 class=""><%= gettext("Choose columns to export") %></h3>
+                      <h3 class="">
+                        <%= gettext("Choose columns to export") %>
+                      </h3>
                     </div>
 
                     <%= for %{name: name, label: label} <- get_columns() do %>
@@ -62,7 +64,12 @@
                       </div>
                     <% end %>
 
-                    <.input type="hidden" field={f[:limit]} value={get_limit()} class="gap-y-4" />
+                    <.input
+                      type="hidden"
+                      field={f[:limit]}
+                      value={get_limit()}
+                      class="gap-y-4"
+                    />
 
                     <div class="border-b-1 border-zinc-300 my-2" />
 
@@ -98,13 +105,21 @@
   </div>
 
   <div>
-    <.filter_form id="products-filter-form" meta={@meta} fields={@filter_fields} />
+    <.filter_form
+      id="products-filter-form"
+      meta={@meta}
+      fields={@filter_fields}
+    />
   </div>
 
   <div class="my-8">
     <%= if @products && @meta do %>
       <Flop.Phoenix.table
-        row_click={fn product -> JS.navigate(~p"/admin/marketplaces/products/#{product.id}") end}
+        row_click={
+          fn product ->
+            JS.navigate(~p"/admin/marketplaces/products/#{product.id}")
+          end
+        }
         items={@products}
         meta={@meta}
         path={~p"/admin/marketplaces/products"}
@@ -113,7 +128,10 @@
           <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600" />
           """,
           symbol_desc: ~H"""
-          <.icon name="hero-chevron-down-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600" />
+          <.icon
+            name="hero-chevron-down-solid"
+            class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600"
+          />
           """,
           thead_attrs: [
             class: "thead-container"
@@ -121,7 +139,9 @@
           thead_th_attrs: [class: "bg-white"],
           thead_tr_attrs: [class: "text-xs sm:text-base border-0"],
           tbody_tr_attrs: [class: "group hover:bg-zinc-200"],
-          tbody_td_attrs: [class: "group-hover:bg-zinc-300 group-hover:text-zinc-950"]
+          tbody_td_attrs: [
+            class: "group-hover:bg-zinc-300 group-hover:text-zinc-950"
+          ]
         ]}
       >
         <:col
@@ -170,7 +190,12 @@
             </span>
           </div>
         </:col>
-        <:col :let={product} label={gettext("Category")} field={:category} col_style="width: 20%;">
+        <:col
+          :let={product}
+          label={gettext("Category")}
+          field={:category}
+          col_style="width: 20%;"
+        >
           <div class="flex text-xs justify-center text-center">
             <span class="bg-blue-100 rounded-md px-1">
               <%= String.replace(product.category, "-", " ") %>
@@ -184,7 +209,10 @@
               target="_blank"
               class="hover:text-sky-500 hover:opacity-100"
             >
-              <.icon name="hero-link-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
+              <.icon
+                name="hero-link-solid"
+                class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
+              />
             </a>
           </div>
         </:action>
@@ -194,22 +222,35 @@
             patch={~p"/admin/marketplaces/products/#{product}/edit"}
             class="hover:text-teal-500"
           >
-            <.icon name="hero-pencil-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
+            <.icon
+              name="hero-pencil-solid"
+              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
+            />
           </.link>
         </:action>
         <:action :let={product}>
           <.link
             id={"products-delete-#{product.id}"}
-            phx-click={JS.push("delete", value: %{id: product.id}) |> hide("##{product.id}")}
-            data-confirm={gettext("Delete product \"%{name}\"?", name: product.name)}
+            phx-click={
+              JS.push("delete", value: %{id: product.id})
+              |> hide("##{product.id}")
+            }
+            data-confirm={
+              gettext("Delete product \"%{name}\"?", name: product.name)
+            }
             class="hover:text-rose-500"
           >
-            <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
+            <.icon
+              name="hero-trash-solid"
+              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
+            />
           </.link>
         </:action>
         <:foot>
           <tr class="h-10">
-            <td><%= gettext("Total") %>: <span class="total"><%= @total %></span></td>
+            <td>
+              <%= gettext("Total") %>: <span class="total"><%= @total %></span>
+            </td>
           </tr>
         </:foot>
       </Flop.Phoenix.table>

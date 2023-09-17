@@ -10,7 +10,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
       <.header>
         <%= @title %>
         <:subtitle>
-          <%= gettext("Use this form to manage User Supplier records in your database.") %>
+          <%= gettext(
+            "Use this form to manage User Supplier records in your database."
+          ) %>
         </:subtitle>
       </.header>
 
@@ -26,7 +28,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
           type="select"
           label={gettext("Role")}
           prompt={gettext("Choose a value")}
-          options={Ecto.Enum.values(PriceSpotter.Marketplaces.Relations.UserSupplier, :role)}
+          options={
+            Ecto.Enum.values(
+              PriceSpotter.Marketplaces.Relations.UserSupplier,
+              :role
+            )
+          }
         />
         <.input
           field={@form[:user_id]}
@@ -63,7 +70,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"user_supplier" => user_supplier_params}, socket) do
+  def handle_event(
+        "validate",
+        %{"user_supplier" => user_supplier_params},
+        socket
+      ) do
     changeset =
       socket.assigns.user_supplier
       |> Marketplaces.change_user_supplier(user_supplier_params)
@@ -77,7 +88,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
   end
 
   defp save_user_supplier(socket, :edit, user_supplier_params) do
-    case Marketplaces.update_user_supplier(socket.assigns.user_supplier, user_supplier_params) do
+    case Marketplaces.update_user_supplier(
+           socket.assigns.user_supplier,
+           user_supplier_params
+         ) do
       {:ok, user_supplier} ->
         notify_parent({:saved, user_supplier})
 
@@ -114,14 +128,21 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
 
   defp get_user_options() do
     PriceSpotter.Accounts.list_users()
-    |> Enum.reduce(Keyword.new(), fn %PriceSpotter.Accounts.User{email: email, id: id}, acc ->
+    |> Enum.reduce(Keyword.new(), fn %PriceSpotter.Accounts.User{
+                                       email: email,
+                                       id: id
+                                     },
+                                     acc ->
       Keyword.put(acc, String.to_atom(email), id)
     end)
   end
 
   defp get_supplier() do
     PriceSpotter.Marketplaces.list_suppliers()
-    |> Enum.reduce(Keyword.new(), fn %PriceSpotter.Marketplaces.Supplier{id: id, name: name},
+    |> Enum.reduce(Keyword.new(), fn %PriceSpotter.Marketplaces.Supplier{
+                                       id: id,
+                                       name: name
+                                     },
                                      acc ->
       supplier_name =
         name

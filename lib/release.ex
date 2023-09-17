@@ -23,7 +23,10 @@ defmodule PriceSpotter.Release do
           :ok = Logger.info("Database is already up")
 
         {:error, error} ->
-          :ok = Logger.error("Error while trying to create database: #{inspect(error)}")
+          :ok =
+            Logger.error(
+              "Error while trying to create database: #{inspect(error)}"
+            )
       end
     end
   end
@@ -36,14 +39,16 @@ defmodule PriceSpotter.Release do
         {:ok, _apps} = Application.ensure_all_started(:ssl)
       end
 
-      {:ok, _res, _apps} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
+      {:ok, _res, _apps} =
+        Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
     end
   end
 
   def rollback(repo, version) do
     :ok = load_app()
 
-    {:ok, _res, _apps} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
+    {:ok, _res, _apps} =
+      Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
   end
 
   @doc """
@@ -70,7 +75,10 @@ defmodule PriceSpotter.Release do
         :ok
 
       {:error, error} ->
-        :ok = Logger.warn("Error while loading application error=#{inspect(error, pretty: true)}")
+        :ok =
+          Logger.warn(
+            "Error while loading application error=#{inspect(error, pretty: true)}"
+          )
     end
   end
 

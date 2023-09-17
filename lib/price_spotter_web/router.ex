@@ -115,7 +115,9 @@ defmodule PriceSpotterWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{PriceSpotterWeb.UserAuth, :ensure_authenticated}] do
-      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/users/settings/confirm_email/:token",
+           UserSettingsLive,
+           :confirm_email
 
       pipe_through [:admin]
       live "/users/settings", UserSettingsLive, :edit

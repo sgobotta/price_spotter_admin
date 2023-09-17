@@ -2,12 +2,16 @@
   <%= @product.name %>
   <:subtitle>
     <p class="text-gray-600 text-sm italic">
-      <%= gettext("Last price") %>: <%= TimeAgo.time_ago(@product.price_updated_at) %>
+      <%= gettext("Last price") %>: <%= TimeAgo.time_ago(
+        @product.price_updated_at
+      ) %>
     </p>
   </:subtitle>
   <:actions>
     <.link
-      phx-click={JS.push("delete", value: %{id: @product.id}) |> hide("##{@product.id}")}
+      phx-click={
+        JS.push("delete", value: %{id: @product.id}) |> hide("##{@product.id}")
+      }
       data-confirm={gettext("Delete product \"%{name}\"?", name: @product.name)}
       class=""
     >
@@ -49,7 +53,11 @@
           <%= String.replace(@product.category, "-", " ") %>
         </div>
       </div>
-      <a href={@product.supplier_url} target="_blank" class="hover:text-sky-500 hover:opacity-100">
+      <a
+        href={@product.supplier_url}
+        target="_blank"
+        class="hover:text-sky-500 hover:opacity-100"
+      >
         <.icon name="hero-link-solid" class="h-5 w-5 opacity-60" />
         <span>
           <%= gettext("External link") %>
@@ -66,7 +74,9 @@
   </div>
 </div>
 
-<.back navigate={~p"/admin/marketplaces/products"}><%= gettext("Back to products") %></.back>
+<.back navigate={~p"/admin/marketplaces/products"}>
+  <%= gettext("Back to products") %>
+</.back>
 
 <.modal
   :if={@live_action == :edit}

@@ -21,7 +21,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, gettext("Edit User supplier"))
-    |> assign(:user_supplier, Marketplaces.get_user_supplier!(id) |> preload_user_supplier)
+    |> assign(
+      :user_supplier,
+      Marketplaces.get_user_supplier!(id) |> preload_user_supplier
+    )
   end
 
   defp apply_action(socket, :new, _params) do
@@ -42,7 +45,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.Index do
          {:saved, user_supplier}},
         socket
       ) do
-    {:noreply, stream_insert(socket, :users_suppliers, preload_user_supplier(user_supplier))}
+    {:noreply,
+     stream_insert(
+       socket,
+       :users_suppliers,
+       preload_user_supplier(user_supplier)
+     )}
   end
 
   @impl true
@@ -53,8 +61,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.Index do
     {:noreply, stream_delete(socket, :users_suppliers, user_supplier)}
   end
 
-  @spec preload_user_supplier(PriceSpotter.Marketplaces.Relations.UserSupplier.t()) ::
+  @spec preload_user_supplier(
           PriceSpotter.Marketplaces.Relations.UserSupplier.t()
-  defp preload_user_supplier(%PriceSpotter.Marketplaces.Relations.UserSupplier{} = us),
-    do: PriceSpotter.Repo.preload(us, [:supplier, :user])
+        ) ::
+          PriceSpotter.Marketplaces.Relations.UserSupplier.t()
+  defp preload_user_supplier(
+         %PriceSpotter.Marketplaces.Relations.UserSupplier{} = us
+       ),
+       do: PriceSpotter.Repo.preload(us, [:supplier, :user])
 end

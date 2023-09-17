@@ -32,7 +32,9 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   def list_product_supplier do
-    Repo.all(from(p in Product, select: p.supplier_name, distinct: p.supplier_name))
+    Repo.all(
+      from(p in Product, select: p.supplier_name, distinct: p.supplier_name)
+    )
   end
 
   @doc """
@@ -242,7 +244,8 @@ defmodule PriceSpotter.Marketplaces do
     # Check supplier existance
     |> Ecto.Multi.one(:supplier, fn %{
                                       maybe_create_product:
-                                        {product_op, %Product{supplier_name: supplier_name}}
+                                        {product_op,
+                                         %Product{supplier_name: supplier_name}}
                                     }
                                     when product_op in [:created, :updated] ->
       from(s in Supplier, where: s.name == ^supplier_name)
@@ -251,7 +254,8 @@ defmodule PriceSpotter.Marketplaces do
     |> Ecto.Multi.run(:maybe_create_supplier, fn
       _repo,
       %{
-        maybe_create_product: {_product_op, %Product{supplier_name: supplier_name}},
+        maybe_create_product:
+          {_product_op, %Product{supplier_name: supplier_name}},
         supplier: nil
       } ->
         {:ok, %Supplier{} = s} = create_supplier(%{name: supplier_name})
@@ -263,9 +267,11 @@ defmodule PriceSpotter.Marketplaces do
     # Relate supplier to a product
     |> Ecto.Multi.run(:assoc_supplier, fn _repo,
                                           %{
-                                            maybe_create_product: {_product_op, %Product{} = p},
+                                            maybe_create_product:
+                                              {_product_op, %Product{} = p},
                                             maybe_create_supplier:
-                                              {_supplier_op, %Supplier{id: supplier_id}}
+                                              {_supplier_op,
+                                               %Supplier{id: supplier_id}}
                                           } ->
       {:ok, %Product{}} = assign_supplier(p, supplier_id)
       {:ok, {:ok, :noop}}
@@ -290,7 +296,8 @@ defmodule PriceSpotter.Marketplaces do
   def fetch_last_product_entry(stream_key, _count \\ "*") do
     stream_name = get_stream_name("product-history_" <> stream_key)
 
-    with {:ok, %Redis.Stream.Entry{} = entry} <- Redis.Client.fetch_last_stream_entry(stream_name) do
+    with {:ok, %Redis.Stream.Entry{} = entry} <-
+           Redis.Client.fetch_last_stream_entry(stream_name) do
       entry
     else
       {:error, :no_product} ->
@@ -309,9 +316,11 @@ defmodule PriceSpotter.Marketplaces do
   Given a supplier name and an internal id for a product, returns a list of
   redis stream entries for all the avaialble historical data.
   """
-  @spec fetch_product_history(String.t(), String.t()) :: {:ok, [Redis.Stream.Entry.t()]} | :error
+  @spec fetch_product_history(String.t(), String.t()) ::
+          {:ok, [Redis.Stream.Entry.t()]} | :error
   def fetch_product_history(supplier_name, internal_id) do
-    stream_name = get_stream_name("product-history_" <> supplier_name <> "_" <> internal_id)
+    stream_name =
+      get_stream_name("product-history_" <> supplier_name <> "_" <> internal_id)
 
     with {:ok, entries} <- Redis.Client.fetch_history(stream_name, 20),
          sorted_entries <- Enum.reverse(entries),
@@ -334,7 +343,9 @@ defmodule PriceSpotter.Marketplaces do
       :error
   end
 
-  @spec map_product_history([Redis.Stream.Entry.t()]) :: [{NaiveDateTime.t(), Product.t()}]
+  @spec map_product_history([Redis.Stream.Entry.t()]) :: [
+          {NaiveDateTime.t(), Product.t()}
+        ]
   defp map_product_history(entries) do
     Enum.map(entries, fn %Redis.Stream.Entry{datetime: datetime} = entry ->
       %Product{} =

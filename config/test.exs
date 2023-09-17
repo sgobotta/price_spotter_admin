@@ -22,7 +22,8 @@ config :price_spotter, PriceSpotter.Repo,
 # you can enable the server option below.
 config :price_spotter, PriceSpotterWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "apBVbRamqeKnh9yAteuCWTQDd7BSdHPEVIxouoAesdZEjQ3mF+0nDoRPUmbnJX0R",
+  secret_key_base:
+    "apBVbRamqeKnh9yAteuCWTQDd7BSdHPEVIxouoAesdZEjQ3mF+0nDoRPUmbnJX0R",
   server: false
 
 # In test we don't send emails.

@@ -12,7 +12,10 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
     test "logs the user in", %{conn: conn, user: user} do
       conn =
         post(conn, ~p"/users/log_in", %{
-          "user" => %{"email" => user.email, "password" => valid_user_password()}
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password()
+          }
         })
 
       assert get_session(conn, :user_token)
@@ -29,7 +32,10 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
     test "logs the admin user in", %{conn: conn, admin_user: admin_user} do
       conn =
         post(conn, ~p"/users/log_in", %{
-          "user" => %{"email" => admin_user.email, "password" => valid_user_password()}
+          "user" => %{
+            "email" => admin_user.email,
+            "password" => valid_user_password()
+          }
         })
 
       assert get_session(conn, :user_token)
@@ -69,7 +75,9 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
         })
 
       assert redirected_to(conn) == "/foo/bar"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ gettext("Welcome back!")
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               gettext("Welcome back!")
     end
 
     test "login following registration", %{conn: conn, user: user} do
@@ -109,10 +117,15 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
     test "redirects to login page with invalid credentials", %{conn: conn} do
       conn =
         post(conn, ~p"/users/log_in", %{
-          "user" => %{"email" => "invalid@email.com", "password" => "invalid_password"}
+          "user" => %{
+            "email" => "invalid@email.com",
+            "password" => "invalid_password"
+          }
         })
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) == gettext("Invalid email or password")
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               gettext("Invalid email or password")
+
       assert redirected_to(conn) == ~p"/users/log_in"
     end
   end
@@ -122,14 +135,18 @@ defmodule PriceSpotterWeb.UserSessionControllerTest do
       conn = conn |> log_in_user(user) |> delete(~p"/users/log_out")
       assert redirected_to(conn) == ~p"/"
       refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ gettext("Logged out successfully.")
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               gettext("Logged out successfully.")
     end
 
     test "succeeds even if the user is not logged in", %{conn: conn} do
       conn = delete(conn, ~p"/users/log_out")
       assert redirected_to(conn) == ~p"/"
       refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ gettext("Logged out successfully.")
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               gettext("Logged out successfully.")
     end
   end
 end

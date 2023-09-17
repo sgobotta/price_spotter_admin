@@ -83,7 +83,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_info(
-        {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent, {:saved, _product}},
+        {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent,
+         {:saved, _product}},
         socket
       ) do
     {:noreply, socket}
@@ -149,7 +150,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   defp get_column_names,
-    do: Enum.join(Enum.map(get_columns(), &Atom.to_string(Map.get(&1, :name))), ",")
+    do:
+      Enum.join(
+        Enum.map(get_columns(), &Atom.to_string(Map.get(&1, :name))),
+        ","
+      )
 
   defp get_columns,
     do: [

@@ -19,7 +19,8 @@ defmodule PriceSpotterWeb.LiveHelpers do
     |> assign_user(session)
   end
 
-  defp subscribe_user_auth, do: PriceSpotterWeb.Endpoint.subscribe(UserAuth.pubsub_topic())
+  defp subscribe_user_auth,
+    do: PriceSpotterWeb.Endpoint.subscribe(UserAuth.pubsub_topic())
 
   defp assign_user(socket, session) do
     assign_new(socket, :current_user, fn ->

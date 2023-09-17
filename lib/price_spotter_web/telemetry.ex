@@ -58,7 +58,8 @@ defmodule PriceSpotterWeb.Telemetry do
       ),
       summary("price_spotter.repo.query.decode_time",
         unit: {:native, :millisecond},
-        description: "The time spent decoding the data received from the database"
+        description:
+          "The time spent decoding the data received from the database"
       ),
       summary("price_spotter.repo.query.query_time",
         unit: {:native, :millisecond},

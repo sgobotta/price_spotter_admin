@@ -11,7 +11,10 @@ defmodule PriceSpotterWeb.UserRegistrationLive do
         <%= gettext("Register for an account") %>
         <:subtitle>
           <%= gettext("Already registered?") %>
-          <.link navigate={~p"/users/log_in"} class="font-semibold text-brand hover:underline">
+          <.link
+            navigate={~p"/users/log_in"}
+            class="font-semibold text-brand hover:underline"
+          >
             <%= gettext("Sign in") %>
           </.link>
         </:subtitle>
@@ -30,8 +33,18 @@ defmodule PriceSpotterWeb.UserRegistrationLive do
           <%= gettext("Oops, something went wrong! Please check the errors below.") %>
         </.error>
 
-        <.input field={@form[:email]} type="email" label={gettext("Email")} required />
-        <.input field={@form[:password]} type="password" label={gettext("Password")} required />
+        <.input
+          field={@form[:email]}
+          type="email"
+          label={gettext("Email")}
+          required
+        />
+        <.input
+          field={@form[:password]}
+          type="password"
+          label={gettext("Password")}
+          required
+        />
 
         <:actions>
           <.button phx-disable-with={gettext("Creating account...")} class="w-full">
@@ -65,10 +78,13 @@ defmodule PriceSpotterWeb.UserRegistrationLive do
           )
 
         changeset = Accounts.change_user_registration(user)
-        {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
+
+        {:noreply,
+         socket |> assign(trigger_submit: true) |> assign_form(changeset)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
+        {:noreply,
+         socket |> assign(check_errors: true) |> assign_form(changeset)}
     end
   end
 

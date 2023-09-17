@@ -33,10 +33,14 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
                  "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
                )
 
-      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "confirm"
+      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context ==
+               "confirm"
     end
 
-    test "does not send confirmation token if user is confirmed", %{conn: conn, user: user} do
+    test "does not send confirmation token if user is confirmed", %{
+      conn: conn,
+      user: user
+    } do
       Repo.update!(Accounts.User.confirm_changeset(user))
 
       {:ok, lv, _html} = live(conn, ~p"/users/confirm")
@@ -60,7 +64,9 @@ defmodule PriceSpotterWeb.UserConfirmationInstructionsLiveTest do
 
       {:ok, conn} =
         lv
-        |> form("#resend_confirmation_form", user: %{email: "unknown@example.com"})
+        |> form("#resend_confirmation_form",
+          user: %{email: "unknown@example.com"}
+        )
         |> render_submit()
         |> follow_redirect(conn, ~p"/")
 
