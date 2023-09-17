@@ -62,8 +62,6 @@
                       </div>
                     <% end %>
 
-                    <.input type="hidden" field={f[:page]} label="Page" class="gap-y-4" />
-                    <.input type="hidden" field={f[:page_size]} label="Page Size" class="gap-y-4" />
                     <.input type="hidden" field={f[:limit]} value={get_limit()} class="gap-y-4" />
 
                     <div class="border-b-1 border-zinc-300 my-2" />
@@ -72,7 +70,7 @@
                       <.input
                         type="checkbox"
                         field={f[:all_pages]}
-                        label="Export all pages?"
+                        label={gettext("Export all pages?")}
                         class="gap-y-4"
                       />
                     </div>
@@ -83,16 +81,6 @@
                       value={get_max_limit()}
                       class="gap-y-4"
                     />
-
-                    <Flop.Phoenix.filter_fields :let={i} form={f} fields={@filter_fields}>
-                      <.input
-                        field={i.field}
-                        label={i.label}
-                        type="hidden"
-                        phx-debounce={120}
-                        {i.rest}
-                      />
-                    </Flop.Phoenix.filter_fields>
 
                     <div class="my-2">
                       <.button class="w-full" type="submit">
