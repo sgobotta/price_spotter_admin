@@ -656,14 +656,14 @@ defmodule PriceSpotterWeb.CoreComponents do
 
     ~H"""
     <.form for={@form} id={@id} phx-target={@target} phx-change={@on_change} phx-submit={@on_change}>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
           <.input field={i.field} label={i.label} type={i.type} phx-debounce={120} {i.rest} />
         </Flop.Phoenix.filter_fields>
       </div>
 
-      <div class="my-2">
-        <.button class="button" phx-target={@target} phx-click={@on_reset} href="#">
+      <div class="my-4 flex justify-end">
+        <.button class="button w-full sm:w-fit" phx-target={@target} phx-click={@on_reset} href="#">
           <%= gettext("Clear Filters") %>
         </.button>
       </div>
