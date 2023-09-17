@@ -39,14 +39,14 @@ RUN npm --version
 RUN node --version
 
 # prepare build dir
-WORKDIR "/app"
+WORKDIR /app
 
 # install hex + rebar
 RUN mix local.hex --force && \
     mix local.rebar --force
 
 # set build ENV
-ENV MIX_ENV="prod"
+ENV MIX_ENV=prod
 ENV SECRET_KEY_BASE=${SECRET_KEY_BASE}
 ENV UPLOADS_PATH=${UPLOADS_PATH}
 
@@ -97,14 +97,14 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-WORKDIR "/app"
+WORKDIR /opt/app
 COPY devops/builder/entrypoint.sh .
 RUN chmod +x entrypoint.sh
-RUN chown nobody /app
+RUN chown nobody /opt/app
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root app/_build/prod/rel/price_spotter .
 
 USER nobody
 
-CMD /app/entrypoint.sh start
+CMD /opt/app/entrypoint.sh start
