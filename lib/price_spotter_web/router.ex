@@ -99,7 +99,9 @@ defmodule PriceSpotterWeb.Router do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
-      on_mount: [{PriceSpotterWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      on_mount: [
+        {PriceSpotterWeb.UserAuth, :redirect_if_user_is_authenticated}
+      ] do
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit

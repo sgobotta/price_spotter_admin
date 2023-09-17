@@ -86,7 +86,8 @@ defmodule PriceSpotterWeb.Telemetry do
   defp periodic_measurements do
     [
       # A module, function and arguments to be invoked periodically.
-      # This function must call :telemetry.execute/3 and a metric must be added above.
+      # This function must call :telemetry.execute/3 and a metric must be added
+      # above.
       # {PriceSpotterWeb, :count_users, []}
     ]
   end

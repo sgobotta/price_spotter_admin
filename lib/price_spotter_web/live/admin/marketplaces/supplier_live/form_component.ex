@@ -55,7 +55,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent do
   end
 
   defp save_supplier(socket, :edit, supplier_params) do
-    case Marketplaces.update_supplier(socket.assigns.supplier, supplier_params) do
+    case Marketplaces.update_supplier(
+           socket.assigns.supplier,
+           supplier_params
+         ) do
       {:ok, supplier} ->
         notify_parent({:saved, supplier})
 

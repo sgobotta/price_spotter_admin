@@ -412,7 +412,8 @@ defmodule PriceSpotterWeb.CoreComponents do
     """
   end
 
-  # All other inputs text, datetime-local, url, password, etc. are handled here...
+  # All other inputs text, datetime-local, url, password, etc. are handled
+  # here...
   def input(%{type: type} = assigns) do
     assigns =
       assign_new(assigns, :container_class, fn ->

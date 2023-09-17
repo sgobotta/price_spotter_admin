@@ -60,7 +60,10 @@ defmodule PriceSpotter.AccountsTest do
       email = unique_user_email()
 
       {:ok, user} =
-        Accounts.register_admin(%{email: email, password: valid_user_password()})
+        Accounts.register_admin(%{
+          email: email,
+          password: valid_user_password()
+        })
 
       assert user.email == email
       assert is_binary(user.hashed_password)
@@ -136,7 +139,8 @@ defmodule PriceSpotter.AccountsTest do
                changeset
              ).email
 
-      # Now try with the upper cased email too, to check that email case is ignored.
+      # Now try with the upper cased email too, to check that email case is
+      # ignored.
       {:error, changeset} =
         Accounts.register_user(%{email: String.upcase(email)})
 
@@ -434,7 +438,7 @@ defmodule PriceSpotter.AccountsTest do
     end
 
     test "deletes all tokens for the given user", %{user: user} do
-      _ = Accounts.generate_user_session_token(user)
+      _token = Accounts.generate_user_session_token(user)
 
       {:ok, _} =
         Accounts.update_user_password(user, valid_user_password(), %{
@@ -666,7 +670,7 @@ defmodule PriceSpotter.AccountsTest do
     end
 
     test "deletes all tokens for the given user", %{user: user} do
-      _ = Accounts.generate_user_session_token(user)
+      _token = Accounts.generate_user_session_token(user)
 
       {:ok, _} =
         Accounts.reset_user_password(user, %{password: "new valid password"})

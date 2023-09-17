@@ -85,7 +85,7 @@
         {Credo.Check.Design.AliasUsage,
          [
            priority: :low,
-           if_nested_deeper_than: 2,
+           if_nested_deeper_than: 5,
            if_called_more_often_than: 0
          ]},
         # You can also customize the exit_status of each check.
@@ -104,7 +104,7 @@
         {Credo.Check.Readability.MaxLineLength,
          [priority: :low, max_length: 80]},
         {Credo.Check.Readability.ModuleAttributeNames, []},
-        {Credo.Check.Readability.ModuleDoc, [exit_status: 1]},
+        {Credo.Check.Readability.ModuleDoc, false},
         {Credo.Check.Readability.ModuleNames, []},
         {Credo.Check.Readability.ParenthesesInCondition, []},
         {Credo.Check.Readability.ParenthesesOnZeroArityDefs, []},

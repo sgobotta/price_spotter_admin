@@ -261,8 +261,8 @@ defmodule PriceSpotter.MarketplacesTest do
   end
 
   describe "users_suppliers" do
-    alias PriceSpotter.Marketplaces.Relations.UserSupplier
     alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+    alias PriceSpotter.Marketplaces.Relations.UserSupplier
 
     import PriceSpotter.MarketplacesFixtures
 

@@ -17,10 +17,10 @@ defmodule PriceSpotterWeb.EnsureRolePlug do
   import Plug.Conn
   import PriceSpotterWeb.Gettext
 
-  alias PriceSpotter.Accounts
-  alias PriceSpotter.Accounts.User
   alias Phoenix.Controller
   alias Plug.Conn
+  alias PriceSpotter.Accounts
+  alias PriceSpotter.Accounts.User
 
   @doc false
   @spec init(any()) :: any()

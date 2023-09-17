@@ -39,7 +39,7 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
 
   @max_attempts 5
 
-  def handle_failed(messages, _) do
+  def handle_failed(messages, _context) do
     for message <- messages do
       if message.metadata.attempt < @max_attempts do
         Broadway.Message.configure_ack(message, retry: true)

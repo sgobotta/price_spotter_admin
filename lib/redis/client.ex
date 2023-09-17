@@ -41,7 +41,8 @@ defmodule Redis.Client do
     Redix.command(:redix, [command, stream_name, "+", "-", "COUNT", count])
   end
 
-  @spec fetch_last_stream_entry(String.t()) :: {:ok, Redis.Stream.Entry.t()}
+  @spec fetch_last_stream_entry(String.t()) ::
+          {:ok, Redis.Stream.Entry.t()} | {:error, :stream_parse_error}
   def fetch_last_stream_entry(stream_name) do
     with {:ok, _entries} = reply <- fetch_reverse_range(stream_name, 1),
          {:ok, parsed_entries} <- parse_stream_reply(reply) do

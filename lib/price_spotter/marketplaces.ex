@@ -296,12 +296,9 @@ defmodule PriceSpotter.Marketplaces do
   def fetch_last_product_entry(stream_key, _count \\ "*") do
     stream_name = get_stream_name("product-history_" <> stream_key)
 
-    with {:ok, %Redis.Stream.Entry{} = entry} <-
-           Redis.Client.fetch_last_stream_entry(stream_name) do
-      entry
-    else
-      {:error, :no_product} ->
-        []
+    case Redis.Client.fetch_last_stream_entry(stream_name) do
+      {:ok, %Redis.Stream.Entry{} = entry} ->
+        entry
 
       error ->
         Logger.error(

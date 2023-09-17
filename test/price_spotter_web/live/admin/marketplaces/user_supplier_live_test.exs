@@ -9,7 +9,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLiveTest do
   @update_attrs UsersSuppliersFixtures.update_attrs()
   @invalid_attrs UsersSuppliersFixtures.invalid_attrs()
 
-  defp create_user_supplier(_) do
+  defp create_user_supplier(_context) do
     %{user_supplier: UsersSuppliersFixtures.create()}
   end
 

@@ -40,11 +40,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          |> URI.to_string()
      )}
 
-    # {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products?#{params}")}
+    # {:noreply,
+    #   push_patch(socket, to: ~p"/admin/marketplaces/products?#{params}")}
   end
 
   @impl true
-  def handle_event("reset-filter", _, %{assigns: assigns} = socket) do
+  def handle_event("reset-filter", _params, %{assigns: assigns} = socket) do
     flop = assigns.meta.flop |> Flop.set_page(1) |> Flop.reset_filters()
 
     path =
@@ -150,11 +151,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   defp get_column_names,
-    do:
-      Enum.join(
-        Enum.map(get_columns(), &Atom.to_string(Map.get(&1, :name))),
-        ","
-      )
+    do: Enum.map_join(get_columns(), ",", &Atom.to_string(Map.get(&1, :name)))
 
   defp get_columns,
     do: [

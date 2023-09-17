@@ -13,7 +13,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
   }
   @invalid_attrs %{email: nil, password: nil, role: nil}
 
-  defp create_user(_) do
+  defp create_user(_context) do
     user = user_fixture()
     %{user: user}
   end

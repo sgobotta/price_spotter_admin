@@ -6,7 +6,7 @@ defmodule PriceSpotter.Accounts do
   import Ecto.Query, warn: false
   alias PriceSpotter.Repo
 
-  alias PriceSpotter.Accounts.{User, UserToken, UserNotifier}
+  alias PriceSpotter.Accounts.{User, UserNotifier, UserToken}
 
   @doc """
   Returns the list of users.
@@ -240,7 +240,7 @@ defmodule PriceSpotter.Accounts do
          {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
       :ok
     else
-      _ -> :error
+      _error -> :error
     end
   end
 
@@ -324,7 +324,7 @@ defmodule PriceSpotter.Accounts do
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
+      {:error, :user, changeset, _changes} -> {:error, changeset}
     end
   end
 
@@ -419,7 +419,7 @@ defmodule PriceSpotter.Accounts do
          {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
       {:ok, user}
     else
-      _ -> :error
+      _error -> :error
     end
   end
 
@@ -477,7 +477,7 @@ defmodule PriceSpotter.Accounts do
          %User{} = user <- Repo.one(query) do
       user
     else
-      _ -> nil
+      _error -> nil
     end
   end
 
@@ -503,7 +503,7 @@ defmodule PriceSpotter.Accounts do
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
+      {:error, :user, changeset, _changes} -> {:error, changeset}
     end
   end
 end

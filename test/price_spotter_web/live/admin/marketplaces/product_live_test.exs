@@ -33,7 +33,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     supplier_url: nil
   }
 
-  defp create_product(_) do
+  defp create_product(_context) do
     product = product_fixture()
     %{product: product}
   end

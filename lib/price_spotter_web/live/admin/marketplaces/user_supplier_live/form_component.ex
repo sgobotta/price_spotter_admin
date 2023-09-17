@@ -126,7 +126,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
-  defp get_user_options() do
+  defp get_user_options do
     PriceSpotter.Accounts.list_users()
     |> Enum.reduce(Keyword.new(), fn %PriceSpotter.Accounts.User{
                                        email: email,
@@ -137,7 +137,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.FormComponent do
     end)
   end
 
-  defp get_supplier() do
+  defp get_supplier do
     PriceSpotter.Marketplaces.list_suppliers()
     |> Enum.reduce(Keyword.new(), fn %PriceSpotter.Marketplaces.Supplier{
                                        id: id,
