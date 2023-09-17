@@ -10,6 +10,8 @@ defmodule PriceSpotter.Release do
   def create_db do
     :ok = load_app()
 
+    {:ok, _apps} = Application.ensure_all_started(:ssl)
+
     for repo <- repos() do
       Application.fetch_env!(@app, repo)
       |> repo.__adapter__().storage_up()
