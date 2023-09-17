@@ -4,19 +4,27 @@ defmodule PriceSpotterWeb.ExportController do
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(
         conn,
-        %{"all_pages" => all_pages?, "columns" => columns, "max_limit" => max_limit} = params
+        %{
+          "all_pages" => all_pages?,
+          "columns" => columns,
+          "max_limit" => max_limit
+        } = params
       ) do
     with columns <- parse_columns(columns),
          params <- sanitize_empty_params(params),
          params <- maybe_put_max_limit(all_pages?, params, max_limit),
          fields <- parse_fields(params, columns),
-         {:ok, {products, _meta}} <- PriceSpotter.Marketplaces.list_products(params),
+         {:ok, {products, _meta}} <-
+           PriceSpotter.Marketplaces.list_products(params),
          csv_data <- csv_content(products, fields),
          datetime <- NaiveDateTime.utc_now(),
          filename <- get_filename(datetime) do
       conn
       |> put_resp_content_type("text/csv")
-      |> put_resp_header("content-disposition", "attachment; filename=\"#{filename}.csv\"")
+      |> put_resp_header(
+        "content-disposition",
+        "attachment; filename=\"#{filename}.csv\""
+      )
       |> send_resp(200, csv_data)
     end
   end
@@ -33,7 +41,9 @@ defmodule PriceSpotterWeb.ExportController do
     end)
   end
 
-  defp maybe_put_max_limit("true", params, max_limit), do: Map.put(params, "limit", max_limit)
+  defp maybe_put_max_limit("true", params, max_limit),
+    do: Map.put(params, "limit", max_limit)
+
   defp maybe_put_max_limit("false", params, _max_limit), do: params
 
   defp parse_fields(params, columns) do

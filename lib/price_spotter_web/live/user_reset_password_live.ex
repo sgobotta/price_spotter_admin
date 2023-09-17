@@ -18,7 +18,12 @@ defmodule PriceSpotterWeb.UserResetPasswordLive do
           <%= gettext("Oops, something went wrong! Please check the errors below.") %>
         </.error>
 
-        <.input field={@form[:password]} type="password" label={gettext("New password")} required />
+        <.input
+          field={@form[:password]}
+          type="password"
+          label={gettext("New password")}
+          required
+        />
         <.input
           field={@form[:password_confirmation]}
           type="password"
@@ -48,7 +53,7 @@ defmodule PriceSpotterWeb.UserResetPasswordLive do
         %{user: user} ->
           Accounts.change_user_password(user)
 
-        _ ->
+        _assigns ->
           %{}
       end
 
@@ -83,7 +88,10 @@ defmodule PriceSpotterWeb.UserResetPasswordLive do
       assign(socket, user: user, token: token)
     else
       socket
-      |> put_flash(:error, gettext("Reset password link is invalid or it has expired."))
+      |> put_flash(
+        :error,
+        gettext("Reset password link is invalid or it has expired.")
+      )
       |> redirect(to: ~p"/")
     end
   end

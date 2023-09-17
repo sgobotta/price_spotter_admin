@@ -60,17 +60,23 @@ defmodule PriceSpotterWeb do
 
       alias PriceSpotter.Accounts.User
 
-      def handle_info(%{event: "logout_user", payload: %{user_id: user_id}}, socket) do
-        with %User{id: ^user_id} <- socket.assigns.current_user do
-          {:noreply,
-           socket
-           |> Phoenix.LiveView.put_flash(
-             :info,
-             gettext("You were logged out. Please login again to continue using our application.")
-           )
-           |> redirect(to: ~p"/users/log_in")}
-        else
-          _any ->
+      def handle_info(
+            %{event: "logout_user", payload: %{user_id: user_id}},
+            socket
+          ) do
+        case socket.assigns.current_user do
+          %User{id: ^user_id} ->
+            {:noreply,
+             socket
+             |> Phoenix.LiveView.put_flash(
+               :info,
+               gettext(
+                 "You were logged out. Please login again to continue using our application."
+               )
+             )
+             |> redirect(to: ~p"/users/log_in")}
+
+          _other ->
             {:noreply, socket}
         end
       end

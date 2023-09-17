@@ -10,9 +10,15 @@
 <.table
   id="suppliers"
   rows={@streams.suppliers}
-  row_click={fn {_id, supplier} -> JS.navigate(~p"/admin/marketplaces/suppliers/#{supplier}") end}
+  row_click={
+    fn {_id, supplier} ->
+      JS.navigate(~p"/admin/marketplaces/suppliers/#{supplier}")
+    end
+  }
 >
-  <:col :let={{_id, supplier}} label={gettext("Name")}><%= supplier.name %></:col>
+  <:col :let={{_id, supplier}} label={gettext("Name")}>
+    <%= supplier.name %>
+  </:col>
   <:action :let={{_id, supplier}}>
     <div class="sr-only">
       <.link navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}>
@@ -32,8 +38,12 @@
   <:action :let={{_id, supplier}}>
     <.link
       id={"suppliers-delete-#{supplier.id}"}
-      phx-click={JS.push("delete", value: %{id: supplier.id}) |> hide("##{supplier.id}")}
-      data-confirm={gettext("Delete supplier \"%{name}\"?", name: supplier.name)}
+      phx-click={
+        JS.push("delete", value: %{id: supplier.id}) |> hide("##{supplier.id}")
+      }
+      data-confirm={
+        gettext("Delete supplier \"%{name}\"?", name: supplier.name)
+      }
       class="hover:text-rose-500"
     >
       <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />

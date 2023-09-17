@@ -14,13 +14,18 @@ module.exports = {
   theme: {
     extend: {
       borderWidth: {
-        '1': '1px'
+        '1': '1px',
+        '12': '12px',
+        '24': '24px'
       },
       colors: {
         brand: "#FD4F00",
       },
       fontFamily: {
         'sans': ['Montserrat-Thin', 'Helvetica', 'Arial', 'sans-serif']
+      },
+      scale: {
+        '102': '1.02',
       }
     },
   },

@@ -21,7 +21,9 @@ defmodule TimeAgo do
   defp format_minutes(seconds) do
     minutes = div(seconds, 60)
 
-    ngettext("%{minutes} minute ago", "%{minutes} minutes ago", minutes, minutes: minutes)
+    ngettext("%{minutes} minute ago", "%{minutes} minutes ago", minutes,
+      minutes: minutes
+    )
     |> String.downcase()
   end
 
@@ -42,7 +44,9 @@ defmodule TimeAgo do
   defp format_months(seconds) do
     months = div(seconds, 2_592_000)
 
-    ngettext("%{months} month ago", "%{months} months ago", months, months: months)
+    ngettext("%{months} month ago", "%{months} months ago", months,
+      months: months
+    )
     |> String.downcase()
   end
 

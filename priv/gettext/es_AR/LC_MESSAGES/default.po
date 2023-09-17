@@ -100,7 +100,7 @@ msgstr "URL de imagen"
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:55
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Last price"
-msgstr "Último Precio"
+msgstr "Ultimo Precio"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:80
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:4
@@ -252,13 +252,13 @@ msgstr "Todos los proveedores"
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:144
 #, elixir-autogen, elixir-format
 msgid "Last Price"
-msgstr "Último Precio"
+msgstr "Ultimo Precio"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:130
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:158
 #, elixir-autogen, elixir-format
 msgid "Last Update"
-msgstr "Última Actualización"
+msgstr "Ultima Actualización"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:141
 #, elixir-autogen, elixir-format, fuzzy
@@ -309,7 +309,7 @@ msgstr "URL de imagen"
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:158
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Last Price Update"
-msgstr "Último Precio"
+msgstr "Ultima actualización"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:162
 #, elixir-autogen, elixir-format, fuzzy
@@ -907,3 +907,18 @@ msgstr "Utiliza este formulario para administrar los registros de la base de acc
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Edit User Supplier"
 msgstr "Editar Acceso a proveedor"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:75
+#, elixir-autogen, elixir-format
+msgid "Export all pages?"
+msgstr "¿Exportar todas las páginas?"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:65
+#, elixir-autogen, elixir-format
+msgid "Page"
+msgstr "Página"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:66
+#, elixir-autogen, elixir-format
+msgid "Page Size"
+msgstr "Entradas por página"

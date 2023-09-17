@@ -33,7 +33,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     supplier_url: nil
   }
 
-  defp create_product(_) do
+  defp create_product(_context) do
     product = product_fixture()
     %{product: product}
   end
@@ -51,7 +51,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     test "saves new product", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      assert index_live |> element("a", gettext("New Product")) |> render_click() =~
+      assert index_live
+             |> element("a", gettext("New Product"))
+             |> render_click() =~
                gettext("New Product")
 
       assert_patch(index_live, ~p"/admin/marketplaces/products/new")
@@ -74,7 +76,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     test "updates product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      assert index_live |> element("a#products-edit-#{product.id}") |> render_click() =~
+      assert index_live
+             |> element("a#products-edit-#{product.id}")
+             |> render_click() =~
                gettext("Edit Product")
 
       assert_patch(index_live, ~p"/admin/marketplaces/products/#{product}/edit")
@@ -102,7 +106,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     test "deletes product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      assert index_live |> element("a#products-delete-#{product.id}") |> render_click()
+      assert index_live
+             |> element("a#products-delete-#{product.id}")
+             |> render_click()
+
       # FIXME: liveview exits
       refute has_element?(index_live, "a#products-delete-#{product.id}")
     end
@@ -112,19 +119,24 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     setup [:create_product, :register_and_log_in_user]
 
     test "displays product", %{conn: conn, product: product} do
-      {:ok, _show_live, html} = live(conn, ~p"/admin/marketplaces/products/#{product}")
+      {:ok, _show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}")
 
       assert html =~ gettext("Show Product")
       assert html =~ product.category
     end
 
     test "updates product within modal", %{conn: conn, product: product} do
-      {:ok, show_live, _html} = live(conn, ~p"/admin/marketplaces/products/#{product}")
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}")
 
       assert show_live |> element("a#edit-button") |> render_click() =~
                gettext("Edit Product")
 
-      assert_patch(show_live, ~p"/admin/marketplaces/products/#{product}/show/edit")
+      assert_patch(
+        show_live,
+        ~p"/admin/marketplaces/products/#{product}/show/edit"
+      )
 
       assert show_live
              |> form("#product-form", product: @invalid_attrs)

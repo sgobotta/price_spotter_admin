@@ -2,7 +2,9 @@ defmodule PriceSpotterWeb.ErrorJSONTest do
   use PriceSpotterWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert PriceSpotterWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert PriceSpotterWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do

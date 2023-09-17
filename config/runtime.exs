@@ -32,7 +32,8 @@ config :price_spotter,
   redis_pass: System.fetch_env!("REDIS_PASS")
 
 if config_env() == :prod do
-  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+  maybe_ipv6 =
+    if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :price_spotter, PriceSpotter.Repo,
     # ssl: true,
@@ -108,7 +109,8 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  config :price_spotter, PriceSpotterWeb.Endpoint, secret_key_base: secret_key_base
+  config :price_spotter, PriceSpotterWeb.Endpoint,
+    secret_key_base: secret_key_base
 
   # ## SSL Support
   #

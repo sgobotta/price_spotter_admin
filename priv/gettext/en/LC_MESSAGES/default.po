@@ -907,3 +907,18 @@ msgstr "User this form to manage user supplier access records in your database"
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Edit User Supplier"
 msgstr "Edit supplier access"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:75
+#, elixir-autogen, elixir-format
+msgid "Export all pages?"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:65
+#, elixir-autogen, elixir-format
+msgid "Page"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:66
+#, elixir-autogen, elixir-format
+msgid "Page Size"
+msgstr ""

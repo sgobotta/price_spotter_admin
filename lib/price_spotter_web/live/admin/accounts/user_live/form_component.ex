@@ -9,7 +9,9 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle><%= gettext("Use this form to edit the user settings") %></:subtitle>
+        <:subtitle>
+          <%= gettext("Use this form to edit the user settings") %>
+        </:subtitle>
       </.header>
 
       <.simple_form
@@ -29,7 +31,9 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
           options={PriceSpotter.Accounts.User.RolesEnum.__enum_map__()}
         />
         <:actions>
-          <.button phx-disable-with={gettext("Saving...")}><%= gettext("Save User") %></.button>
+          <.button phx-disable-with={gettext("Saving...")}>
+            <%= gettext("Save User") %>
+          </.button>
         </:actions>
       </.simple_form>
     </div>
@@ -47,7 +51,11 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"user" => user_params}, %{assigns: %{action: :edit}} = socket) do
+  def handle_event(
+        "validate",
+        %{"user" => user_params},
+        %{assigns: %{action: :edit}} = socket
+      ) do
     changeset =
       socket.assigns.user
       |> Accounts.change_user(user_params)

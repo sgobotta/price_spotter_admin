@@ -9,7 +9,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
+  def handle_params(%{"id" => id}, _params, socket) do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
@@ -17,7 +17,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Show do
   end
 
   @impl true
-  def handle_info({PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent, {:saved, user}}, socket) do
+  def handle_info(
+        {PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent, {:saved, user}},
+        socket
+      ) do
     {:noreply, assign(socket, :user, user)}
   end
 

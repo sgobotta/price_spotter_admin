@@ -23,13 +23,32 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
       >
         <.input field={@form[:category]} type="text" label={gettext("Category")} />
         <.input field={@form[:img_url]} type="text" label={gettext("Img url")} />
-        <.input field={@form[:internal_id]} type="text" label={gettext("Internal id")} />
-        <.input field={@form[:supplier_name]} type="text" label={gettext("Supplier name")} />
+        <.input
+          field={@form[:internal_id]}
+          type="text"
+          label={gettext("Internal id")}
+        />
+        <.input
+          field={@form[:supplier_name]}
+          type="text"
+          label={gettext("Supplier name")}
+        />
         <.input field={@form[:name]} type="text" label={gettext("Name")} />
-        <.input field={@form[:price]} type="number" label={gettext("Price")} step="any" />
-        <.input field={@form[:supplier_url]} type="text" label={gettext("Supplier url")} />
+        <.input
+          field={@form[:price]}
+          type="number"
+          label={gettext("Price")}
+          step="any"
+        />
+        <.input
+          field={@form[:supplier_url]}
+          type="text"
+          label={gettext("Supplier url")}
+        />
         <:actions>
-          <.button phx-disable-with={gettext("Saving...")}><%= gettext("Save Product") %></.button>
+          <.button phx-disable-with={gettext("Saving...")}>
+            <%= gettext("Save Product") %>
+          </.button>
         </:actions>
       </.simple_form>
     </div>

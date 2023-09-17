@@ -58,7 +58,8 @@ defmodule PriceSpotterWeb.Telemetry do
       ),
       summary("price_spotter.repo.query.decode_time",
         unit: {:native, :millisecond},
-        description: "The time spent decoding the data received from the database"
+        description:
+          "The time spent decoding the data received from the database"
       ),
       summary("price_spotter.repo.query.query_time",
         unit: {:native, :millisecond},
@@ -85,7 +86,8 @@ defmodule PriceSpotterWeb.Telemetry do
   defp periodic_measurements do
     [
       # A module, function and arguments to be invoked periodically.
-      # This function must call :telemetry.execute/3 and a metric must be added above.
+      # This function must call :telemetry.execute/3 and a metric must be added
+      # above.
       # {PriceSpotterWeb, :count_users, []}
     ]
   end

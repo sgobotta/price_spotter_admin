@@ -16,10 +16,19 @@ defmodule PriceSpotter.Marketplaces.Product do
       :min_price,
       :max_price
     ],
-    sortable: [:name, :category, :internal_id, :supplier_name, :price, :price_updated_at],
+    sortable: [
+      :name,
+      :category,
+      :internal_id,
+      :supplier_name,
+      :price,
+      :price_updated_at
+    ],
     custom_fields: [
       price_updated_since: [
-        filter: {PriceSpotter.Marketplaces.Product.CustomFilters, :price_updated_since, []},
+        filter:
+          {PriceSpotter.Marketplaces.Product.CustomFilters,
+           :price_updated_since, []},
         ecto_type: :naive_datetime
       ],
       max_price: [
@@ -123,7 +132,8 @@ defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
 
   alias PriceSpotter.Marketplaces.Product
 
-  @spec price_updated_since(Product.t(), Flop.Filter.t(), keyword()) :: Ecto.Query.t()
+  @spec price_updated_since(Product.t(), Flop.Filter.t(), keyword()) ::
+          Ecto.Query.t()
   def price_updated_since(q, %Flop.Filter{value: value, op: op}, _options) do
     case Ecto.Type.cast(:naive_datetime, value) do
       {:ok, since_date} ->

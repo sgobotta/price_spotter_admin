@@ -12,7 +12,10 @@ defmodule PriceSpotterWeb.UserAuthTest do
   setup %{conn: conn} do
     conn =
       conn
-      |> Map.replace!(:secret_key_base, PriceSpotterWeb.Endpoint.config(:secret_key_base))
+      |> Map.replace!(
+        :secret_key_base,
+        PriceSpotterWeb.Endpoint.config(:secret_key_base)
+      )
       |> init_test_session(%{})
 
     %{user: user_fixture(), conn: conn}
@@ -24,17 +27,25 @@ defmodule PriceSpotterWeb.UserAuthTest do
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
-      assert get_session(conn, :live_socket_id) == "users_sessions:#{Base.url_encode64(token)}"
+
+      assert get_session(conn, :live_socket_id) ==
+               "users_sessions:#{Base.url_encode64(token)}"
+
       assert redirected_to(conn) == ~p"/"
       assert Accounts.get_user_by_session_token(token)
     end
 
     test "revokes previous session when logging in for a second time" do
-      %{conn: conn, user: user} = register_and_log_in_admin(%{conn: build_conn()})
+      %{conn: conn, user: user} =
+        register_and_log_in_admin(%{conn: build_conn()})
 
       {:ok, lv, html} = live(conn, ~p"/users/settings")
       assert html =~ gettext("Account Settings")
-      assert html =~ gettext("Manage your account email address and password settings")
+
+      assert html =~
+               gettext(
+                 "Manage your account email address and password settings"
+               )
 
       another_conn =
         build_conn()
@@ -48,26 +59,47 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
       assert_redirect(lv, ~p"/users/log_in")
 
-      assert {:error, {:redirect, %{flash: flash}}} = live(conn, ~p"/users/settings")
+      assert {:error, {:redirect, %{flash: flash}}} =
+               live(conn, ~p"/users/settings")
 
       assert flash["error"] == gettext("You must log in to access this page.")
     end
 
-    test "clears everything previously stored in the session", %{conn: conn, user: user} do
-      conn = conn |> put_session(:to_be_removed, "value") |> UserAuth.log_in_user(user)
+    test "clears everything previously stored in the session", %{
+      conn: conn,
+      user: user
+    } do
+      conn =
+        conn
+        |> put_session(:to_be_removed, "value")
+        |> UserAuth.log_in_user(user)
+
       refute get_session(conn, :to_be_removed)
     end
 
     test "redirects to the configured path", %{conn: conn, user: user} do
-      conn = conn |> put_session(:user_return_to, "/hello") |> UserAuth.log_in_user(user)
+      conn =
+        conn
+        |> put_session(:user_return_to, "/hello")
+        |> UserAuth.log_in_user(user)
+
       assert redirected_to(conn) == "/hello"
     end
 
-    test "writes a cookie if remember_me is configured", %{conn: conn, user: user} do
-      conn = conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
+    test "writes a cookie if remember_me is configured", %{
+      conn: conn,
+      user: user
+    } do
+      conn =
+        conn
+        |> fetch_cookies()
+        |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
+
       assert get_session(conn, :user_token) == conn.cookies[@remember_me_cookie]
 
-      assert %{value: signed_token, max_age: max_age} = conn.resp_cookies[@remember_me_cookie]
+      assert %{value: signed_token, max_age: max_age} =
+               conn.resp_cookies[@remember_me_cookie]
+
       assert signed_token != get_session(conn, :user_token)
       assert max_age == 5_184_000
     end
@@ -99,7 +131,10 @@ defmodule PriceSpotterWeb.UserAuthTest do
       |> put_session(:live_socket_id, live_socket_id)
       |> UserAuth.log_out_user()
 
-      assert_receive %Phoenix.Socket.Broadcast{event: "disconnect", topic: ^live_socket_id}
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "disconnect",
+        topic: ^live_socket_id
+      }
     end
 
     test "works even if user is already logged out", %{conn: conn} do
@@ -113,13 +148,20 @@ defmodule PriceSpotterWeb.UserAuthTest do
   describe "fetch_current_user/2" do
     test "authenticates user from session", %{conn: conn, user: user} do
       {user_token, _tokens} = Accounts.generate_user_session_token(user)
-      conn = conn |> put_session(:user_token, user_token) |> UserAuth.fetch_current_user([])
+
+      conn =
+        conn
+        |> put_session(:user_token, user_token)
+        |> UserAuth.fetch_current_user([])
+
       assert conn.assigns.current_user.id == user.id
     end
 
     test "authenticates user from cookies", %{conn: conn, user: user} do
       logged_in_conn =
-        conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
+        conn
+        |> fetch_cookies()
+        |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
 
       user_token = logged_in_conn.cookies[@remember_me_cookie]
       %{value: signed_token} = logged_in_conn.resp_cookies[@remember_me_cookie]
@@ -137,7 +179,7 @@ defmodule PriceSpotterWeb.UserAuthTest do
     end
 
     test "does not authenticate if data is missing", %{conn: conn, user: user} do
-      _ = Accounts.generate_user_session_token(user)
+      _token = Accounts.generate_user_session_token(user)
       conn = UserAuth.fetch_current_user(conn, [])
       refute get_session(conn, :user_token)
       refute conn.assigns.current_user
@@ -145,7 +187,10 @@ defmodule PriceSpotterWeb.UserAuthTest do
   end
 
   describe "on_mount: mount_current_user" do
-    test "assigns current_user based on a valid user_token ", %{conn: conn, user: user} do
+    test "assigns current_user based on a valid user_token ", %{
+      conn: conn,
+      user: user
+    } do
       {user_token, _tokens} = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
@@ -155,7 +200,8 @@ defmodule PriceSpotterWeb.UserAuthTest do
       assert updated_socket.assigns.current_user.id == user.id
     end
 
-    test "assigns nil to current_user assign if there isn't a valid user_token ", %{conn: conn} do
+    test "assigns nil to current_user assign if there isn't a valid user_token ",
+         %{conn: conn} do
       user_token = "invalid_token"
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
@@ -165,7 +211,9 @@ defmodule PriceSpotterWeb.UserAuthTest do
       assert updated_socket.assigns.current_user == nil
     end
 
-    test "assigns nil to current_user assign if there isn't a user_token", %{conn: conn} do
+    test "assigns nil to current_user assign if there isn't a user_token", %{
+      conn: conn
+    } do
       session = conn |> get_session()
 
       {:cont, updated_socket} =
@@ -176,17 +224,27 @@ defmodule PriceSpotterWeb.UserAuthTest do
   end
 
   describe "on_mount: ensure_authenticated" do
-    test "authenticates current_user based on a valid user_token ", %{conn: conn, user: user} do
+    test "authenticates current_user based on a valid user_token ", %{
+      conn: conn,
+      user: user
+    } do
       {user_token, _tokens} = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       {:cont, updated_socket} =
-        UserAuth.on_mount(:ensure_authenticated, %{}, session, %LiveView.Socket{})
+        UserAuth.on_mount(
+          :ensure_authenticated,
+          %{},
+          session,
+          %LiveView.Socket{}
+        )
 
       assert updated_socket.assigns.current_user.id == user.id
     end
 
-    test "redirects to login page if there isn't a valid user_token ", %{conn: conn} do
+    test "redirects to login page if there isn't a valid user_token ", %{
+      conn: conn
+    } do
       user_token = "invalid_token"
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
@@ -195,7 +253,9 @@ defmodule PriceSpotterWeb.UserAuthTest do
         assigns: %{__changed__: %{}, flash: %{}}
       }
 
-      {:halt, updated_socket} = UserAuth.on_mount(:ensure_authenticated, %{}, session, socket)
+      {:halt, updated_socket} =
+        UserAuth.on_mount(:ensure_authenticated, %{}, session, socket)
+
       assert updated_socket.assigns.current_user == nil
     end
 
@@ -207,13 +267,18 @@ defmodule PriceSpotterWeb.UserAuthTest do
         assigns: %{__changed__: %{}, flash: %{}}
       }
 
-      {:halt, updated_socket} = UserAuth.on_mount(:ensure_authenticated, %{}, session, socket)
+      {:halt, updated_socket} =
+        UserAuth.on_mount(:ensure_authenticated, %{}, session, socket)
+
       assert updated_socket.assigns.current_user == nil
     end
   end
 
   describe "on_mount: :redirect_if_user_is_authenticated" do
-    test "redirects if there is an authenticated  user ", %{conn: conn, user: user} do
+    test "redirects if there is an authenticated  user ", %{
+      conn: conn,
+      user: user
+    } do
       {user_token, _tokens} = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
@@ -241,7 +306,11 @@ defmodule PriceSpotterWeb.UserAuthTest do
 
   describe "redirect_if_user_is_authenticated/2" do
     test "redirects if user is authenticated", %{conn: conn, user: user} do
-      conn = conn |> assign(:current_user, user) |> UserAuth.redirect_if_user_is_authenticated([])
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> UserAuth.redirect_if_user_is_authenticated([])
+
       assert conn.halted
       assert redirected_to(conn) == ~p"/"
     end
@@ -291,7 +360,11 @@ defmodule PriceSpotterWeb.UserAuthTest do
     end
 
     test "does not redirect if user is authenticated", %{conn: conn, user: user} do
-      conn = conn |> assign(:current_user, user) |> UserAuth.require_authenticated_user([])
+      conn =
+        conn
+        |> assign(:current_user, user)
+        |> UserAuth.require_authenticated_user([])
+
       refute conn.halted
       refute conn.status
     end

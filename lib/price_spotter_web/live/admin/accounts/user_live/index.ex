@@ -33,7 +33,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
   end
 
   @impl true
-  def handle_info({PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent, {:saved, user}}, socket) do
+  def handle_info(
+        {PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent, {:saved, user}},
+        socket
+      ) do
     {:noreply, stream_insert(socket, :users, user)}
   end
 
