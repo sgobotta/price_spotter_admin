@@ -35,7 +35,7 @@ env:
 
 jobs:
   dev:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       db:
         image: postgres
@@ -120,7 +120,7 @@ jobs:
           POSTGRES_USER: postgres
           REDIS_HOST: ${{ env.REDIS_HOST }}
           REDIS_PASS: ${{ env.REDIS_PASS }}
-          UPLOADS_PATH: priv/static/uploads/
+          UPLOADS_PATH: ${{ env.UPLOADS_PATH }}
 
   prod:
     runs-on: ubuntu-22.04
@@ -151,4 +151,4 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           REDIS_HOST: ${{ env.REDIS_HOST }}
           REDIS_PASS: ${{ env.REDIS_PASS }}
-          UPLOADS_PATH: priv/static/uploads/
+          UPLOADS_PATH: ${{ env.UPLOADS_PATH }}
