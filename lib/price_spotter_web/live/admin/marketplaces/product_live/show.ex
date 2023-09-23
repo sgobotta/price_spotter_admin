@@ -120,7 +120,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   defp get_dataset_trend([]), do: :bullish
   defp get_dataset_trend([_price]), do: :bullish
 
-  defp get_dataset_trend([last_price, price | _rest] = l)
+  defp get_dataset_trend([last_price, price | _rest])
        when last_price == price do
     :notrend
   end
