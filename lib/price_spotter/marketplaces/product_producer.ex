@@ -3,9 +3,29 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
 
   require Logger
 
-  def start_link(_opts) do
+  def child_spec(supplier: supplier, module_name: module_name),
+    do: %{
+      id: supplier <> "-producer",
+      start: {
+        PriceSpotter.Marketplaces.ProductProducer,
+        :start_link,
+        [
+          [
+            supplier: supplier,
+            id: module_name
+          ]
+        ]
+      },
+      restart: :permanent,
+      type: :worker
+    }
+
+  def start_link(opts) do
+    id = Keyword.fetch!(opts, :id)
+    supplier_name = Keyword.fetch!(opts, :supplier)
+
     Broadway.start_link(__MODULE__,
-      name: __MODULE__,
+      name: Module.concat(String.to_atom(id), __MODULE__),
       producer: [
         module:
           {OffBroadwayRedisStream.Producer,
@@ -14,9 +34,9 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
                host: System.get_env("REDIS_HOST", "localhost"),
                password: System.get_env("REDIS_PASS", "123456")
              ],
-             stream: get_stream(),
-             group: "processor-group",
-             consumer_name: hostname(),
+             stream: get_stream(supplier_name),
+             group: get_group(supplier_name),
+             consumer_name: get_consumer_name(supplier_name),
              make_stream: true
            ]}
       ],
@@ -63,7 +83,13 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
     {:ok, :loaded, %{}}
   end
 
-  defp get_stream, do: "#{get_stage()}_stream_new-products_la-golosineria_v1"
+  defp get_group(supplier_id),
+    do: "#{get_stage()}-#{supplier_id}-processor-group"
+
+  defp get_consumer_name(supplier_id), do: "#{supplier_id}-#{hostname()}"
+
+  defp get_stream(supplier_id),
+    do: "#{get_stage()}_stream_new-products_#{supplier_id}_v1"
 
   defp get_stage, do: PriceSpotter.Application.stage()
 end
