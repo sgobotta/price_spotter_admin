@@ -20,8 +20,15 @@ defmodule PriceSpotter.Application do
       PriceSpotterWeb.Endpoint,
       # Start a worker by calling: PriceSpotter.Worker.start_link(arg)
       # {PriceSpotter.Worker, arg}
-      {PriceSpotter.Marketplaces.ProductProducer, []},
-      {Redix, host: redis_host(), name: :redix, password: redis_pass()}
+      {Redix, host: redis_host(), name: :redix, password: redis_pass()},
+      PriceSpotter.Marketplaces.ProductProducer.child_spec(
+        supplier: "la-golosineria",
+        module_name: "LaGolosineriaProducer"
+      ),
+      PriceSpotter.Marketplaces.ProductProducer.child_spec(
+        supplier: "maxiconsumo-burzaco",
+        module_name: "MaxiconsumoBurzacoProducer"
+      )
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

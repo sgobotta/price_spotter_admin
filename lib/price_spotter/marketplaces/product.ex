@@ -117,13 +117,9 @@ defmodule PriceSpotter.Marketplaces.Product do
   @spec sanitize_price(String.t()) :: String.t()
   defp sanitize_price(nil), do: 0
 
-  defp sanitize_price(price) do
-    if String.length(price) > 3 do
-      String.replace(price, ".", "")
-    else
-      price
-    end
-  end
+  defp sanitize_price("unpriced"), do: 0
+
+  defp sanitize_price(price), do: price
 end
 
 defmodule PriceSpotter.Marketplaces.Product.CustomFilters do
