@@ -296,8 +296,7 @@ defmodule PriceSpotter.Accounts do
       user
       |> maybe_change_user_password(attrs)
       |> change_user_email(attrs, require_change: false)
-
-    # |> change_user_role(attrs)
+      |> change_user_role(attrs)
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
