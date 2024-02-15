@@ -116,7 +116,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
   end
 
   describe "Show" do
-    setup [:create_product, :register_and_log_in_user]
+    setup [:create_product, :register_and_log_in_admin]
 
     test "displays product", %{conn: conn, product: product} do
       {:ok, _show_live, html} =

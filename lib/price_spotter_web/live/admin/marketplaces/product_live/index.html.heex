@@ -3,9 +3,11 @@
     <.header>
       <%= gettext("Listing Products") %>
       <:actions>
-        <.link patch={~p"/admin/marketplaces/products/new"}>
-          <.button><%= gettext("New Product") %></.button>
-        </.link>
+        <%= if Accounts.can_create_products?(@current_user) do %>
+          <.link patch={~p"/admin/marketplaces/products/new"}>
+            <.button><%= gettext("New Product") %></.button>
+          </.link>
+        <% end %>
 
         <div class="flex justify-end mb-2 rounded-lg">
           <.dropdown id="product-filters-dropdown">
