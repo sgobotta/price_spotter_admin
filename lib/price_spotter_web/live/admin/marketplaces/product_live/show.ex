@@ -1,10 +1,13 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   use PriceSpotterWeb, :live_view
 
+  alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    socket = assign_defaults(session, socket)
+
     if connected?(socket) do
       Process.send_after(self(), :update_chart, 500)
     end

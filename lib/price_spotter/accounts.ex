@@ -201,8 +201,38 @@ defmodule PriceSpotter.Accounts do
       %Ecto.Changeset{data: %User{}}
 
   """
-  def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs, validate_email: false)
+  def change_user_email(user, attrs \\ %{}, opts \\ []) do
+    User.email_changeset(user, attrs, Keyword.put(opts, :validate_email, false))
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user role.
+
+  ## Examples
+
+      iex> change_user_role(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user_role(user, attrs \\ %{}) do
+    User.role_changeset(user, attrs)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user password.
+
+    ## Examples
+
+      iex> maybe_change_user_password(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def maybe_change_user_password(user, attrs) do
+    if Map.has_key?(attrs, :password) do
+      change_user_password(user, attrs)
+    else
+      Ecto.Changeset.change(user)
+    end
   end
 
   @doc """
@@ -256,6 +286,25 @@ defmodule PriceSpotter.Accounts do
       :tokens,
       UserToken.user_and_contexts_query(user, [context])
     )
+  end
+
+  @doc """
+  Updates the user settings, such as password and role.
+  """
+  def update_user_settings(user, attrs) do
+    changeset =
+      user
+      |> maybe_change_user_password(attrs)
+      |> change_user_email(attrs, require_change: false)
+      |> change_user_role(attrs)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _changes} -> {:error, changeset}
+    end
   end
 
   @doc ~S"""
@@ -506,4 +555,13 @@ defmodule PriceSpotter.Accounts do
       {:error, :user, changeset, _changes} -> {:error, changeset}
     end
   end
+
+  def can_create_products?(%User{role: :admin}), do: true
+  def can_create_products?(%User{role: _role}), do: false
+
+  def can_edit_products?(%User{role: :admin}), do: true
+  def can_edit_products?(%User{role: _role}), do: false
+
+  def can_delete_products?(%User{role: :admin}), do: true
+  def can_delete_products?(%User{role: _}), do: false
 end

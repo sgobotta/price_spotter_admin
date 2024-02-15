@@ -9,6 +9,8 @@ defmodule PriceSpotter.Accounts.User do
     :admin
   ])
 
+  @type t :: %__MODULE__{}
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
@@ -175,8 +177,15 @@ defmodule PriceSpotter.Accounts.User do
     |> cast(attrs, [:email])
     |> validate_email(opts)
     |> case do
-      %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, gettext("did not change"))
+      %{changes: %{email: _}} = changeset ->
+        changeset
+
+      %{} = changeset ->
+        if Keyword.get(opts, :require_change, true) do
+          add_error(changeset, :email, gettext("did not change"))
+        else
+          changeset
+        end
     end
   end
 
@@ -199,6 +208,11 @@ defmodule PriceSpotter.Accounts.User do
       message: gettext("does not match password")
     )
     |> validate_password(opts)
+  end
+
+  def role_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:role])
   end
 
   @doc """

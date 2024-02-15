@@ -1,6 +1,7 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   use PriceSpotterWeb, :live_view
 
+  alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
   alias PriceSpotter.Marketplaces.Product
 
@@ -167,4 +168,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp get_max_limit, do: Product.max_limit()
 
   defp get_limit, do: Product.limit()
+
+  defp can_edit_products?(user), do: Accounts.can_edit_products?(user)
+  defp can_delete_products?(user), do: Accounts.can_edit_products?(user)
 end

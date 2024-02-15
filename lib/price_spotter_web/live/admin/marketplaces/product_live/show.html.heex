@@ -8,29 +8,36 @@
     </p>
   </:subtitle>
   <:actions>
-    <.link
-      phx-click={
-        JS.push("delete", value: %{id: @product.id}) |> hide("##{@product.id}")
-      }
-      data-confirm={gettext("Delete product \"%{name}\"?", name: @product.name)}
-      class=""
-    >
-      <.button class="bg-rose-500 hover:bg-rose-400">
-        <%= gettext("Delete product") %>
-        <span>
-          <.icon name="hero-trash-solid" class="h-5 w-5 opacity-60" />
-        </span>
-      </.button>
-    </.link>
+    <%= if Accounts.can_edit_products?(@current_user) do %>
+      <.link
+        phx-click={
+          JS.push("delete", value: %{id: @product.id})
+          |> hide("##{@product.id}")
+        }
+        data-confirm={
+          gettext("Delete product \"%{name}\"?", name: @product.name)
+        }
+        class=""
+      >
+        <.button class="bg-rose-500 hover:bg-rose-400">
+          <%= gettext("Delete product") %>
+          <span>
+            <.icon name="hero-trash-solid" class="h-5 w-5 opacity-60" />
+          </span>
+        </.button>
+      </.link>
+    <% end %>
   </:actions>
   <:actions>
-    <.link
-      id="edit-button"
-      patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
-      phx-click={JS.push_focus()}
-    >
-      <.button><%= gettext("Edit Product") %></.button>
-    </.link>
+    <%= if Accounts.can_edit_products?(@current_user) do %>
+      <.link
+        id="edit-button"
+        patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
+        phx-click={JS.push_focus()}
+      >
+        <.button><%= gettext("Edit Product") %></.button>
+      </.link>
+    <% end %>
   </:actions>
 </.header>
 

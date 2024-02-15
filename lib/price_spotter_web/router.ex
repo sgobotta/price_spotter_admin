@@ -33,28 +33,43 @@ defmodule PriceSpotterWeb.Router do
     scope "/admin/marketplaces", Admin.Marketplaces do
       pipe_through [:require_authenticated_user]
 
-      live "/products", ProductLive.Index, :index
-      live "/products/new", ProductLive.Index, :new
-      live "/products/:id/edit", ProductLive.Index, :edit
+      scope "/products" do
+        scope "/new" do
+          pipe_through [:admin]
+          live "/", ProductLive.Index, :new
+        end
 
-      live "/products/:id", ProductLive.Show, :show
-      live "/products/:id/show/edit", ProductLive.Show, :edit
+        scope "/:id" do
+          pipe_through [:admin]
+          live "/show/edit", ProductLive.Show, :edit
+          live "/edit", ProductLive.Index, :edit
+        end
 
-      pipe_through [:admin]
+        live "/", ProductLive.Index, :index
+        live "/:id", ProductLive.Show, :show
+      end
 
-      live "/suppliers", SupplierLive.Index, :index
-      live "/suppliers/new", SupplierLive.Index, :new
-      live "/suppliers/:id/edit", SupplierLive.Index, :edit
+      scope "/suppliers" do
+        pipe_through [:admin]
 
-      live "/suppliers/:id", SupplierLive.Show, :show
-      live "/suppliers/:id/show/edit", SupplierLive.Show, :edit
+        live "/", SupplierLive.Index, :index
+        live "/new", SupplierLive.Index, :new
+        live "/:id/edit", SupplierLive.Index, :edit
 
-      live "/users_suppliers", UserSupplierLive.Index, :index
-      live "/users_suppliers/new", UserSupplierLive.Index, :new
-      live "/users_suppliers/:id/edit", UserSupplierLive.Index, :edit
+        live "/:id", SupplierLive.Show, :show
+        live "/:id/show/edit", SupplierLive.Show, :edit
+      end
 
-      live "/users_suppliers/:id", UserSupplierLive.Show, :show
-      live "/users_suppliers/:id/show/edit", UserSupplierLive.Show, :edit
+      scope "/users_suppliers" do
+        pipe_through [:admin]
+
+        live "/", UserSupplierLive.Index, :index
+        live "/new", UserSupplierLive.Index, :new
+        live "/:id/edit", UserSupplierLive.Index, :edit
+
+        live "/:id", UserSupplierLive.Show, :show
+        live "/:id/show/edit", UserSupplierLive.Show, :edit
+      end
     end
 
     scope "/admin/accounts", Admin.Accounts do

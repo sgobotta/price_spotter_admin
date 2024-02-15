@@ -3,9 +3,11 @@
     <.header>
       <%= gettext("Listing Products") %>
       <:actions>
-        <.link patch={~p"/admin/marketplaces/products/new"}>
-          <.button><%= gettext("New Product") %></.button>
-        </.link>
+        <%= if Accounts.can_create_products?(@current_user) do %>
+          <.link patch={~p"/admin/marketplaces/products/new"}>
+            <.button><%= gettext("New Product") %></.button>
+          </.link>
+        <% end %>
 
         <div class="flex justify-end mb-2 rounded-lg">
           <.dropdown id="product-filters-dropdown">
@@ -216,7 +218,7 @@
             </a>
           </div>
         </:action>
-        <:action :let={product}>
+        <:action :let={product} :if={can_edit_products?(@current_user)}>
           <.link
             id={"products-edit-#{product.id}"}
             patch={~p"/admin/marketplaces/products/#{product}/edit"}
@@ -228,7 +230,7 @@
             />
           </.link>
         </:action>
-        <:action :let={product}>
+        <:action :let={product} :if={can_delete_products?(@current_user)}>
           <.link
             id={"products-delete-#{product.id}"}
             phx-click={
