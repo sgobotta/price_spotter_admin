@@ -92,7 +92,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
   end
 
   defp save_user(socket, :edit, user_params) do
-    case Accounts.update_user(socket.assigns.user, user_params) do
+    case Accounts.update_user_settings(socket.assigns.user, user_params) do
       {:ok, user} ->
         notify_parent({:saved, user})
 
