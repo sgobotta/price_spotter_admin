@@ -556,12 +556,12 @@ defmodule PriceSpotter.Accounts do
     end
   end
 
-  def can_create_products?(%User{role: :admin} = user), do: true
-  def can_create_products?(%User{role: _role} = user), do: false
+  def can_create_products?(%User{role: :admin}), do: true
+  def can_create_products?(%User{role: _role}), do: false
 
-  def can_edit_products?(%User{role: :admin} = user), do: true
-  def can_edit_products?(%User{role: _role} = user), do: false
+  def can_edit_products?(%User{role: :admin}), do: true
+  def can_edit_products?(%User{role: _role}), do: false
 
-  def can_delete_products?(%User{role: :admin} = user), do: true
-  def can_delete_products?(%User{role: _} = user), do: false
+  def can_delete_products?(%User{role: :admin}), do: true
+  def can_delete_products?(%User{role: _}), do: false
 end
