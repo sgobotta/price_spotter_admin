@@ -39,7 +39,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
   end
 
   describe "Index" do
-    setup [:create_product, :register_and_log_in_user]
+    setup [:create_product, :register_and_log_in_admin]
 
     test "lists all products", %{conn: conn, product: product} do
       {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/products")

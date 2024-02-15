@@ -216,7 +216,7 @@
             </a>
           </div>
         </:action>
-        <:action :let={product}>
+        <:action :let={product} :if={can_edit_products?(@current_user)}>
           <.link
             id={"products-edit-#{product.id}"}
             patch={~p"/admin/marketplaces/products/#{product}/edit"}
@@ -228,7 +228,7 @@
             />
           </.link>
         </:action>
-        <:action :let={product}>
+        <:action :let={product} :if={can_delete_products?(@current_user)}>
           <.link
             id={"products-delete-#{product.id}"}
             phx-click={
