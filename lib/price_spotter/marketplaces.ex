@@ -209,6 +209,10 @@ defmodule PriceSpotter.Marketplaces do
     # Create or Update product
     |> Ecto.Multi.run(:maybe_create_product, fn
       _repo, %{product: nil} = _multi ->
+        Logger.debug(
+          "Detected new product, creating new entry with internal_id=#{internal_id}"
+        )
+
         cs =
           Ecto.Changeset.put_change(
             cs,
@@ -217,14 +221,23 @@ defmodule PriceSpotter.Marketplaces do
           )
 
         {:ok, %Product{} = p} = create_product(cs.changes)
+
+        Logger.debug(
+          "Created new product with product_id=#{p.id} product=#{inspect(p)}"
+        )
+
         {:ok, {:created, p}}
 
       _repo, %{product: %Product{} = product} = _multi ->
         changes = cs.changes
 
-        changes =
+        maybe_updated_product =
           if product.price == changes.price do
-            changes
+            Logger.debug(
+              "Price did not change, nothing to update product_id=#{product.id} product=#{inspect(product)}"
+            )
+
+            product
           else
             Logger.debug(
               "Updating product with id=#{product.id} with price from old_price=#{inspect(product.price)} to new_price=#{inspect(changes.price)}"
@@ -235,11 +248,18 @@ defmodule PriceSpotter.Marketplaces do
               :price_updated_at,
               NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
             )
+
+            {:ok, %Product{} = updated_product} =
+              update_product(product, changes)
+
+            Logger.debug(
+              "Updated product with product_id=#{updated_product.id} product=#{inspect(updated_product)}"
+            )
+
+            updated_product
           end
 
-        {:ok, %Product{} = p} = update_product(product, changes)
-        Logger.debug("Updated product with id=#{p.id} product=#{inspect(p)}")
-        {:ok, {:updated, p}}
+        {:ok, {:updated, maybe_updated_product}}
     end)
     # Check supplier existance
     |> Ecto.Multi.one(:supplier, fn %{
