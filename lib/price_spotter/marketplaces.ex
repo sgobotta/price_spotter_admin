@@ -6,7 +6,7 @@ defmodule PriceSpotter.Marketplaces do
   import Ecto.Query, warn: false
   alias PriceSpotter.Repo
 
-  alias PriceSpotter.Marketplaces.{Product, Supplier}
+  alias PriceSpotter.Marketplaces.{Product, Relations, Supplier}
 
   require Logger
 
@@ -25,6 +25,17 @@ defmodule PriceSpotter.Marketplaces do
 
   def list_products(params) do
     Flop.validate_and_run(Product, params, for: Product)
+  end
+
+  def list_products_by_user(params, user) do
+    from(
+      us in Relations.UserSupplier,
+      where: us.user_id == ^user.id,
+      join: p in Product,
+      on: us.supplier_id == p.supplier_id,
+      select: p
+    )
+    |> Flop.validate_and_run(params, for: Product)
   end
 
   def list_product_categories do
