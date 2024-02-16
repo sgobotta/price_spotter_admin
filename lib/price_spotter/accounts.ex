@@ -223,17 +223,15 @@ defmodule PriceSpotter.Accounts do
 
     ## Examples
 
-      iex> maybe_change_user_password(user)
+      iex> maybe_change_user_password(user, %{"password" => "some password"})
       %Ecto.Changeset{data: %User{}}
 
   """
-  def maybe_change_user_password(user, attrs) do
-    if Map.has_key?(attrs, :password) do
-      change_user_password(user, attrs)
-    else
-      Ecto.Changeset.change(user)
-    end
-  end
+  def maybe_change_user_password(user, %{"password" => ""}),
+    do: Ecto.Changeset.change(user)
+
+  def maybe_change_user_password(user, attrs),
+    do: User.password_changeset(user, attrs)
 
   @doc """
   Emulates that the email will change without actually changing
