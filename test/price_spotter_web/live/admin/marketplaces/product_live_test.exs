@@ -1,4 +1,5 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
+  alias PriceSpotter.Marketplaces
   use PriceSpotterWeb.ConnCase
 
   import Phoenix.LiveViewTest
@@ -35,11 +36,23 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
   defp create_product(_context) do
     product = product_fixture()
-    %{product: product}
+    %{product: product |> PriceSpotter.Repo.preload(:supplier)}
+  end
+
+  defp assoc_user_product(context) do
+    %{product: product, user: user} = context
+
+    Marketplaces.create_user_supplier(%{
+      user_id: user.id,
+      supplier_id: product.supplier_id,
+      role: :maintainer
+    })
+
+    %{}
   end
 
   describe "Index" do
-    setup [:create_product, :register_and_log_in_admin]
+    setup [:create_product, :register_and_log_in_admin, :assoc_user_product]
 
     test "lists all products", %{conn: conn, product: product} do
       {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/products")
@@ -73,6 +86,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ "some category"
     end
 
+    @tag :wip
     test "updates product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
