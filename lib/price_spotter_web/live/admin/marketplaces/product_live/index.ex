@@ -14,7 +14,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    case Marketplaces.list_products(params) do
+    case Marketplaces.list_products_by_user(
+           params,
+           socket.assigns.current_user
+         ) do
       {:ok, {products, meta}} ->
         {:noreply,
          socket
