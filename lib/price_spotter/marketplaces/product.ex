@@ -76,7 +76,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :name,
       :price,
       :supplier_url,
-      :price_updated_at
+      :price_updated_at,
+      :supplier_id
     ])
     |> validate_required([
       :category,
