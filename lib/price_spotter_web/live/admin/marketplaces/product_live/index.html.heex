@@ -151,7 +151,7 @@
           label={gettext("Product")}
           field={:name}
           col_style="width: 30%;"
-          attrs={[class: "text-xs sm:text-sm"]}
+          tbody_td_attrs={[class: "text-xs sm:text-sm text-red-500"]}
         >
           <div><%= product.name %></div>
         </:col>
@@ -160,7 +160,7 @@
           label={gettext("Last Price")}
           field={:price}
           col_style="width: 25%; text-align: center"
-          attrs={[class: "text-xs sm:text-base"]}
+          tbody_td_attrs={[class: "text-xs sm:text-base"]}
         >
           <div class="flex justify-center">
             <div class="flex bg-green-200 rounded-lg text-center font-medium w-fit px-1">
