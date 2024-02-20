@@ -13,12 +13,19 @@ defmodule PriceSpotter.Fixtures do
       %{shop_id: "some new id"}
 
   """
-  @spec maybe_assign(map(), atom(), module(), module(), atom()) :: map()
-  def maybe_assign(attrs, attr, struct_type, fixtures_module, action \\ :create) do
+  @spec maybe_assign(map(), atom(), module(), module(), atom(), atom()) :: map()
+  def maybe_assign(
+        attrs,
+        attr,
+        struct_type,
+        fixtures_module,
+        action \\ :create,
+        related_attr \\ :id
+      ) do
     case Map.has_key?(attrs, attr) do
       false ->
-        %^struct_type{id: id} = apply(fixtures_module, action, [attrs])
-        Map.merge(attrs, %{attr => id})
+        %^struct_type{} = struct = apply(fixtures_module, action, [attrs])
+        Map.merge(attrs, %{attr => Map.get(struct, related_attr)})
 
       true ->
         attrs
