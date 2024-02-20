@@ -14,7 +14,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    case Marketplaces.list_products(params) do
+    case Marketplaces.list_products_by_user(
+           params,
+           socket.assigns.current_user
+         ) do
       {:ok, {products, meta}} ->
         {:noreply,
          socket
@@ -107,7 +110,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp assign_selection_options(socket) do
     socket
     |> assign(:product_categories, Marketplaces.list_product_categories())
-    |> assign(:product_suppliers, Marketplaces.list_product_supplier())
+    |> assign(
+      :product_suppliers,
+      Marketplaces.list_suppliers_by_user(socket.assigns.current_user)
+    )
   end
 
   defp assign_filter_fields(socket) do

@@ -29,10 +29,11 @@ defmodule PriceSpotter.Marketplaces do
 
   def list_products_by_user(params, user) do
     from(
-      us in Relations.UserSupplier,
-      where: us.user_id == ^user.id,
-      join: p in Product,
-      on: us.supplier_id == p.supplier_id,
+      p in Product,
+      join: s in Supplier,
+      on: s.id == p.supplier_id,
+      join: us in Relations.UserSupplier,
+      on: us.user_id == ^user.id and s.id == us.supplier_id,
       select: p
     )
     |> Flop.validate_and_run(params, for: Product)
@@ -40,12 +41,6 @@ defmodule PriceSpotter.Marketplaces do
 
   def list_product_categories do
     Repo.all(from(p in Product, select: p.category, distinct: p.category))
-  end
-
-  def list_product_supplier do
-    Repo.all(
-      from(p in Product, select: p.supplier_name, distinct: p.supplier_name)
-    )
   end
 
   @doc """
@@ -401,6 +396,22 @@ defmodule PriceSpotter.Marketplaces do
   """
   def list_suppliers do
     Repo.all(Supplier)
+  end
+
+  @doc """
+  Given a user, returns a list of suppliers the user has access to.
+  """
+  @spec list_suppliers_by_user(PriceSpotter.Accounts.User.t()) :: [String.t()]
+  def list_suppliers_by_user(user) do
+    from(
+      s in Supplier,
+      join: us in Relations.UserSupplier,
+      on: s.id == us.supplier_id,
+      where: us.user_id == ^user.id,
+      select: s.name,
+      distinct: s.name
+    )
+    |> Repo.all()
   end
 
   @doc """
