@@ -43,7 +43,7 @@ defmodule PriceSpotter.MixProject do
   defp deps do
     [
       # Code quality and Testing
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.17.1", only: [:test]},
       # Phoenix default apps
