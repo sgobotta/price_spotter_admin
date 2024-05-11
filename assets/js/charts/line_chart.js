@@ -12,7 +12,7 @@ export default class {
 
     const config = {
       type: 'line',
-      data: {labels: [], datasets: []},
+      data: {datasets: [], labels: []},
       options: {
         datasets: {
           // https://www.chartjs.org/docs/3.6.0/charts/line.html#dataset-properties
@@ -23,19 +23,19 @@ export default class {
         plugins: {
           // https://nagix.github.io/chartjs-plugin-streaming/2.0.0/guide/options.html
           streaming: {
-            duration: 60 * 1000,
-            delay: 1500
+            delay: 1500,
+            duration: 60 * 1000
           }
         },
         scales: {
           x: {
             // chartjs-plugin-streaming
-            suggestedMin: 50,
-            suggestedMax: 200
+            suggestedMax: 200,
+            suggestedMin: 50
           },
           y: {
-            suggestedMin: 50,
-            suggestedMax: 200
+            suggestedMax: 50000,
+            suggestedMin: 500
           }
         }
       }
@@ -44,10 +44,28 @@ export default class {
     this.chart = new Chart(ctx, config)
   }
 
+  resetDataset(label) {
+    const dataset = this._findDataset(label)
+    if (dataset) {
+      dataset.data = []
+    }
+    this.chart.config.data.labels = []
+    this.chart.update()
+  }
+
   addPoint(data_label, label, value, backgroundColor, borderColor) {   
     this.chart.config.data.labels.push(data_label)
-    const dataset = this._findDataset(label) || this._createDataset(label, backgroundColor, borderColor)
+    const dataset = this._findDataset(label) || this._createDataset(
+      label, backgroundColor, borderColor
+    )
     dataset.data.push({x: Date.now(), y: value})
+    
+    const numericYValues = dataset.data.map(point => parseFloat(point.y))
+    const suggestedMin = Math.min(...numericYValues);
+    const suggestedMax = Math.max(...numericYValues);
+    this.chart.config.options.scales.y.suggestedMin = suggestedMin - 500
+    this.chart.config.options.scales.y.suggestedMax = suggestedMax + 500
+    
     this.chart.update()
   }
 
@@ -60,7 +78,13 @@ export default class {
   }
 
   _createDataset(label, backgroundColor, borderColor) {
-    const newDataset = {label, data: [], borderColor: borderColor, fill: 'origin', backgroundColor: backgroundColor}
+    const newDataset = {
+      backgroundColor,
+      borderColor,
+      data: [],
+      fill: 'origin',
+      label
+    }
     this.chart.data.datasets.push(newDataset)
     return newDataset
   }
