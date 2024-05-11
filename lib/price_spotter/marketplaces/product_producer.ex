@@ -1,4 +1,5 @@
 defmodule PriceSpotter.Marketplaces.ProductProducer do
+  @moduledoc false
   use Broadway
 
   require Logger
