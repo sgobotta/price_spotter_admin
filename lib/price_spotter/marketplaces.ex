@@ -8,7 +8,11 @@ defmodule PriceSpotter.Marketplaces do
 
   alias PriceSpotter.Marketplaces.{Product, Relations, Supplier}
 
+  alias Redis.Stream
+
   require Logger
+
+  @type interval :: :daily | :weekly | :monthly
 
   @doc """
   Returns the list of products.
@@ -341,13 +345,21 @@ defmodule PriceSpotter.Marketplaces do
   """
   @spec fetch_product_history(String.t(), String.t()) ::
           {:ok, [Redis.Stream.Entry.t()]} | :error
-  def fetch_product_history(supplier_name, internal_id) do
+  def fetch_product_history(supplier_name, internal_id, interval \\ :daily) do
     stream_name =
       get_stream_name("product-history_" <> supplier_name <> "_" <> internal_id)
 
-    with {:ok, entries} <- Redis.Client.fetch_history(stream_name, 20),
-         sorted_entries <- Enum.reverse(entries),
-         history <- map_product_history(sorted_entries) do
+    before_now = look_into_the_past(-20, interval)
+
+    since =
+      DateTime.utc_now()
+      |> DateTime.add(before_now, :day)
+      |> DateTime.to_unix(:millisecond)
+
+    with {:ok, entries} <-
+           Redis.Client.fetch_reverse_stream_since(stream_name, since),
+         filtered_entries <- filter_history_entries(entries, interval),
+         history <- map_product_history(filtered_entries) do
       {:ok, history}
     else
       error ->
@@ -364,6 +376,55 @@ defmodule PriceSpotter.Marketplaces do
       )
 
       :error
+  end
+
+  @spec look_into_the_past(integer(), atom()) :: integer()
+  defp look_into_the_past(days, :daily), do: days
+  defp look_into_the_past(days, :monthly), do: days * 30
+  defp look_into_the_past(days, :weekly), do: days * 7
+
+  @spec filter_history_entries([Redis.Stream.Entry.t()], atom()) :: [
+          Redis.Stream.Entry.t()
+        ]
+  defp filter_history_entries(entries, interval) do
+    entries
+    |> group_history_by(interval)
+    |> Enum.map(fn {_datetime, entries} ->
+      entries
+      |> Enum.sort_by(
+        &DateTime.to_date(Stream.Entry.get_datetime(&1)),
+        {:desc, Date}
+      )
+      |> hd()
+    end)
+    |> Enum.sort_by(
+      &DateTime.to_date(Stream.Entry.get_datetime(&1)),
+      {:asc, Date}
+    )
+  end
+
+  @spec group_history_by([Redis.Stream.Entry.t()], interval()) :: map()
+  defp group_history_by(entries, :daily) do
+    entries
+    |> Enum.group_by(&DateTime.to_date(Stream.Entry.get_datetime(&1)))
+  end
+
+  defp group_history_by(entries, :monthly) do
+    entries
+    |> Enum.group_by(fn %Stream.Entry{} = entry ->
+      Stream.Entry.get_datetime(entry)
+      |> DateTime.to_date()
+      |> Date.beginning_of_month()
+    end)
+  end
+
+  defp group_history_by(entries, :weekly) do
+    entries
+    |> Enum.group_by(fn %Stream.Entry{} = entry ->
+      Stream.Entry.get_datetime(entry)
+      |> DateTime.to_date()
+      |> Date.beginning_of_week()
+    end)
   end
 
   @spec map_product_history([Redis.Stream.Entry.t()]) :: [

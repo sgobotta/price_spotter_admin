@@ -3,6 +3,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
+  alias PriceSpotterWeb.Utils.DatetimeUtils
 
   @impl true
   def mount(_params, session, socket) do
@@ -12,7 +13,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
       Process.send_after(self(), :update_chart, 500)
     end
 
-    {:ok, socket}
+    {:ok,
+     socket
+     |> assign_interval()}
+  end
+
+  @impl true
+  def handle_event("interval_change", %{"interval" => interval}, socket) do
+    interval = String.to_existing_atom(interval)
+    Process.send_after(self(), :update_chart, 50)
+
+    {:noreply,
+     socket
+     |> assign_interval(interval)}
   end
 
   @impl true
@@ -40,7 +53,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
            supplier_name: supplier_name
          } <- socket.assigns.product,
          {:ok, history} <-
-           Marketplaces.fetch_product_history(supplier_name, internal_id) do
+           Marketplaces.fetch_product_history(
+             supplier_name,
+             internal_id,
+             socket.assigns.interval
+           ) do
+      socket = push_event(socket, "reset-dataset", %{label: product_name})
+
       socket =
         Enum.reduce(build_dataset(product_name, history), socket, fn data,
                                                                      acc ->
@@ -52,8 +71,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
       _error ->
         {:noreply,
          socket
+         |> push_event("reset-dataset", %{label: socket.assigns.product.name})
          |> push_event("new-point", %{
-           data_label: get_datetime_label(NaiveDateTime.utc_now()),
+           data_label: get_datetime_label(DateTime.utc_now()),
            label: socket.assigns.product.name,
            value: 0
          })
@@ -76,13 +96,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp render_chart(assigns) do
     ~H"""
-    <canvas
-      id="chart-canvas"
-      phx-update="ignore"
-      phx-hook="LineChart"
-      height="200"
-      width="300"
-    />
+    <canvas id="chart-canvas" phx-update="ignore" phx-hook="LineChart" />
     """
   end
 
@@ -109,16 +123,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     end)
   end
 
-  defp get_datetime_label(%NaiveDateTime{
-         year: year,
-         month: month,
-         day: day,
-         hour: hour,
-         minute: minute
-       }) do
-    minute = if minute < 10, do: "0#{minute}", else: minute
-    "#{day}/#{month}/#{year} #{hour}:#{minute}hs"
-  end
+  defp get_datetime_label(%DateTime{} = datetime),
+    do: DatetimeUtils.human_readable_datetime(datetime, :shift_timezone)
 
   defp get_dataset_trend([]), do: :bullish
   defp get_dataset_trend([_price]), do: :bullish
@@ -141,4 +147,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp get_chart_colors(:bearish),
     do: {"rgba(253, 164, 175, 1)", "rgba(244, 63, 94, 1)"}
+
+  # ----------------------------------------------------------------------------
+  # Render functions
+  #
+
+  defp render_price(price), do: "$#{price}"
+
+  # ----------------------------------------------------------------------------
+  # Assignment functions
+  #
+
+  @spec assign_interval(Phoenix.LiveView.Socket.t(), Marketplaces.interval()) ::
+          Phoenix.LiveView.Socket.t()
+  defp assign_interval(socket, interval \\ :daily),
+    do: assign(socket, :interval, interval)
 end
