@@ -4,6 +4,8 @@
 
 @import "./fonts.css";
 
+@import "./colors.css";
+
 /* This file is for your main application CSS */
 
 nav.pagination {
