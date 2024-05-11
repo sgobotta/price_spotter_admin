@@ -71,7 +71,8 @@ defmodule PriceSpotter.MixProject do
       {:flop_phoenix, "~> 0.22.6"},
       {:csv, "~> 2.4"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:ecto_enum, "~> 1.4"}
+      {:ecto_enum, "~> 1.4"},
+      {:tzdata, "~> 1.1"}
     ]
   end
 
