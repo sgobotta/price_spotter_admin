@@ -2,22 +2,24 @@ defmodule Redis.Client do
   @moduledoc """
   Convenience module to perform Redis operations
   """
+  alias Redis.Stream
+
   require Logger
+
+  @type redix_response ::
+          {:ok, Redix.Protocol.redis_value()}
+          | {:error, atom | Redix.Error.t() | Redix.ConnectionError.t()}
 
   @doc """
   Given a key returns the stored value.
   """
-  @spec get(binary) ::
-          {:ok, Redix.Protocol.redis_value()}
-          | {:error, atom | Redix.Error.t() | Redix.ConnectionError.t()}
+  @spec get(binary) :: redix_response()
   def get(key), do: Redix.command(:redix, ["GET", key])
 
   @doc """
   Given a key and a map as value, encodes and sets the value in the given key.
   """
-  @spec set(binary, map) ::
-          {:ok, Redix.Protocol.redis_value()}
-          | {:error, atom | Redix.Error.t() | Redix.ConnectionError.t()}
+  @spec set(binary, map) :: redix_response()
   def set(key, value),
     do: Redix.command(:redix, ["SET", key, Jason.encode!(value)])
 
@@ -40,6 +42,11 @@ defmodule Redis.Client do
   def fetch_stream(stream_name, command, count) do
     Redix.command(:redix, [command, stream_name, "+", "-", "COUNT", count])
   end
+
+  @spec fetch_reverse_stream_since(binary(), binary() | non_neg_integer()) ::
+          Stream.response()
+  def fetch_reverse_stream_since(stream_name, since),
+    do: Stream.xrevrange(stream_name, "+", since)
 
   @spec fetch_last_stream_entry(String.t()) ::
           {:ok, Redis.Stream.Entry.t()} | {:error, :stream_parse_error}
@@ -134,48 +141,4 @@ defmodule Redis.Client do
   @spec parse_stream_entries([any()]) :: [map()]
   defp parse_stream_entries(entries),
     do: entries |> Enum.map(&parse_stream_entry/1)
-end
-
-defmodule Redis.Stream.Entry do
-  require Integer
-
-  @enforce_keys [:id, :values, :datetime]
-  defstruct id: nil, values: nil, datetime: nil
-
-  @type t :: %__MODULE__{}
-
-  @doc """
-  Given a redis stream entry returns a readable map representation of the
-  entry values.
-  """
-  @spec from_raw_entry(any()) :: map()
-  def from_raw_entry([entry_id, entry]) do
-    datetime = parse_stream_entry_id(entry_id)
-
-    Enum.reduce(Enum.with_index(entry), {[], []}, fn {value, index},
-                                                     {keys, values} ->
-      case Integer.is_even(index) do
-        true ->
-          {keys ++ [value], values}
-
-        false ->
-          {keys, values ++ [value]}
-      end
-    end)
-    |> then(fn {keys, values} -> Enum.zip(keys, values) end)
-    |> Enum.into(%{})
-    |> then(fn values ->
-      %__MODULE__{id: entry_id, values: values, datetime: datetime}
-    end)
-  end
-
-  @spec parse_stream_entry_id(String.t()) :: NaiveDateTime.t()
-  defp parse_stream_entry_id(entry_id) do
-    entry_id
-    |> String.split("-")
-    |> hd
-    |> String.to_integer()
-    |> DateTime.from_unix!(:millisecond)
-    |> DateTime.to_naive()
-  end
 end
