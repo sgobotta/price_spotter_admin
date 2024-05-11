@@ -44,11 +44,11 @@ msgstr[0] "hace %{hours} hora"
 msgstr[1] "hace %{hours} horas"
 
 #: lib/price_spotter_web/components/time_ago.ex:47
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "%{months} month ago"
 msgid_plural "%{months} months ago"
-msgstr[0] "Hace %{months} minuto"
-msgstr[1] "Hace %{months} minutos"
+msgstr[0] "Hace %{months} mes"
+msgstr[1] "Hace %{months} meses"
 
 #: lib/price_spotter_web/components/time_ago.ex:56
 #, elixir-autogen, elixir-format
@@ -98,7 +98,7 @@ msgid "Img url"
 msgstr "URL de imagen"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:5
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Last price"
 msgstr "Ultimo Precio"
 
@@ -255,7 +255,7 @@ msgid "Last Update"
 msgstr "Ultima Actualización"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:144
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Max Price"
 msgstr "Hasta $"
 
@@ -301,12 +301,12 @@ msgid "Image URL"
 msgstr "URL de imagen"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:161
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Last Price Update"
 msgstr "Ultima actualización"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:165
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Product URL"
 msgstr "Producto"
 
@@ -317,7 +317,7 @@ msgid "Account Settings"
 msgstr "Configuración de Cuenta"
 
 #: lib/price_spotter_web/controllers/user_session_controller.ex:8
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Account created successfully!"
 msgstr "Cuenta creada con éxito!"
 
@@ -467,7 +467,7 @@ msgid "Password reset successfully."
 msgstr "Contraseña restablecida con éxito."
 
 #: lib/price_spotter_web/controllers/user_session_controller.ex:14
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Password updated successfully!"
 msgstr "Contraseña actualizada con éxito!"
 
@@ -588,7 +588,7 @@ msgid "Price Spotter"
 msgstr ""
 
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:69
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Products"
 msgstr "Productos"
 
@@ -633,18 +633,18 @@ msgid "Don't have an account?"
 msgstr "No tienes cuenta?"
 
 #: lib/price_spotter_web/live/user_login_live.ex:15
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Sign up"
 msgstr "Registrarme"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:239
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:15
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Delete product \"%{name}\"?"
 msgstr "Borrar producto \"%{name}\"?"
 
 #: lib/price_spotter_web/controllers/page_controller.ex:7
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Homepage"
 msgstr "Inicio"
 
@@ -668,12 +668,12 @@ msgid "You were logged out. Please login again to continue using our application
 msgstr "Has sido desconectado. Por favor intenta acceder nuevamente para seguir navegando."
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/show.html.heex:19
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Back to users"
 msgstr "Volver a usuari@s"
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:41
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Delete user \"%{name}\"?"
 msgstr "Borrar producto \"%{name}\"?"
 
@@ -740,7 +740,7 @@ msgid "Choose a user role"
 msgstr "Elige un rol de usuari@"
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:35
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Save User"
 msgstr "Nuev@ Usuari@"
 
@@ -750,18 +750,18 @@ msgid "Use this form to edit the user settings"
 msgstr "Utilice este formulario para editar usuari@s"
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:116
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "User created successfully"
 msgstr "Usuario confirmado con éxito."
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:101
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "User updated successfully"
 msgstr "Usuario actualizado"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:19
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:29
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Edit Supplier"
 msgstr "Editar proveedor"
 
@@ -773,59 +773,59 @@ msgstr "Proveedores"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:25
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:5
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "New Supplier"
 msgstr "Nuevo Proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:28
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Show Supplier"
 msgstr "Proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:82
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Supplier created successfully"
 msgstr "Proveedor confirmado con éxito."
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:67
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Supplier updated successfully"
 msgstr "Proveedor creado"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:13
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Use this form to manage supplier records in your database."
 msgstr "Utiliza este formulario para administrar los registros de la base."
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:21
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Back to suppliers"
 msgstr "Volver a proveedores"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:45
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Delete supplier \"%{name}\"?"
 msgstr "Borrar proveedor \"%{name}\"?"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:11
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Edit supplier"
 msgstr "Editar proveedor"
 
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:92
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Suppliers"
 msgstr "Proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:4
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "This is a supplier record from your database."
 msgstr "Este es un registro de la base de datos."
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:30
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:42
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:49
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Choose a value"
 msgstr "Elige un rol de usuari@"
 
@@ -836,69 +836,69 @@ msgstr "Desea desactivar el acceso de \"%{email}\" para los registros de \"%{sup
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.ex:38
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:2
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Listing Users suppliers"
 msgstr "Proveedores"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.ex:32
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:5
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "New User supplier"
 msgstr "Nuevo acceso a proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:54
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Save User supplier"
 msgstr "Nuevo acceso a proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/show.html.heex:4
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "This is a user_supplier record from your database."
 msgstr "Este es un registro de acceso a proveedor de la base de datos."
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/show.html.heex:2
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "User supplier"
 msgstr "Nuevo acceso a proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:115
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "User supplier created successfully"
 msgstr "Acceso a proveedor confirmado con éxito."
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:100
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "User supplier updated successfully"
 msgstr "Acceso a proveedor creado"
 
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:103
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Users Suppliers"
 msgstr "Nuevo Acceso a proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/show.html.heex:23
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Back to Users Suppliers"
 msgstr "Volver a accesos a proveedores"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.ex:23
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/show.ex:29
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Edit User supplier"
 msgstr "Editar acceso a proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/show.ex:28
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Show User supplier"
 msgstr "Nuevo Acceso a proveedor"
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:13
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Use this form to manage User Supplier records in your database."
 msgstr "Utiliza este formulario para administrar los registros de la base de accesos a proveedores."
 
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/show.html.heex:13
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Edit User Supplier"
 msgstr "Editar Acceso a proveedor"
 
