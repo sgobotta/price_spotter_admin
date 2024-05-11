@@ -62,7 +62,7 @@ msgstr[1] ""
 msgid "Attempting to reconnect"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:85
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:163
 #, elixir-autogen, elixir-format
 msgid "Back to products"
 msgstr ""
@@ -71,18 +71,19 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:127
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:169
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:197
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:89
 #, elixir-autogen, elixir-format
 msgid "Category"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:73
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:75
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:38
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:95
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:30
 #, elixir-autogen, elixir-format
 msgid "Edit Product"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:70
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:105
 #, elixir-autogen, elixir-format
 msgid "External link"
 msgstr ""
@@ -97,7 +98,7 @@ msgstr ""
 msgid "Img url"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:5
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:113
 #, elixir-autogen, elixir-format
 msgid "Last price"
 msgstr ""
@@ -158,7 +159,7 @@ msgstr ""
 msgid "Saving..."
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:74
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:94
 #, elixir-autogen, elixir-format
 msgid "Show Product"
 msgstr ""
@@ -166,6 +167,7 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:133
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:168
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:185
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:79
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:2
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/form_component.ex:48
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:19
@@ -213,7 +215,7 @@ msgstr ""
 msgid "Success!"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:23
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:15
 #, elixir-autogen, elixir-format
 msgid "Delete product"
 msgstr ""
@@ -602,7 +604,7 @@ msgstr ""
 msgid "Wholesaler products and prices"
 msgstr ""
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:62
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:82
 #, elixir-autogen, elixir-format
 msgid "There was an error loading the price chart"
 msgstr ""
@@ -638,7 +640,7 @@ msgid "Sign up"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:241
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:18
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:10
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Delete product \"%{name}\"?"
 msgstr ""
@@ -905,4 +907,19 @@ msgstr "Edit supplier access"
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:82
 #, elixir-autogen, elixir-format
 msgid "Export all pages?"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:130
+#, elixir-autogen, elixir-format
+msgid "Daily"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:154
+#, elixir-autogen, elixir-format
+msgid "Monthly"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:142
+#, elixir-autogen, elixir-format
+msgid "Weekly"
 msgstr ""
