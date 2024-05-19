@@ -29,6 +29,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @impl true
+  def handle_event("delete", _params, socket) do
+    {:ok, _} = Marketplaces.delete_product(socket.assigns.product)
+
+    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
+  end
+
+  @impl true
   def handle_params(%{"id" => id}, _uri, socket) do
     {:noreply,
      socket
@@ -82,13 +89,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
            gettext("There was an error loading the price chart")
          )}
     end
-  end
-
-  @impl true
-  def handle_event("delete", _params, socket) do
-    {:ok, _} = Marketplaces.delete_product(socket.assigns.product)
-
-    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   defp page_title(:show), do: gettext("Show Product")
