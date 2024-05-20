@@ -1,6 +1,8 @@
 defmodule PriceSpotter.Marketplaces.Product do
+  alias PriceSpotter.Marketplaces.Product
   use Ecto.Schema
   import Ecto.Changeset
+  import PriceSpotterWeb.Gettext
 
   @max_limit 10_000
   @default_limit 10
@@ -14,7 +16,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :supplier_name,
       :price_updated_since,
       :min_price,
-      :max_price
+      :max_price,
+      :ean
     ],
     sortable: [
       :name,
@@ -22,7 +25,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :internal_id,
       :supplier_name,
       :price,
-      :price_updated_at
+      :price_updated_at,
+      :ean
     ],
     custom_fields: [
       price_updated_since: [
@@ -49,6 +53,7 @@ defmodule PriceSpotter.Marketplaces.Product do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "products" do
+    field :ean, :string
     field :category, :string
     field :img_url, :string
     field :internal_id, :string
@@ -68,6 +73,7 @@ defmodule PriceSpotter.Marketplaces.Product do
   def changeset(product, attrs) do
     product
     |> cast(attrs, [
+      :ean,
       :category,
       :img_url,
       :internal_id,
@@ -79,8 +85,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :price_updated_at,
       :supplier_id
     ])
+    |> maybe_validate_change(:ean, &validate_ean/1)
     |> validate_required([
-      :category,
       :img_url,
       :internal_id,
       :supplier_name,
@@ -102,6 +108,7 @@ defmodule PriceSpotter.Marketplaces.Product do
     changeset(
       %__MODULE__{},
       Map.merge(product, %{
+        "ean" => product["ean_code"],
         "supplier_name" => product["supplier"],
         "meta" => Jason.decode!(product["meta"]),
         "price" => sanitize_price(product["price"])
@@ -121,6 +128,27 @@ defmodule PriceSpotter.Marketplaces.Product do
   defp sanitize_price("unpriced"), do: 0
 
   defp sanitize_price(price), do: price
+
+  defp maybe_validate_change(changeset, field, validate_fn) do
+    case get_change(changeset, field) do
+      nil ->
+        changeset
+
+      _change ->
+        validate_fn.(changeset)
+    end
+  end
+
+  @spec validate_ean(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  defp validate_ean(changeset) do
+    validate_length(changeset, :ean, min: 13, max: 14)
+    |> then(fn changeset ->
+      changeset
+      |> validate_format(:ean, ~r/^\d+$/,
+        message: gettext("must be numbers only")
+      )
+    end)
+  end
 end
 
 defmodule PriceSpotter.Marketplaces.Product.CustomFilters do

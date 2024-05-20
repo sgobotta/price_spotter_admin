@@ -110,6 +110,7 @@ defmodule PriceSpotterWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import PriceSpotterWeb.CoreComponents
+      import PriceSpotterWeb.CustomComponents
       import PriceSpotterWeb.Gettext
 
       # Shortcut for generating JS commands

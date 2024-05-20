@@ -107,6 +107,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     """
   end
 
+  @spec maybe_render_category(String.t() | nil) :: String.t()
+  def maybe_render_category(category) do
+    case category do
+      nil ->
+        gettext("Unassigned")
+
+      category ->
+        String.replace(category, "-", " ")
+    end
+  end
+
   defp assign_selection_options(socket) do
     socket
     |> assign(:product_categories, Marketplaces.list_product_categories())
@@ -122,6 +133,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
         label: gettext("Product"),
         op: :ilike,
         placeholder: gettext("Filter by product name")
+      ],
+      ean: [
+        label: gettext("EAN"),
+        op: :ilike,
+        placeholder: gettext("Search by EAN"),
+        type: "number",
+        new_feature: true
       ],
       category: [
         label: gettext("Category"),
@@ -163,6 +181,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp get_columns,
     do: [
       %{name: :name, label: gettext("Product")},
+      %{name: :ean, label: gettext("EAN")},
       %{name: :price, label: gettext("Price")},
       %{name: :price_updated_at, label: gettext("Last Price Update")},
       %{name: :supplier_name, label: gettext("Supplier")},

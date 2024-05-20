@@ -15,7 +15,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
     {:ok,
      socket
+     |> assign(:copy_clicked, false)
      |> assign_interval()}
+  end
+
+  @impl true
+  def handle_event("copy_ean", _params, socket) do
+    {:noreply, assign(socket, :copy_clicked, true)}
   end
 
   @impl true
@@ -26,6 +32,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     {:noreply,
      socket
      |> assign_interval(interval)}
+  end
+
+  @impl true
+  def handle_event("delete", _params, socket) do
+    {:ok, _} = Marketplaces.delete_product(socket.assigns.product)
+
+    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   @impl true
@@ -82,13 +95,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
            gettext("There was an error loading the price chart")
          )}
     end
-  end
-
-  @impl true
-  def handle_event("delete", _params, socket) do
-    {:ok, _} = Marketplaces.delete_product(socket.assigns.product)
-
-    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   defp page_title(:show), do: gettext("Show Product")
@@ -153,6 +159,33 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   #
 
   defp render_price(price), do: "$#{price}"
+
+  @spec format_ean_string(nil | String.t()) :: String.t()
+  defp format_ean_string(nil), do: gettext("Unassigned")
+
+  defp format_ean_string(ean) do
+    if String.length(ean) === 13 do
+      {country_code, rest} = String.split_at(ean, 2)
+      {manufacturer_code, rest} = String.split_at(rest, 5)
+      {product_code, rest} = String.split_at(rest, 5)
+      {check_digit, ""} = String.split_at(rest, 1)
+
+      "#{country_code} #{manufacturer_code} #{product_code} #{check_digit}"
+    else
+      ean
+    end
+  end
+
+  @spec maybe_render_category(String.t() | nil) :: String.t()
+  def maybe_render_category(category) do
+    case category do
+      nil ->
+        gettext("Unassigned")
+
+      category ->
+        String.replace(category, "-", " ")
+    end
+  end
 
   # ----------------------------------------------------------------------------
   # Assignment functions

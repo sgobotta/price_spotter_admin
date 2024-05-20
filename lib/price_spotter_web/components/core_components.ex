@@ -244,7 +244,7 @@ defmodule PriceSpotterWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-gray-100">
+      <div class="mt-10 space-y-8">
         <%= render_slot(@inner_block, f) %>
         <div
           :for={action <- @actions}
@@ -738,13 +738,32 @@ defmodule PriceSpotterWeb.CoreComponents do
     >
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
         <Flop.Phoenix.filter_fields :let={i} form={@form} fields={@fields}>
-          <.input
-            field={i.field}
-            label={i.label}
-            type={i.type}
-            phx-debounce={120}
-            {i.rest}
-          />
+          <%= if i.rest[:new_feature] do %>
+            <div class="relative">
+              <div class="absolute top-0 right-0">
+                <.pill
+                  text={gettext("New")}
+                  color="bg-red-500 dark:bg-red-500"
+                  text_color="text-white dark:text-white"
+                />
+              </div>
+              <.input
+                field={i.field}
+                label={i.label}
+                type={i.type}
+                phx-debounce={120}
+                {i.rest}
+              />
+            </div>
+          <% else %>
+            <.input
+              field={i.field}
+              label={i.label}
+              type={i.type}
+              phx-debounce={120}
+              {i.rest}
+            />
+          <% end %>
         </Flop.Phoenix.filter_fields>
       </div>
 
@@ -792,6 +811,21 @@ defmodule PriceSpotterWeb.CoreComponents do
       >
         <%= render_slot(@inner_block, assigns) %>
       </div>
+    </div>
+    """
+  end
+
+  attr :text, :string, required: true
+  attr :color, :string, default: "bg-white"
+  attr :text_color, :string, default: "text-black"
+
+  def pill(assigns) do
+    ~H"""
+    <div class={"
+      rounded-md #{@color} px-2 text-xs cursor-default border-[1px] shadow-md
+      bg-gradient-to-r from-red-500 to-teal-500 rounded-lg opacity-75 transition duration-500
+    "}>
+      <span class={"#{@text_color} animate-pulse"}><%= @text %></span>
     </div>
     """
   end
