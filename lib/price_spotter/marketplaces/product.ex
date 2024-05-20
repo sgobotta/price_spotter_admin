@@ -16,7 +16,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :supplier_name,
       :price_updated_since,
       :min_price,
-      :max_price
+      :max_price,
+      :ean
     ],
     sortable: [
       :name,
@@ -24,7 +25,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :internal_id,
       :supplier_name,
       :price,
-      :price_updated_at
+      :price_updated_at,
+      :ean
     ],
     custom_fields: [
       price_updated_since: [
