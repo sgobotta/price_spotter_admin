@@ -93,6 +93,43 @@
             </div>
           </span>
         </li>
+        <li class="flex border-b py-1 border-b-zinc-600 dark:border-b-zinc-400 justify-between">
+          <div>
+            <span class="font-medium w-1/2 md:w-1/3">
+              <%= gettext("EAN") %>
+            </span>
+          </div>
+          <div id="ean-code">
+            <.render_ean
+              ean={format_ean_string(@product.ean)}
+              has_code={@product.ean !== nil}
+            />
+            <input id="#ean_code" type="hidden" value={@product.ean} />
+          </div>
+          <%= if @product.ean do %>
+            <div>
+              <span
+                tabindex="0"
+                id="copy-ean-code"
+                data-to="#ean_code"
+                phx-hook="Copy"
+                phx-click="copy_ean"
+              >
+                <%= if @copy_clicked do %>
+                  <.icon
+                    name="hero-clipboard-document-check"
+                    class="text-teal-500 dark:teal-gray-500 h-5 w-5"
+                  />
+                <% else %>
+                  <.icon
+                    name="hero-clipboard-document"
+                    class="text-gray-900 dark:text-gray-100 h-5 w-5 hover:text-blue-500"
+                  />
+                <% end %>
+              </span>
+            </div>
+          <% end %>
+        </li>
         <li class="flex border-b py-1 border-b-zinc-600 dark:border-b-zinc-400">
           <a
             href={@product.supplier_url}

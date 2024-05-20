@@ -23,6 +23,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
       >
         <.input field={@form[:category]} type="text" label={gettext("Category")} />
         <.input field={@form[:img_url]} type="text" label={gettext("Img url")} />
+        <.input field={@form[:ean]} type="number" label={gettext("EAN")} />
         <.input
           field={@form[:internal_id]}
           type="text"
