@@ -163,9 +163,15 @@
           tbody_td_attrs={[class: "text-xs sm:text-base"]}
         >
           <div class="flex justify-center">
-            <div class="flex bg-green-200 rounded-lg text-center font-medium w-fit px-1">
+            <div class="
+              text-sm flex bg-green-200 rounded-lg text-center font-medium w-fit px-1
+              shadow-inner-lg border-[1px] border-green-300
+              text-gray-700
+            ">
               <%!-- <.icon name="hero-currency-dollar-solid" class="self-center h-5 w-5 opacity-60 text-zinc-600" /> --%>
-              <span class="self-center">$<%= product.price %></span>
+              <span class="self-center">
+                $<%= product.price %>
+              </span>
             </div>
           </div>
         </:col>
@@ -174,9 +180,8 @@
           label={gettext("Last Update")}
           field={:price_updated_at}
           col_style="width: 20%;"
-          attrs={[class: ""]}
         >
-          <div class="text-center text-sm italic">
+          <div class="text-center text-xs italic">
             <%= TimeAgo.time_ago(product.price_updated_at) %>
           </div>
         </:col>
@@ -187,7 +192,7 @@
           col_style="width: 15%;"
         >
           <div class="flex text-xs justify-center text-center">
-            <span class="bg-red-100 rounded-md px-1">
+            <span class="bg-red-100 rounded-md px-1 shadow-inner-lg border-[1px] border-red-200">
               <%= String.replace(product.supplier_name, "-", " ") %>
             </span>
           </div>
@@ -199,7 +204,7 @@
           col_style="width: 20%;"
         >
           <div class="flex text-xs justify-center text-center">
-            <span class="bg-blue-100 rounded-md px-1">
+            <span class="bg-blue-100 rounded-md px-1 shadow-inner-lg border-[1px] border-blue-200">
               <%= String.replace(product.category, "-", " ") %>
             </span>
           </div>
