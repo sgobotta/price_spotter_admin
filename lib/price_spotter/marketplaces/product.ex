@@ -87,7 +87,6 @@ defmodule PriceSpotter.Marketplaces.Product do
     ])
     |> maybe_validate_change(:ean, &validate_ean/1)
     |> validate_required([
-      :category,
       :img_url,
       :internal_id,
       :supplier_name,
