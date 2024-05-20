@@ -124,7 +124,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
         placeholder: gettext("Filter by product name")
       ],
       ean: [
-        label: gettext("Ean"),
+        label: gettext("EAN"),
         op: :ilike,
         placeholder: gettext("Search by EAN"),
         type: "number",
@@ -170,7 +170,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp get_columns,
     do: [
       %{name: :name, label: gettext("Product")},
-      %{name: :ean, label: gettext("Ean")},
+      %{name: :ean, label: gettext("EAN")},
       %{name: :price, label: gettext("Price")},
       %{name: :price_updated_at, label: gettext("Last Price Update")},
       %{name: :supplier_name, label: gettext("Supplier")},
