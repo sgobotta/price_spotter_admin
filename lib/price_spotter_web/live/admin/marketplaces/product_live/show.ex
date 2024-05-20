@@ -176,6 +176,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     end
   end
 
+  @spec maybe_render_category(String.t() | nil) :: String.t()
+  def maybe_render_category(category) do
+    case category do
+      nil ->
+        gettext("Unassigned")
+
+      category ->
+        String.replace(category, "-", " ")
+    end
+  end
+
   # ----------------------------------------------------------------------------
   # Assignment functions
   #
