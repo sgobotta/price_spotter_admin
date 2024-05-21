@@ -23,12 +23,28 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import LiveViewHooks from './hooks'
 
+// On page load or when changing themes, best to add inline in `head` to avoid
+// FOUC
+if (
+  localStorage.getItem('theme') === 'dark' ||
+  (!('theme' in localStorage) &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+) {
+document.documentElement.classList.add('dark')
+localStorage.setItem("theme", "dark")
+} else {
+document.documentElement.classList.remove('dark')
+localStorage.setItem("theme", "light")
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket(
+const _theme = localStorage.getItem("theme")
+const liveSocket = new LiveSocket(
   "/live",
   Socket,
   {
-    params: {_csrf_token: csrfToken},
+    params: {_csrf_token: csrfToken, _theme},
     hooks: LiveViewHooks
   }
 )
