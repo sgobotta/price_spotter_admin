@@ -25,65 +25,68 @@ defmodule PriceSpotterWeb.Router do
     plug PriceSpotterWeb.EnsureRolePlug, :admin
   end
 
-  scope "/", PriceSpotterWeb do
-    pipe_through [:browser]
+  live_session :default,
+    on_mount: [{PriceSpotterWeb.Theme, :fetch_theme}] do
+    scope "/", PriceSpotterWeb do
+      pipe_through [:browser]
 
-    get "/", PageController, :home
+      get "/", PageController, :home
 
-    scope "/admin/marketplaces", Admin.Marketplaces do
-      pipe_through [:require_authenticated_user]
+      scope "/admin/marketplaces", Admin.Marketplaces do
+        pipe_through [:require_authenticated_user]
 
-      scope "/products" do
-        scope "/new" do
-          pipe_through [:admin]
-          live "/", ProductLive.Index, :new
+        scope "/products" do
+          scope "/new" do
+            pipe_through [:admin]
+            live "/", ProductLive.Index, :new
+          end
+
+          scope "/:id" do
+            pipe_through [:admin]
+            live "/show/edit", ProductLive.Show, :edit
+            live "/edit", ProductLive.Index, :edit
+          end
+
+          live "/", ProductLive.Index, :index
+          live "/:id", ProductLive.Show, :show
         end
 
-        scope "/:id" do
+        scope "/suppliers" do
           pipe_through [:admin]
-          live "/show/edit", ProductLive.Show, :edit
-          live "/edit", ProductLive.Index, :edit
+
+          live "/", SupplierLive.Index, :index
+          live "/new", SupplierLive.Index, :new
+          live "/:id/edit", SupplierLive.Index, :edit
+
+          live "/:id", SupplierLive.Show, :show
+          live "/:id/show/edit", SupplierLive.Show, :edit
         end
 
-        live "/", ProductLive.Index, :index
-        live "/:id", ProductLive.Show, :show
+        scope "/users_suppliers" do
+          pipe_through [:admin]
+
+          live "/", UserSupplierLive.Index, :index
+          live "/new", UserSupplierLive.Index, :new
+          live "/:id/edit", UserSupplierLive.Index, :edit
+
+          live "/:id", UserSupplierLive.Show, :show
+          live "/:id/show/edit", UserSupplierLive.Show, :edit
+        end
       end
 
-      scope "/suppliers" do
-        pipe_through [:admin]
+      scope "/admin/accounts", Admin.Accounts do
+        pipe_through [:require_authenticated_user, :admin]
 
-        live "/", SupplierLive.Index, :index
-        live "/new", SupplierLive.Index, :new
-        live "/:id/edit", SupplierLive.Index, :edit
+        live "/users", UserLive.Index, :index
+        live "/users/new", UserLive.Index, :new
+        live "/users/:id/edit", UserLive.Index, :edit
 
-        live "/:id", SupplierLive.Show, :show
-        live "/:id/show/edit", SupplierLive.Show, :edit
+        live "/users/:id", UserLive.Show, :show
+        live "/users/:id/show/edit", UserLive.Show, :edit
       end
 
-      scope "/users_suppliers" do
-        pipe_through [:admin]
-
-        live "/", UserSupplierLive.Index, :index
-        live "/new", UserSupplierLive.Index, :new
-        live "/:id/edit", UserSupplierLive.Index, :edit
-
-        live "/:id", UserSupplierLive.Show, :show
-        live "/:id/show/edit", UserSupplierLive.Show, :edit
-      end
+      get "/products/export", ExportController, :create
     end
-
-    scope "/admin/accounts", Admin.Accounts do
-      pipe_through [:require_authenticated_user, :admin]
-
-      live "/users", UserLive.Index, :index
-      live "/users/new", UserLive.Index, :new
-      live "/users/:id/edit", UserLive.Index, :edit
-
-      live "/users/:id", UserLive.Show, :show
-      live "/users/:id/show/edit", UserLive.Show, :edit
-    end
-
-    get "/products/export", ExportController, :create
   end
 
   # Other scopes may use custom stacks.

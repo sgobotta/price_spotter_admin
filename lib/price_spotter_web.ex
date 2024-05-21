@@ -54,6 +54,7 @@ defmodule PriceSpotterWeb do
       use Phoenix.LiveView,
         layout: {PriceSpotterWeb.Layouts, :app}
 
+      unquote(PriceSpotterWeb.Theme.theme_helpers())
       unquote(html_helpers())
 
       import PriceSpotterWeb.LiveHelpers
