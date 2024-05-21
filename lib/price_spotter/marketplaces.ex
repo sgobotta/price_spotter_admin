@@ -239,9 +239,7 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, {:created, p}}
 
       _repo, %{product: %Product{} = product} = _multi ->
-        changes = cs.changes
-
-        maybe_updated_product =
+        maybe_update_product = fn product, changes ->
           if product.price == changes.price do
             Logger.debug(
               "Price did not change, nothing to update product_id=#{product.id} product=#{inspect(product)}"
@@ -267,6 +265,16 @@ defmodule PriceSpotter.Marketplaces do
             )
 
             updated_product
+          end
+        end
+
+        maybe_updated_product =
+          case Ecto.Changeset.changed?(cs, :price) do
+            true ->
+              maybe_update_product.(product, cs.changes)
+
+            false ->
+              product
           end
 
         {:ok, {:updated, maybe_updated_product}}

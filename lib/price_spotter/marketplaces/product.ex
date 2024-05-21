@@ -91,7 +91,6 @@ defmodule PriceSpotter.Marketplaces.Product do
       :internal_id,
       :supplier_name,
       :name,
-      :price,
       :supplier_url
     ])
     |> unique_constraint(:internal_id)
@@ -123,10 +122,9 @@ defmodule PriceSpotter.Marketplaces.Product do
   def limit, do: @default_limit
 
   @spec sanitize_price(String.t()) :: String.t()
-  defp sanitize_price(nil), do: 0
+  defp sanitize_price(nil), do: nil
 
-  defp sanitize_price("unpriced"), do: 0
-
+  defp sanitize_price("unpriced"), do: nil
   defp sanitize_price(price), do: price
 
   defp maybe_validate_change(changeset, field, validate_fn) do
