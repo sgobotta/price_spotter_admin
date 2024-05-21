@@ -1,5 +1,6 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   use PriceSpotterWeb, :live_view
+  use PriceSpotterWeb.Navigation, :action
 
   alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
@@ -43,10 +44,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _uri, socket) do
+    %Marketplaces.Product{
+      name: product_name
+    } = product = Marketplaces.get_product!(id)
+
     {:noreply,
      socket
-     |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:product, Marketplaces.get_product!(id))}
+     |> assign(:page_title, product_name)
+     |> assign_header_action()
+     |> assign(
+       :section_title,
+       page_title(socket.assigns.live_action)
+     )
+     |> assign(:product, product)}
   end
 
   @impl true
@@ -89,11 +99,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
            data_label: get_datetime_label(DateTime.utc_now()),
            label: socket.assigns.product.name,
            value: 0
-         })
-         |> put_flash(
-           :error,
-           gettext("There was an error loading the price chart")
-         )}
+         })}
     end
   end
 
@@ -185,6 +191,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
       category ->
         String.replace(category, "-", " ")
     end
+  end
+
+  defp render_header_action(assigns) do
+    ~H"""
+    <.navigation_back navigate={~p"/admin/marketplaces/products/"} />
+    """
   end
 
   # ----------------------------------------------------------------------------

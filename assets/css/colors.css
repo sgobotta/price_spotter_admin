@@ -3,7 +3,7 @@ body {
 }
 
 .main-bg {
-  @apply bg-gray-100 dark:bg-gray-800;
+  @apply bg-gray-200 dark:bg-gray-800;
 }
 
 .header-bg {

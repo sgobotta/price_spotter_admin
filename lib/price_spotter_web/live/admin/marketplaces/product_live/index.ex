@@ -1,5 +1,6 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   use PriceSpotterWeb, :live_view
+  use PriceSpotterWeb.Navigation, :action
 
   alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
@@ -26,6 +27,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          |> assign_filter_fields()
          |> assign(:total, meta.total_count)
          |> assign(filter_fields_form: to_form(meta))
+         |> assign_header_action()
+         |> assign(:section_title, gettext("Products"))
          |> apply_action(socket.assigns.live_action, params)}
 
       _error ->
@@ -97,13 +100,21 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   def render_next_icon(assigns) do
     ~H"""
-    <.icon name="hero-arrow-right-solid" class="h-7 w-7" />
+    <div class="navigation-btn-container">
+      <div class="navigation-btn">
+        <.icon name="hero-arrow-right-solid" class="h-7 w-7" />
+      </div>
+    </div>
     """
   end
 
   def render_previous_icon(assigns) do
     ~H"""
-    <.icon name="hero-arrow-left-solid" class="h-7 w-7" />
+    <div class="navigation-btn-container">
+      <div class="navigation-btn">
+        <.icon name="hero-arrow-left-solid" class="h-7 w-7" />
+      </div>
+    </div>
     """
   end
 
@@ -196,4 +207,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   defp can_edit_products?(user), do: Accounts.can_edit_products?(user)
   defp can_delete_products?(user), do: Accounts.can_edit_products?(user)
+
+  defp render_header_action(assigns) do
+    ~H"""
+    <.navigation_back navigate={~p"/"} />
+    """
+  end
 end

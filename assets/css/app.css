@@ -70,7 +70,7 @@ table.table thead tr th {
 }
 
 table.table tbody tr {
-  @apply px-4 h-16 cursor-pointer border-b-1 border-dashed border-zinc-200 hover:shadow-lg transition duration-200 hover:scale-102 rounded-lg hover:text-zinc-50;
+  @apply px-4 h-16 cursor-pointer border-b-1 border-dashed border-gray-300 hover:shadow-lg transition duration-200 hover:scale-102 rounded-lg hover:text-gray-50;
 }
 
 table.table tbody tr:nth-child(odd) {
@@ -110,7 +110,7 @@ input {
 }
 
 input, select {
-  @apply focus:ring-1 focus:ring-sky-500 bg-zinc-50 shadow-inner-lg h-10 focus:shadow-2xl active:shadow-2xl focus:bg-zinc-100 active:bg-zinc-100 !important;
+  @apply focus:ring-1 focus:ring-sky-500 bg-zinc-50 shadow-inner-lg h-10 focus:shadow-2xl active:shadow-2xl focus:bg-zinc-100 active:bg-zinc-100 border-[1px] border-zinc-300 !important;
 }
 
 .shadow-inner-lg {
@@ -149,4 +149,17 @@ input[type=checkbox]:checked {
 
 span.order-direction {
   @apply text-xl;
+}
+
+nav.pagination {
+  align-items: center;
+}
+
+.navigation-btn-container {
+  @apply cursor-default flex items-center p-4 m-2 w-12 h-12 transition duration-500 focus:bg-zinc-300/25 focus:dark:bg-zinc-700/25 active:bg-zinc-300/25 active:dark:bg-zinc-700/25 hover:shadow-inner hover:dark:shadow-inner hover:dark:bg-zinc-800 rounded-full justify-center;
+}
+
+.navigation-btn {
+  @apply text-sm font-semibold leading-6 transition-colors duration-500;
+
 }

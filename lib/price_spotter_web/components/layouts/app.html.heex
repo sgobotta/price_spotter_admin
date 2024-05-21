@@ -1,18 +1,28 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <a href="" class="hover:text-zinc-700">
-        <%= gettext("Price Spotter") %>
-      </a>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="" class="hover:text-zinc-700"></a>
-      <a href="/" class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80">
-        <%= gettext("Home") %> <span aria-hidden="true">&rarr;</span>
-      </a>
+<header class="sticky top-0 header-bg z-50">
+  <div>
+    <div class="
+      flex items-center justify-between
+      border-b border-zinc-300 dark:border-zinc-600 border-dotted
+      text-xs sm:text-sm
+      backdrop-blur-lg
+      rounded-b-xl
+    ">
+      <div
+        id="header action"
+        phx-update="ignore"
+        class="flex flex-row basis-1/2"
+      >
+        <div :if={assigns[:header_action] != nil}>
+          <%= assigns[:header_action] %>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="#" class="hover:text-zinc-700 hover:dark:text-zinc-300">
+            <%= assigns[:section_title] %>
+          </a>
+        </div>
+      </div>
+      <div class="flex basis-1/2 justify-end items-center gap-4 font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
+      </div>
     </div>
   </div>
 </header>

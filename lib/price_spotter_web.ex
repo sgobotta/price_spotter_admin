@@ -112,6 +112,8 @@ defmodule PriceSpotterWeb do
       import PriceSpotterWeb.CoreComponents
       import PriceSpotterWeb.CustomComponents
       import PriceSpotterWeb.Gettext
+      # Import navigation actions
+      import PriceSpotterWeb.Navigation.Components
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

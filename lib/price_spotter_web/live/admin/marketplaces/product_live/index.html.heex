@@ -1,7 +1,6 @@
 <div class="xl:mx-32">
   <div class="my-4">
     <.header>
-      <%= gettext("Listing Products") %>
       <:actions>
         <%= if Accounts.can_create_products?(@current_user) do %>
           <.link patch={~p"/admin/marketplaces/products/new"}>
@@ -127,20 +126,20 @@
         path={~p"/admin/marketplaces/products"}
         opts={[
           symbol_asc: ~H"""
-          <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600" />
+          <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-gray-500" />
           """,
           symbol_desc: ~H"""
           <.icon
             name="hero-chevron-down-solid"
-            class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-600"
+            class="h-3 w-3 sm:h-5 sm:w-5 text-gray-500"
           />
           """,
           thead_attrs: [
             class: "thead-container"
           ],
-          thead_th_attrs: [class: "bg-gray-100 dark:bg-gray-800"],
+          thead_th_attrs: [class: "bg-gray-200 dark:bg-gray-800"],
           thead_tr_attrs: [class: "text-xs sm:text-base border-0"],
-          tbody_tr_attrs: [class: "group hover:bg-zinc-200"],
+          tbody_tr_attrs: [class: "group hover:bg-gray-300"],
           tbody_td_attrs: [
             class: "group-hover:text-black"
           ]
