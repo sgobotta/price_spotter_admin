@@ -100,9 +100,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   def render_next_icon(assigns) do
     ~H"""
-    <div class="navigation-btn-container">
+    <div class="navigation-btn-container pressable">
       <div class="navigation-btn">
-        <.icon name="hero-arrow-right-solid" class="h-7 w-7" />
+        <.icon name="hero-arrow-right-solid" class="h-6 w-6" />
       </div>
     </div>
     """
@@ -110,9 +110,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   def render_previous_icon(assigns) do
     ~H"""
-    <div class="navigation-btn-container">
+    <div class="navigation-btn-container pressable">
       <div class="navigation-btn">
-        <.icon name="hero-arrow-left-solid" class="h-7 w-7" />
+        <.icon name="hero-arrow-left-solid" class="h-6 w-6" />
       </div>
     </div>
     """

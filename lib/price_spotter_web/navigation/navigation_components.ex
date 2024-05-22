@@ -36,7 +36,7 @@ defmodule PriceSpotterWeb.Navigation.Components do
 
   def action(assigns) do
     ~H"""
-    <.link navigate={@navigate} class="navigation-btn-container">
+    <.link navigate={@navigate} class="navigation-btn-container pressable">
       <div class="navigation-btn">
         <%= render_slot(@inner_block) %>
       </div>

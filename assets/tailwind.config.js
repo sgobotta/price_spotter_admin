@@ -12,24 +12,20 @@ module.exports = {
     "../lib/*_web/**/*.*ex"
   ],
   darkMode: 'class',
-  safelist: [
-    // Update the pattern to allow any color and any size
-    {
-      pattern: /(animate)-([a-zA-Z])/
-    },
-    {
-      pattern: /(bg|border|text|from|to|shadow)-([a-zA-Z]+)-(\d+)/
-    },
-    {
-      pattern: /(dark)/
-    }
-  ],
   theme: {
     extend: {
       borderWidth: {
         '1': '1px',
         '12': '12px',
         '24': '24px'
+      },
+      boxShadow: {
+        'inner-md': 'inset 0 8px 8px 0 rgb(107 114 128 / 0.5)',
+        'inner-sm': 'inset 0 6px 6px 0 rgb(107 114 128 / 0.5)',
+        'inner-xs': 'inset 4px 4px 4px 2px rgb(107 114 128 / 0.5)',
+        'outer-md': '0 0 4px 2px rgb(107 114 128 / 0.5)',
+        'outer-sm': '0 0 3px 2px rgb(107 114 128 / 0.5)',
+        'outer-xs': '0 0 2px 1px rgb(107 114 128 / 0.5)'
       },
       colors: {
         brand: "#FD4F00",
