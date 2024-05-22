@@ -69,11 +69,11 @@ defmodule PriceSpotterWeb.CoreComponents do
       phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
-      class="relative z-50 hidden"
+      class="relative z-50 hidden bg-red-500"
     >
       <div
         id={"#{@id}-bg"}
-        class="bg-zinc-50/90 fixed inset-0 transition-opacity"
+        class="bg-zinc-100/90 dark:bg-zinc-900/90 fixed inset-0 transition-opacity"
         aria-hidden="true"
       />
       <div
@@ -91,7 +91,7 @@ defmodule PriceSpotterWeb.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-14 shadow-lg ring-1 transition"
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-zinc-200 dark:bg-zinc-800 p-14 shadow-lg ring-1 transition"
             >
               <div class="absolute top-6 right-5">
                 <button
@@ -244,7 +244,7 @@ defmodule PriceSpotterWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-2 space-y-8 transparent">
+      <div class="mt-2 space-y-5 transparent">
         <%= render_slot(@inner_block, f) %>
         <div
           :for={action <- @actions}
@@ -355,7 +355,7 @@ defmodule PriceSpotterWeb.CoreComponents do
 
     ~H"""
     <div phx-feedback-for={@name}>
-      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
         <input type="hidden" name={@name} value="false" />
         <input
           type="checkbox"
@@ -380,7 +380,7 @@ defmodule PriceSpotterWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-1 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm"
+        class="mt-1 block w-full rounded-md border border-zinc-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm"
         multiple={@multiple}
         {@rest}
       >
@@ -449,7 +449,10 @@ defmodule PriceSpotterWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label
+      for={@for}
+      class="block text-sm font-semibold leading-6 text-zinc-800 dark:text-zinc-200"
+    >
       <%= render_slot(@inner_block) %>
     </label>
     """
@@ -462,7 +465,7 @@ defmodule PriceSpotterWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 dark:text-rose-400 phx-no-feedback:hidden">
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
       <%= render_slot(@inner_block) %>
     </p>
@@ -485,10 +488,13 @@ defmodule PriceSpotterWeb.CoreComponents do
       @class
     ]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-200">
           <%= render_slot(@inner_block) %>
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+        <p
+          :if={@subtitle != []}
+          class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400"
+        >
           <%= render_slot(@subtitle) %>
         </p>
       </div>
@@ -552,7 +558,11 @@ defmodule PriceSpotterWeb.CoreComponents do
         <tbody
           id={@id}
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700"
+          class="
+            relative divide-y divide-zinc-100 dark:divide-zinc-900
+            border-t border-zinc-200 dark:border-zinc-800
+            text-sm leading-6 text-zinc-700 dark:text-zinc-300
+          "
         >
           <tr
             :for={row <- @rows}

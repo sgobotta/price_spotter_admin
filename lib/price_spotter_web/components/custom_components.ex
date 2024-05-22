@@ -12,8 +12,8 @@ defmodule PriceSpotterWeb.CustomComponents do
   def render_ean(assigns) do
     ~H"""
     <span class={"
-        text-sm font-medium md:block text-center self-center bg-gray-100
-        rounded-md px-2 shadow-inner-lg border-2 border-gray-200
+        text-sm font-medium md:block text-center self-center bg-zinc-100
+        rounded-md px-2 shadow-inner-lg border-2 border-zinc-200
         #{if @has_code, do: "text-blue-500", else: "text-yellow-500"}
       "}>
       <%= @ean %>

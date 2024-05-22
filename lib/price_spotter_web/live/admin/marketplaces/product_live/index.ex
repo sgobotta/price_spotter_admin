@@ -102,7 +102,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     ~H"""
     <div class="navigation-btn-container pressable">
       <div class="navigation-btn">
-        <.icon name="hero-arrow-right-solid" class="h-6 w-6" />
+        <.icon name="hero-arrow-right-solid" class="h-4 w-4" />
       </div>
     </div>
     """
@@ -112,7 +112,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     ~H"""
     <div class="navigation-btn-container pressable">
       <div class="navigation-btn">
-        <.icon name="hero-arrow-left-solid" class="h-6 w-6" />
+        <.icon name="hero-arrow-left-solid" class="h-4 w-4" />
       </div>
     </div>
     """

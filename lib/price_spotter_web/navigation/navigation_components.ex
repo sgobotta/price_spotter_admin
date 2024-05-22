@@ -15,7 +15,7 @@ defmodule PriceSpotterWeb.Navigation.Components do
       <.action navigate={@navigate}>
         <PriceSpotterWeb.CoreComponents.icon
           name="hero-arrow-left-solid"
-          class="h-5 w-5"
+          class="h-4 w-4"
         />
       </.action>
     </a>

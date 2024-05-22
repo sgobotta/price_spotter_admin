@@ -16,13 +16,16 @@
           <%= assigns[:header_action] %>
         </div>
         <div class="flex items-center gap-4">
-          <a href="#" class="hover:text-zinc-700 hover:dark:text-zinc-300">
+          <a
+            href="#"
+            class="hover:text-zinc-700 hover:dark:text-zinc-300 font-medium"
+          >
             <%= assigns[:section_title] %>
           </a>
         </div>
       </div>
-      <div class="flex basis-1/2 justify-end items-center gap-4 font-semibold leading-6 text-zinc-900 dark:text-zinc-100">
-        <%!-- <.toggle_theme_button theme={@theme} /> --%>
+      <div class="flex basis-1/2 justify-end items-center gap-4 font-semibold leading-6 text-zinc-900 dark:text-zinc-100 mr-4">
+        <.toggle_theme_button theme={@theme} />
       </div>
     </div>
   </div>
