@@ -239,43 +239,41 @@ defmodule PriceSpotter.Marketplaces do
         {:ok, {:created, p}}
 
       _repo, %{product: %Product{} = product} = _multi ->
-        maybe_update_product = fn product, changes ->
-          if product.price == changes.price do
-            Logger.debug(
-              "Price did not change, nothing to update product_id=#{product.id} product=#{inspect(product)}"
-            )
+        maybe_update_product = fn product, %Ecto.Changeset{} = changeset ->
+          maybe_price_change =
+            Ecto.Changeset.get_change(changeset, :price, product.price)
 
-            product
-          else
-            Logger.debug(
-              "Updating product with id=#{product.id} with price from old_price=#{inspect(product.price)} to new_price=#{inspect(changes.price)}"
-            )
+          %Ecto.Changeset{} =
+            changeset =
+            if product.price == maybe_price_change do
+              Logger.debug(
+                "Price did not change. Skipping price update for product_id=#{product.id} product=#{inspect(product)}"
+              )
 
-            Map.put(
-              changes,
-              :price_updated_at,
-              NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-            )
+              changeset
+            else
+              Logger.debug(
+                "Detected price change. Updating product with id=#{product.id} with price from old_price=#{inspect(product.price)} to new_price=#{inspect(maybe_price_change)}"
+              )
 
-            {:ok, %Product{} = updated_product} =
-              update_product(product, changes)
+              Ecto.Changeset.put_change(
+                changeset,
+                :price_updated_at,
+                NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+              )
+            end
 
-            Logger.debug(
-              "Updated product with product_id=#{updated_product.id} product=#{inspect(updated_product)}"
-            )
+          {:ok, %Product{} = updated_product} =
+            update_product(product, changeset.changes)
 
-            updated_product
-          end
+          Logger.debug(
+            "Updated product with product_id=#{updated_product.id} product=#{inspect(updated_product)}"
+          )
+
+          updated_product
         end
 
-        maybe_updated_product =
-          case Ecto.Changeset.changed?(cs, :price) do
-            true ->
-              maybe_update_product.(product, cs.changes)
-
-            false ->
-              product
-          end
+        %Product{} = maybe_updated_product = maybe_update_product.(product, cs)
 
         {:ok, {:updated, maybe_updated_product}}
     end)
