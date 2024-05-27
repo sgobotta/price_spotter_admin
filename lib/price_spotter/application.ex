@@ -32,6 +32,10 @@ defmodule PriceSpotter.Application do
       PriceSpotter.Marketplaces.ProductProducer.child_spec(
         supplier: "maxiconsumo-burzaco-by-ean",
         module_name: "MaxiconsumoByEanProducer"
+      ),
+      PriceSpotter.Marketplaces.ProductProducer.child_spec(
+        supplier: "yaguar",
+        module_name: "YaguarByEanProducer"
       )
     ]
 

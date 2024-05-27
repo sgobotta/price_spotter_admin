@@ -219,6 +219,7 @@
         <:action :let={product}>
           <div>
             <a
+              :if={product.supplier_url != nil}
               href={product.supplier_url}
               target="_blank"
               class="hover:text-sky-500 hover:opacity-100"

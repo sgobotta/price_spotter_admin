@@ -90,8 +90,7 @@ defmodule PriceSpotter.Marketplaces.Product do
       :img_url,
       :internal_id,
       :supplier_name,
-      :name,
-      :supplier_url
+      :name
     ])
     |> unique_constraint(:internal_id)
   end
