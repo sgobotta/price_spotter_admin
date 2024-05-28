@@ -7,6 +7,8 @@ defmodule PriceSpotter.Marketplaces.Product do
   @max_limit 10_000
   @default_limit 10
 
+  @eans_length [8, 13, 14]
+
   @derive {
     Flop.Schema,
     filterable: [
@@ -85,13 +87,13 @@ defmodule PriceSpotter.Marketplaces.Product do
       :price_updated_at,
       :supplier_id
     ])
-    |> maybe_validate_change(:ean, &validate_ean/1)
     |> validate_required([
       :img_url,
       :internal_id,
       :supplier_name,
       :name
     ])
+    |> validate_ean()
     |> unique_constraint(:internal_id)
   end
 
@@ -126,25 +128,36 @@ defmodule PriceSpotter.Marketplaces.Product do
   defp sanitize_price("unpriced"), do: nil
   defp sanitize_price(price), do: price
 
-  defp maybe_validate_change(changeset, field, validate_fn) do
-    case get_change(changeset, field) do
+  @spec validate_ean(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  def validate_ean(changeset) do
+    case get_change(changeset, :ean) do
       nil ->
         changeset
 
-      _change ->
-        validate_fn.(changeset)
+      ean ->
+        changeset
+        |> validate_format(:ean, ~r/^\d+$/,
+          message: gettext("must be numbers only")
+        )
+        |> validate_ean_length(ean)
     end
   end
 
-  @spec validate_ean(Ecto.Changeset.t()) :: Ecto.Changeset.t()
-  defp validate_ean(changeset) do
-    validate_length(changeset, :ean, min: 13, max: 14)
-    |> then(fn changeset ->
+  @spec validate_ean_length(Ecto.Changeset.t(), String.t()) ::
+          Ecto.Changeset.t()
+  defp validate_ean_length(changeset, ean) do
+    if String.length(ean) in @eans_length do
       changeset
-      |> validate_format(:ean, ~r/^\d+$/,
-        message: gettext("must be numbers only")
+    else
+      add_error(
+        changeset,
+        :ean,
+        dgettext("errors", "must be %{x}, %{y}, or %{z} characters long"),
+        x: 8,
+        y: 13,
+        z: 14
       )
-    end)
+    end
   end
 end
 
