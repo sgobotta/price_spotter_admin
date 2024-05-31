@@ -24,78 +24,80 @@
                 />
               </svg>
             </:toggle>
-            <ul class="mt-1 border shadow-xl menu bg-white border-base-300 w-64 rounded-b-md">
-              <li class="p-4">
-                <div class="mb-2">
-                  <.form
-                    :let={f}
-                    for={@filter_fields_form}
-                    action={
-                      PriceSpotterWeb.Router.Helpers.export_path(
-                        PriceSpotterWeb.Endpoint,
-                        :create
-                      )
-                    }
-                    method="get"
-                    target="_blank"
-                  >
-                    <.input
-                      type="hidden"
-                      field={f[:columns]}
-                      value={get_column_names()}
-                      class="gap-y-4"
-                      checked={true}
-                    />
-
-                    <div class="border-b-1 border-zinc-300 mb-2">
-                      <h3 class="">
-                        <%= gettext("Choose columns to export") %>
-                      </h3>
-                    </div>
-
-                    <%= for %{name: name, label: label} <- get_columns() do %>
-                      <div class="py-1">
-                        <.input
-                          type="checkbox"
-                          field={f[name]}
-                          label={label}
-                          class="gap-y-4"
-                          checked={true}
-                        />
-                      </div>
-                    <% end %>
-
-                    <.input
-                      type="hidden"
-                      field={f[:limit]}
-                      value={get_limit()}
-                      class="gap-y-4"
-                    />
-
-                    <div class="border-b-1 border-zinc-300 my-2" />
-
-                    <div class="py-1">
+            <ul class="mt-1 border shadow-outer-md menu bg-zinc-100 border-base-300 w-64 rounded-b-md rounded-md">
+              <li>
+                <div class="py-3">
+                  <div class="px-1">
+                    <.form
+                      :let={f}
+                      for={@filter_fields_form}
+                      action={
+                        PriceSpotterWeb.Router.Helpers.export_path(
+                          PriceSpotterWeb.Endpoint,
+                          :create
+                        )
+                      }
+                      method="get"
+                      target="_blank"
+                    >
                       <.input
-                        type="checkbox"
-                        field={f[:all_pages]}
-                        label={gettext("Export all pages?")}
+                        type="hidden"
+                        field={f[:columns]}
+                        value={get_column_names()}
+                        class="gap-y-4"
+                        checked={true}
+                      />
+
+                      <div class="border-b-1 border-zinc-300 mb-2 text-zinc-500 text-sm pb-2 cursor-default">
+                        <h3 class="text-sm pl-2">
+                          <%= gettext("Export") %>
+                        </h3>
+                      </div>
+
+                      <%= for %{name: name, label: label} <- get_columns() do %>
+                        <div class="p-1 hover:bg-zinc-200 rounded-md">
+                          <.input
+                            type="checkbox"
+                            field={f[name]}
+                            label={label}
+                            class="gap-y-4 p-1 cursor-default"
+                            checked={true}
+                          />
+                        </div>
+                      <% end %>
+
+                      <.input
+                        type="hidden"
+                        field={f[:limit]}
+                        value={get_limit()}
                         class="gap-y-4"
                       />
-                    </div>
 
-                    <.input
-                      type="hidden"
-                      field={f[:max_limit]}
-                      value={get_max_limit()}
-                      class="gap-y-4"
-                    />
+                      <div class="border-b-1 border-zinc-300 my-2" />
 
-                    <div class="my-2">
-                      <.button class="w-full" type="submit">
-                        <%= gettext("Export") %>
-                      </.button>
-                    </div>
-                  </.form>
+                      <div class="p-1">
+                        <.input
+                          type="checkbox"
+                          field={f[:all_pages]}
+                          label={gettext("Export all pages?")}
+                          class="gap-y-4 text-xs"
+                        />
+                      </div>
+
+                      <.input
+                        type="hidden"
+                        field={f[:max_limit]}
+                        value={get_max_limit()}
+                        class="gap-y-4"
+                      />
+
+                      <div class="mt-2">
+                        <.button class="w-full" type="submit">
+                          <%= gettext("Export") %>
+                        </.button>
+                      </div>
+                    </.form>
+                  </div>
                 </div>
               </li>
             </ul>
@@ -137,7 +139,10 @@
           thead_attrs: [
             class: "thead-container"
           ],
-          thead_th_attrs: [class: "bg-gray-200 dark:bg-gray-800"],
+          thead_th_attrs: [
+            class:
+              "bg-gray-200 dark:bg-gray-800 hover:underline underline-offset-4"
+          ],
           thead_tr_attrs: [class: "text-xs sm:text-base border-0"],
           tbody_tr_attrs: [class: "group hover:bg-gray-300"],
           tbody_td_attrs: [
@@ -150,7 +155,7 @@
           label={gettext("Product")}
           field={:name}
           col_style="width: 30%;"
-          tbody_td_attrs={[class: "text-xs sm:text-sm text-red-500"]}
+          tbody_td_attrs={[class: "text-xs sm:text-xs text-red-500"]}
         >
           <div><%= product.name %></div>
         </:col>
@@ -165,9 +170,10 @@
             <div class={"
               text-sm flex rounded-lg text-center font-medium w-fit px-1
               shadow-inner-lg border-[1px]
+              text-gray-600 dark:text-gray-400
               #{if product.price == nil,
-                do: "bg-yellow-200 border-yellow-300 text-gray-500",
-                else: "bg-green-200 border-green-300 text-gray-700"}
+                do: "bg-yellow-200 border-yellow-300",
+                else: "bg-green-200 border-green-300"}
             "}>
               <%!-- <.icon name="hero-currency-dollar-solid" class="self-center h-5 w-5 opacity-60 text-zinc-600" /> --%>
               <span class="self-center">
@@ -219,6 +225,7 @@
         <:action :let={product}>
           <div>
             <a
+              :if={product.supplier_url != nil}
               href={product.supplier_url}
               target="_blank"
               class="hover:text-sky-500 hover:opacity-100"

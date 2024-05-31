@@ -141,3 +141,8 @@ msgstr ""
 #, elixir-autogen, elixir-format, fuzzy
 msgid "is not valid"
 msgstr ""
+
+#: lib/price_spotter/marketplaces/product.ex:155
+#, elixir-autogen, elixir-format
+msgid "must be %{x}, %{y}, or %{z} characters long"
+msgstr ""

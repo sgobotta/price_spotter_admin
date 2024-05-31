@@ -170,15 +170,32 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   defp format_ean_string(nil), do: gettext("Unassigned")
 
   defp format_ean_string(ean) do
-    if String.length(ean) === 13 do
-      {country_code, rest} = String.split_at(ean, 2)
-      {manufacturer_code, rest} = String.split_at(rest, 5)
-      {product_code, rest} = String.split_at(rest, 5)
-      {check_digit, ""} = String.split_at(rest, 1)
+    case String.length(ean) do
+      8 ->
+        {first, rest} = String.split_at(ean, 4)
+        {second, ""} = String.split_at(rest, 4)
 
-      "#{country_code} #{manufacturer_code} #{product_code} #{check_digit}"
-    else
-      ean
+        "#{first} #{second}"
+
+      13 ->
+        {country_code, rest} = String.split_at(ean, 2)
+        {manufacturer_code, rest} = String.split_at(rest, 5)
+        {product_code, rest} = String.split_at(rest, 5)
+        {check_digit, ""} = String.split_at(rest, 1)
+
+        "#{country_code} #{manufacturer_code} #{product_code} #{check_digit}"
+
+      14 ->
+        {units_in_package, rest} = String.split_at(ean, 1)
+        {country_code, rest} = String.split_at(rest, 2)
+        {manufacturer_code, rest} = String.split_at(rest, 5)
+        {product_code, rest} = String.split_at(rest, 5)
+        {check_digit, ""} = String.split_at(rest, 1)
+
+        "#{units_in_package} #{country_code} #{manufacturer_code} #{product_code} #{check_digit}"
+
+      _other ->
+        ean
     end
   end
 

@@ -276,8 +276,11 @@ defmodule PriceSpotterWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 rounded-lg py-2 px-3",
+        "bg-transparent hover:bg-zinc-300",
+        "border-1 border-zinc-300",
+        "text-sm font-semibold leading-6",
+        "text-zinc-700 dark:text-zinc-200",
         @class
       ]}
       {@rest}
@@ -355,7 +358,7 @@ defmodule PriceSpotterWeb.CoreComponents do
 
     ~H"""
     <div phx-feedback-for={@name}>
-      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+      <label class="flex items-center gap-4 text-xs leading-6 text-zinc-700 dark:text-zinc-300">
         <input type="hidden" name={@name} value="false" />
         <input
           type="checkbox"
@@ -363,7 +366,7 @@ defmodule PriceSpotterWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class={"rounded focus:ring-0 checkbox #{@class}"}
+          class={"rounded focus:ring-0 checkbox #{@class} cursor-pointer"}
           {@rest}
         />
         <%= @label %>
