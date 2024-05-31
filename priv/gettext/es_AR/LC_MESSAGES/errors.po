@@ -131,7 +131,7 @@ msgstr "debe contener entre %{min} y %{max} caracteres"
 msgid "is not valid"
 msgstr "no es válido"
 
-#: lib/price_spotter/marketplaces/product.ex:153
+#: lib/price_spotter/marketplaces/product.ex:155
 #, elixir-autogen, elixir-format
 msgid "must be %{x}, %{y}, or %{z} characters long"
 msgstr "debe contener %{x}, %{y} o %{z} caracteres"
