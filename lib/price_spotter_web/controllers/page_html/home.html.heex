@@ -7,50 +7,53 @@
     class="absolute inset-0 h-full w-full"
     preserveAspectRatio="xMinYMid slice"
   >
-    <path fill="#EE7868" d="M0 0h1480v957H0z" />
+    <path
+      class="fill-red-100 stroke-red-100 stroke-1 dark:fill-red-900 dark:stroke-red-900"
+      d="M0 0h1480v957H0z"
+    />
     <path
       d="M137.542 466.27c-582.851-48.41-988.806-82.127-1608.412 658.2l67.39 810 3083.15-256.51L1535.94-49.622l-98.36 8.183C1269.29 281.468 734.115 515.799 146.47 467.012l-8.928-.742Z"
-      fill="#FF9F92"
+      class="fill-red-200 stroke-red-200 stroke-1 dark:fill-red-800 dark:stroke-red-800"
     />
     <path
       d="M371.028 528.664C-169.369 304.988-545.754 149.198-1361.45 665.565l-182.58 792.025 3014.73 694.98 389.42-1689.25-96.18-22.171C1505.28 697.438 924.153 757.586 379.305 532.09l-8.277-3.426Z"
-      fill="#FA8372"
+      class="fill-red-300 stroke-red-300 stroke-1 dark:fill-red-700 dark:stroke-red-700"
     />
     <path
       d="M359.326 571.714C-104.765 215.795-428.003-32.102-1349.55 255.554l-282.3 1224.596 3047.04 722.01 312.24-1354.467C1411.25 1028.3 834.355 935.995 366.435 577.166l-7.109-5.452Z"
-      fill="#E96856"
-      fill-opacity=".6"
+      class="fill-red-400 stroke-red-400 stroke-1 dark:fill-red-600 dark:stroke-red-600"
     />
     <path
       d="M1593.87 1236.88c-352.15 92.63-885.498-145.85-1244.602-613.557l-5.455-7.105C-12.347 152.31-260.41-170.8-1225-131.458l-368.63 1599.048 3057.19 704.76 130.31-935.47Z"
-      fill="#C42652"
-      fill-opacity=".2"
+      class="fill-red-500/60 stroke-red-500/60 stroke-1 dark:fill-red-500/60 dark:stroke-red-500/60"
     />
     <path
       d="M1411.91 1526.93c-363.79 15.71-834.312-330.6-1085.883-863.909l-3.822-8.102C72.704 125.95-101.074-242.476-1052.01-408.907l-699.85 1484.267 2837.75 1338.01 326.02-886.44Z"
-      fill="#A41C42"
-      fill-opacity=".2"
+      class="fill-red-400/50 stroke-red-400/20 stroke-1 dark:fill-red-600/50 dark:stroke-red-600/20"
     />
     <path
       d="M1116.26 1863.69c-355.457-78.98-720.318-535.27-825.287-1115.521l-1.594-8.816C185.286 163.833 112.786-237.016-762.678-643.898L-1822.83 608.665 571.922 2635.55l544.338-771.86Z"
-      fill="#A41C42"
-      fill-opacity=".2"
+      class="fill-red-300/40 stroke-red-300/20 stroke-1 dark:fill-red-700/40 dark:stroke-red-700/20"
     />
   </svg>
 </div>
-<div class="px-4 py-10 sm:px-6 sm:py-28 lg:px-8 xl:px-28 xl:py-32">
+<div class="px-4 py-10 sm:px-6 sm:py-28 lg:px-8 xl:px-28 xl:py-32 cursor-default">
   <div class="mx-auto max-w-xl lg:mx-0">
     <img src={~p"/images/logo.svg"} width="128" />
     <h1 class="text-brand mt-10 flex items-center text-sm font-semibold leading-6">
       <%= gettext("Price Spotter") %>
-      <small class="bg-brand/5 text-[0.8125rem] ml-3 rounded-full px-2 font-medium leading-6">
+      <small class="
+        bg-brand/5 dark:bg-brand/5
+        text-[0.8125rem] ml-3 rounded-full px-2 font-medium leading-6
+        hover:bg-zinc-50 hover:dark:bg-zinc-900 transition-colors duration-500
+      ">
         v<%= Application.spec(:price_spotter, :vsn) %>
       </small>
     </h1>
-    <p class="text-[2rem] mt-4 font-semibold leading-10 tracking-tighter text-zinc-900">
+    <p class="text-[2rem] mt-4 font-semibold leading-10 tracking-tighter text-zinc-900 dark:text-zinc-100">
       <%= gettext("Wholesaler products and prices") %>
     </p>
-    <p class="mt-4 text-base leading-7 text-zinc-600">
+    <p class="mt-4 text-base leading-7 text-zinc-600 dark:text-zinc-400">
       <%= gettext(
         "Search, filter and export products and prices from suppliers to your spreadsheets."
       ) %>
@@ -62,11 +65,22 @@
             href={~p"/admin/marketplaces/products"}
             class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
           >
-            <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
+            <span class="
+              absolute inset-0 rounded-2xl
+              bg-zinc-200 dark:bg-zinc-800
+              transition
+              group-hover:bg-zinc-300 group-hover:dark:bg-zinc-700
+              sm:group-hover:scale-105
+            ">
             </span>
             <span class="relative flex items-center gap-4 sm:flex-col">
-              <.icon name="hero-shopping-bag-solid" class="h-7 w-7" />
-              <%= gettext("Products") %>
+              <.icon
+                name="hero-shopping-bag-solid"
+                class="h-7 w-7 group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300"
+              />
+              <span class="group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300">
+                <%= gettext("Products") %>
+              </span>
             </span>
           </a>
           <%= if @current_user && @current_user.role in [:admin] do %>
@@ -74,33 +88,66 @@
               href={~p"/admin/accounts/users"}
               class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
             >
-              <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
+              <span class="
+                absolute inset-0 rounded-2xl
+                bg-zinc-200 dark:bg-zinc-800
+                transition
+                group-hover:bg-zinc-300 group-hover:dark:bg-zinc-700
+                sm:group-hover:scale-105
+              ">
               </span>
               <span class="relative flex items-center gap-4 sm:flex-col">
-                <.icon name="hero-user-solid" class="h-7 w-7" />
-                <%= gettext("Users") %>
+                <.icon
+                  name="hero-user-solid"
+                  class="h-7 w-7 group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300"
+                />
+                <span class="group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300">
+                  <%= gettext("Users") %>
+                </span>
               </span>
             </a>
             <a
               href={~p"/admin/marketplaces/suppliers"}
               class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
             >
-              <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
+              <span class="
+                absolute inset-0 rounded-2xl
+                bg-zinc-200 dark:bg-zinc-800
+                transition
+                group-hover:bg-zinc-300 group-hover:dark:bg-zinc-700
+                sm:group-hover:scale-105
+              ">
               </span>
               <span class="relative flex items-center gap-4 sm:flex-col">
-                <.icon name="hero-building-storefront-solid" class="h-7 w-7" />
-                <%= gettext("Suppliers") %>
+                <.icon
+                  name="hero-building-storefront-solid"
+                  class="h-7 w-7 group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300"
+                />
+                <span class="group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300">
+                  <%= gettext("Suppliers") %>
+                </span>
               </span>
             </a>
             <a
               href={~p"/admin/marketplaces/users_suppliers"}
               class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
             >
-              <span class="absolute inset-0 rounded-2xl bg-zinc-50 transition group-hover:bg-zinc-100 sm:group-hover:scale-105">
+              <span class="
+                absolute inset-0 rounded-2xl
+                bg-zinc-200 dark:bg-zinc-800
+                transition
+                group-hover:bg-zinc-300 group-hover:dark:bg-zinc-700
+                sm:group-hover:scale-105
+              ">
               </span>
               <span class="relative flex items-center gap-4 sm:flex-col">
-                <.icon name="hero-lock-open-solid" class="h-7 w-7" />
-                <%= gettext("Users Suppliers") %>
+                <.icon
+                  name="hero-lock-open-solid"
+                  class="h-7 w-7 group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300"
+                />
+                <span class="group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300">
+                  <%= gettext("Users Suppliers") %>
+                </span>
               </span>
             </a>
           <% end %>

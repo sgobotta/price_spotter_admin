@@ -24,7 +24,7 @@
                 />
               </svg>
             </:toggle>
-            <ul class="mt-1 border shadow-outer-md menu bg-zinc-100 border-base-300 w-64 rounded-b-md rounded-md">
+            <ul class="mt-1 border border-zinc-300 dark:border-zinc-700 shadow-outer-md menu bg-zinc-100 dark:bg-zinc-900 border-base-300 w-64 rounded-b-md rounded-md">
               <li>
                 <div class="py-3">
                   <div class="px-1">
@@ -48,14 +48,14 @@
                         checked={true}
                       />
 
-                      <div class="border-b-1 border-zinc-300 mb-2 text-zinc-500 text-sm pb-2 cursor-default">
+                      <div class="border-b-1 border-zinc-300 dark:border-zinc-700 mb-2 text-zinc-500 text-sm pb-2 cursor-default">
                         <h3 class="text-sm pl-2">
                           <%= gettext("Export") %>
                         </h3>
                       </div>
 
                       <%= for %{name: name, label: label} <- get_columns() do %>
-                        <div class="p-1 hover:bg-zinc-200 rounded-md">
+                        <div class="p-1 hover:bg-zinc-200 hover:dark:bg-zinc-800 rounded-md">
                           <.input
                             type="checkbox"
                             field={f[name]}
@@ -73,7 +73,7 @@
                         class="gap-y-4"
                       />
 
-                      <div class="border-b-1 border-zinc-300 my-2" />
+                      <div class="border-b-1 border-zinc-300 dark:border-zinc-700 my-2" />
 
                       <div class="p-1">
                         <.input
@@ -128,12 +128,12 @@
         path={~p"/admin/marketplaces/products"}
         opts={[
           symbol_asc: ~H"""
-          <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-gray-500" />
+          <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-500" />
           """,
           symbol_desc: ~H"""
           <.icon
             name="hero-chevron-down-solid"
-            class="h-3 w-3 sm:h-5 sm:w-5 text-gray-500"
+            class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-500"
           />
           """,
           thead_attrs: [
@@ -141,12 +141,14 @@
           ],
           thead_th_attrs: [
             class:
-              "bg-gray-200 dark:bg-gray-800 hover:underline underline-offset-4"
+              "bg-zinc-100 dark:bg-zinc-900 hover:underline underline-offset-4"
           ],
           thead_tr_attrs: [class: "text-xs sm:text-base border-0"],
-          tbody_tr_attrs: [class: "group hover:bg-gray-300"],
+          tbody_tr_attrs: [
+            class: "group hover:bg-zinc-300 hover:dark:bg-zinc-700"
+          ],
           tbody_td_attrs: [
-            class: "group-hover:text-black"
+            class: "group-hover:text-zinc-900 dark:group-hover:text-zinc-500"
           ]
         ]}
       >
@@ -155,7 +157,7 @@
           label={gettext("Product")}
           field={:name}
           col_style="width: 30%;"
-          tbody_td_attrs={[class: "text-xs sm:text-xs text-red-500"]}
+          tbody_td_attrs={[class: "text-xs sm:text-xs"]}
         >
           <div><%= product.name %></div>
         </:col>
@@ -170,7 +172,7 @@
             <div class={"
               text-sm flex rounded-lg text-center font-medium w-fit px-1
               shadow-inner-lg border-[1px]
-              text-gray-600 dark:text-gray-400
+              text-zinc-600 dark:text-zinc-400
               #{if product.price == nil,
                 do: "bg-yellow-200 border-yellow-300",
                 else: "bg-green-200 border-green-300"}
@@ -205,7 +207,7 @@
           col_style="width: 15%;"
         >
           <div class="flex text-xs justify-center text-center">
-            <span class="bg-red-100 rounded-md px-1 shadow-inner-lg border-[1px] border-red-200">
+            <span class="bg-red-100 rounded-md px-1 shadow-inner-lg border-[1px] border-red-200 text-zinc-500">
               <%= String.replace(product.supplier_name, "-", " ") %>
             </span>
           </div>
@@ -217,7 +219,7 @@
           col_style="width: 20%;"
         >
           <div class="flex text-xs justify-center text-center">
-            <span class="bg-blue-100 rounded-md px-1 shadow-inner-lg border-[1px] border-blue-200">
+            <span class="bg-blue-100 rounded-md px-1 shadow-inner-lg border-[1px] border-blue-200 text-zinc-500">
               <%= maybe_render_category(product.category) %>
             </span>
           </div>

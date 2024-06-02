@@ -58,7 +58,7 @@ table.table {
 }
 
 table.table thead {
-  @apply text-base h-14 text-black font-medium !important;
+  @apply text-base h-14 text-zinc-900 dark:text-zinc-100 font-medium !important;
 }
 
 table.table thead.thead-container {
@@ -70,7 +70,7 @@ table.table thead tr th {
 }
 
 table.table tbody tr {
-  @apply px-4 h-16 cursor-pointer border-b-1 border-dashed border-gray-300 hover:shadow-lg transition duration-200 hover:scale-[1.001] rounded-lg hover:text-gray-50;
+  @apply px-4 h-16 cursor-pointer border-b-1 border-dashed border-zinc-300 dark:border-zinc-700 hover:shadow-lg transition duration-200 hover:scale-[1.001] rounded-lg hover:text-zinc-100 hover:dark:text-zinc-900;
 }
 
 table.table tbody tr:nth-child(odd) {
@@ -82,7 +82,7 @@ table.table tbody tr:nth-child(even) {
 }
 
 table.table tbody tr td {
-  @apply p-1 text-zinc-700 border-0;
+  @apply p-1 text-zinc-700 dark:text-zinc-300 border-0;
 }
 
 table.table tbody tr td:first-child {
@@ -110,7 +110,7 @@ input {
 }
 
 input, select {
-  @apply focus:ring-1 focus:ring-sky-500 bg-zinc-50 shadow-inner-lg h-10 focus:shadow-2xl active:shadow-2xl focus:bg-zinc-100 active:bg-zinc-100 border-[1px] border-zinc-300 !important;
+  @apply focus:ring-1 focus:ring-sky-500 bg-zinc-100 dark:bg-zinc-900 shadow-inner-lg h-10 focus:shadow-lg active:shadow-lg focus:bg-zinc-200 active:bg-zinc-200 focus:dark:bg-zinc-800 active:dark:bg-zinc-800 border-0 !important;
 }
 
 .shadow-inner-lg {
@@ -120,7 +120,7 @@ input, select {
 }
 
 .checkbox {
-  @apply block w-6 h-6 ring-1 ring-gray-300 ring-offset-gray-300 focus:ring-1 focus:ring-gray-300 focus:ring-offset-gray-300 focus:outline focus:outline-1 !important;
+  @apply block w-6 h-6 ring-1 ring-zinc-300 dark:ring-zinc-700 ring-offset-zinc-300 dark:ring-offset-zinc-700 focus:ring-1 focus:ring-zinc-300 focus:ring-offset-zinc-300 focus:dark:ring-zinc-700 focus:dark:ring-offset-zinc-700 focus:outline focus:outline-1 !important;
 }
 
 label + .checkbox {
@@ -131,7 +131,7 @@ input[type=checkbox]:checked.checkbox.warn {
 }
 
 input[type=checkbox] {
-  @apply bg-zinc-50 border-none rounded-lg text-sky-500 transition transform duration-200;
+  @apply bg-zinc-100 dark:bg-zinc-900 border-none rounded-lg text-sky-500 transition transform duration-200;
 }
 
 input[type=checkbox]:hover {
@@ -139,7 +139,7 @@ input[type=checkbox]:hover {
 }
 
 input[type=checkbox]:focus {
-  @apply bg-zinc-50 border-none rounded-lg;
+  @apply bg-zinc-100 dark:bg-zinc-900 border-none rounded-lg;
 }
 
 input[type=checkbox]:checked {
@@ -159,10 +159,9 @@ nav.pagination {
 }
 
 .pressable {
-  @apply transition-shadow duration-200 shadow-outer-sm dark:shadow-outer-sm hover:shadow-outer-xs hover:dark:shadow-outer-xs active:shadow-inner-xs active:dark:shadow-inner-xs active:bg-gray-300/50 active:dark:bg-gray-500/50 rounded-full active:text-gray-700 
+  @apply transition-shadow duration-200 shadow-outer-sm dark:shadow-outer-sm hover:shadow-outer-xs hover:dark:shadow-outer-xs active:shadow-inner-xs active:dark:shadow-inner-xs active:bg-zinc-300/50 active:dark:bg-zinc-500/50 rounded-full active:text-zinc-700 
 }
 
 .navigation-btn {
-  @apply text-sm font-semibold leading-6 transition-colors duration-500 text-gray-600 dark:text-gray-400;
-
+  @apply text-sm font-semibold leading-6 transition-colors duration-500 text-zinc-600 dark:text-zinc-400;
 }
