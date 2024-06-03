@@ -58,4 +58,40 @@ defmodule PriceSpotterWeb.CustomComponents do
     </div>
     """
   end
+
+  attr :icon, :string, required: true
+  attr :name, :string, required: true
+  attr :navigate_to, :string, required: true
+  @doc """
+  Renders a shortcut button that navigates to a site section.
+  """
+  def home_shortcut(assigns) do
+    ~H"""
+    <a
+      href={@navigate_to}
+      class="group relative rounded-2xl px-6 py-4 text-sm font-semibold leading-6 text-zinc-900 sm:py-6 text-center"
+    >
+      <span class="
+        absolute inset-0 rounded-2xl
+        bg-zinc-100 dark:bg-zinc-900
+        border-[1px] dark:border-[1px] border-dashed
+        border-zinc-400 dark:border-zinc-600
+        transition
+        group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800
+        group-hover:border-none
+        sm:group-hover:scale-[1.03]
+      ">
+      </span>
+      <span class="relative flex items-center gap-4 sm:flex-col">
+        <CoreComponents.icon
+          name={@icon}
+          class="h-7 w-7 group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300"
+        />
+        <span class="group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300">
+          <%= @name %>
+        </span>
+      </span>
+    </a>
+    """
+  end
 end
