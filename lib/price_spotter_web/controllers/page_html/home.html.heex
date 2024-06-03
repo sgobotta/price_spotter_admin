@@ -62,23 +62,23 @@
       <div class="w-full sm:w-auto">
         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
           <.home_shortcut
-            icon={"hero-shopping-bag-solid"}
+            icon="hero-shopping-bag-solid"
             name={gettext("Products")}
             navigate_to={~p"/admin/marketplaces/products"}
           />
           <%= if @current_user && @current_user.role in [:admin] do %>
             <.home_shortcut
-              icon={"hero-user-solid"}
+              icon="hero-user-solid"
               name={gettext("Users")}
               navigate_to={~p"/admin/accounts/users"}
             />
             <.home_shortcut
-              icon={"hero-building-storefront-solid"}
+              icon="hero-building-storefront-solid"
               name={gettext("Suppliers")}
               navigate_to={~p"/admin/marketplaces/suppliers"}
             />
             <.home_shortcut
-              icon={"hero-lock-open-solid"}
+              icon="hero-lock-open-solid"
               name={gettext("Users Suppliers")}
               navigate_to={~p"/admin/marketplaces/users_suppliers"}
             />

@@ -62,6 +62,7 @@ defmodule PriceSpotterWeb.CustomComponents do
   attr :icon, :string, required: true
   attr :name, :string, required: true
   attr :navigate_to, :string, required: true
+
   @doc """
   Renders a shortcut button that navigates to a site section.
   """
