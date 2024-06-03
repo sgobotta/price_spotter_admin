@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   # This action is triggered on any branch that opens a pull request.
   push:
     branches:
