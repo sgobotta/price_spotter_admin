@@ -80,15 +80,15 @@ defmodule PriceSpotterWeb.CustomComponents do
         transition
         group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800
         group-hover:border-none
-        sm:group-hover:scale-[1.03]
+        sm:group-hover:scale-[1.02]
       ">
       </span>
       <span class="relative flex items-center gap-4 sm:flex-col">
         <CoreComponents.icon
           name={@icon}
-          class="h-7 w-7 group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300"
+          class="h-7 w-7 group-hover:text-brand text-zinc-600 dark:text-zinc-400 transition-all duration-300"
         />
-        <span class="group-hover:text-brand text-zinc-900 dark:text-zinc-100 transition-all duration-300">
+        <span class="group-hover:text-brand text-zinc-500 dark:text-zinc-500 transition-all duration-300">
           <%= @name %>
         </span>
       </span>
