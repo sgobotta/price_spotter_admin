@@ -171,7 +171,7 @@ defmodule PriceSpotterWeb.CoreComponents do
       <p class="mt-2 text-sm leading-5"><%= msg %></p>
       <button
         type="button"
-        class="group absolute top-1 right-1 p-2"
+        class="group absolute top-1 right-1 p-2 hover:bg-transparent hover:dark:bg-transparent"
         aria-label={gettext("close")}
       >
         <.icon
@@ -277,10 +277,7 @@ defmodule PriceSpotterWeb.CoreComponents do
       type={@type}
       class={[
         "phx-submit-loading:opacity-75 rounded-lg py-2 px-3",
-        "bg-transparent hover:bg-zinc-300 hover:dark:bg-zinc-700",
-        "border-1 border-zinc-300 dark:border-zinc-700 hover:border-zinc-300 hover:dark:border-zinc-700",
         "text-sm font-semibold leading-6",
-        "text-zinc-700 dark:text-zinc-200",
         @class
       ]}
       {@rest}
@@ -491,10 +488,13 @@ defmodule PriceSpotterWeb.CoreComponents do
       @class
     ]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-200">
           <%= render_slot(@inner_block) %>
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+        <p
+          :if={@subtitle != []}
+          class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400"
+        >
           <%= render_slot(@subtitle) %>
         </p>
       </div>
