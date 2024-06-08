@@ -73,7 +73,7 @@ defmodule PriceSpotterWeb.CoreComponents do
     >
       <div
         id={"#{@id}-bg"}
-        class="bg-zinc-100/90 dark:bg-zinc-900/90 fixed inset-0 transition-opacity"
+        class="bg-zinc-100/90 dark:bg-zinc-800/90 fixed inset-0 transition-opacity"
         aria-hidden="true"
       />
       <div
@@ -91,13 +91,13 @@ defmodule PriceSpotterWeb.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 p-14 shadow-lg ring-1 transition"
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 p-14 shadow-lg ring-1 transition dark:border-1 dark:border-zinc-500"
             >
               <div class="absolute top-6 right-5">
                 <button
                   phx-click={JS.exec("data-cancel", to: "##{@id}")}
                   type="button"
-                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40 text-zinc-900 dark:text-zinc-100"
+                  class="-m-3 flex-none p-3 opacity-20 hover:!text-zinc-800 hover:dark:!text-zinc-100 text-zinc-800 dark:text-zinc-100 rounded-full cursor-default"
                   aria-label={gettext("close")}
                 >
                   <.icon name="hero-x-mark-solid" class="h-5 w-5" />
@@ -144,7 +144,7 @@ defmodule PriceSpotterWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
+        "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1 cursor-default",
         @kind == :info &&
           "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
         @kind == :error &&
@@ -171,13 +171,10 @@ defmodule PriceSpotterWeb.CoreComponents do
       <p class="mt-2 text-sm leading-5"><%= msg %></p>
       <button
         type="button"
-        class="group absolute top-1 right-1 p-2"
+        class="group absolute top-1 right-1 m-2 hover:!bg-transparent hover:dark:!bg-transparent !border-0 cursor-default"
         aria-label={gettext("close")}
       >
-        <.icon
-          name="hero-x-mark-solid"
-          class="h-5 w-5 opacity-40 group-hover:opacity-70"
-        />
+        <.icon name="hero-x-mark-solid" class="h-5 w-5" />
       </button>
     </div>
     """
@@ -277,10 +274,7 @@ defmodule PriceSpotterWeb.CoreComponents do
       type={@type}
       class={[
         "phx-submit-loading:opacity-75 rounded-lg py-2 px-3",
-        "bg-transparent hover:bg-zinc-300 hover:dark:bg-zinc-700",
-        "border-1 border-zinc-300 dark:border-zinc-700 hover:border-zinc-300 hover:dark:border-zinc-700",
         "text-sm font-semibold leading-6",
-        "text-zinc-700 dark:text-zinc-200",
         @class
       ]}
       {@rest}
@@ -383,7 +377,7 @@ defmodule PriceSpotterWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-1 block w-full rounded-md border border-zinc-300 bg-white shadow-sm dark:shadow-2xl focus:border-zinc-400 focus:ring-0 sm:text-sm"
+        class="mt-1 block w-full rounded-md border border-zinc-300 shadow-sm dark:shadow-2xl focus:border-zinc-400 focus:ring-0 sm:text-sm"
         multiple={@multiple}
         {@rest}
       >
@@ -403,7 +397,7 @@ defmodule PriceSpotterWeb.CoreComponents do
         id={@id}
         name={@name}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
+          "mt-2 block w-full rounded-lg text-zinc-700 dark:text-zinc-300 focus:ring-0 sm:text-sm sm:leading-6",
           "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
           "min-h-[6rem] border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
@@ -432,7 +426,7 @@ defmodule PriceSpotterWeb.CoreComponents do
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 dark:text-zinc-100 focus:ring-0 sm:text-sm sm:leading-6",
+          "mt-2 block w-full rounded-lg text-zinc-700 dark:text-zinc-300 focus:ring-0 sm:text-sm sm:leading-6",
           "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
           "border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
@@ -491,10 +485,13 @@ defmodule PriceSpotterWeb.CoreComponents do
       @class
     ]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-200">
           <%= render_slot(@inner_block) %>
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+        <p
+          :if={@subtitle != []}
+          class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400"
+        >
           <%= render_slot(@subtitle) %>
         </p>
       </div>

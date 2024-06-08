@@ -20,9 +20,11 @@ module.exports = {
         '24': '24px'
       },
       boxShadow: {
+        'inner-inverted': 'inset 0 2px 4px 0 rgb(255 255 255 / 0.05)',
         'inner-md': 'inset 0 8px 8px 0 rgb(107 114 128 / 0.5)',
         'inner-sm': 'inset 0 6px 6px 0 rgb(107 114 128 / 0.5)',
         'inner-xs': 'inset 4px 4px 4px 2px rgb(107 114 128 / 0.5)',
+        'inner-xs-inverted': 'inset 4px 4px 4px 2px rgb(18 20 18 / 0.5)',
         'outer-md': '0 0 4px 2px rgb(107 114 128 / 0.5)',
         'outer-sm': '0 0 3px 2px rgb(107 114 128 / 0.5)',
         'outer-xs': '0 0 2px 1px rgb(107 114 128 / 0.5)'

@@ -1,21 +1,17 @@
 body {
-  @apply selection:bg-zinc-900 selection:text-zinc-100 dark:selection:bg-zinc-100 dark:selection:text-zinc-900;
+  @apply selection:bg-zinc-800 selection:text-zinc-100 dark:selection:bg-zinc-100 dark:selection:text-zinc-800;
 }
 
 .main-bg {
-  @apply bg-zinc-100 dark:bg-zinc-900;
+  @apply bg-zinc-100 dark:bg-zinc-800;
 }
 
 .header-bg {
-  @apply bg-zinc-100/25 dark:bg-zinc-900/25;
+  @apply bg-zinc-100/25 dark:bg-zinc-800/25;
 }
 
 .card-bg {
-  @apply bg-zinc-50 dark:bg-zinc-800;
-}
-
-.input-bg {
-  @apply bg-zinc-100 dark:bg-zinc-900;
+  @apply bg-zinc-50 dark:bg-zinc-700;
 }
 
 .blur-bg {
@@ -23,7 +19,7 @@ body {
 }
 
 .search-item-bg {
-  @apply hover:bg-slate-200 hover:dark:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-900
+  @apply hover:bg-zinc-200 hover:dark:bg-zinc-700 focus:bg-zinc-100 dark:focus:bg-zinc-800
 }
 
 .link-colors {
@@ -39,5 +35,5 @@ table tbody tr th, table tbody tr td {
 }
 
 input {
-  @apply input-bg border-zinc-200 hover:border-zinc-200 focus:border-zinc-200 dark:border-zinc-800 hover:dark:border-zinc-800 dark:focus:border-zinc-800 ring-0 !important;
+  @apply border-zinc-200 hover:border-zinc-200 focus:border-zinc-200 dark:border-zinc-700 hover:dark:border-zinc-700 dark:focus:border-zinc-700 ring-0 !important;
 }

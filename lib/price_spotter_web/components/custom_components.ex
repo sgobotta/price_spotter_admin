@@ -74,11 +74,11 @@ defmodule PriceSpotterWeb.CustomComponents do
     >
       <span class="
         absolute inset-0 rounded-2xl
-        bg-zinc-100 dark:bg-zinc-900
+        bg-zinc-100 dark:bg-zinc-800
         border-[1px] dark:border-[1px] border-dashed
         border-zinc-400 dark:border-zinc-600
-        transition
-        group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800
+        transition duration-500
+        group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700
         group-hover:border-none
         sm:group-hover:scale-[1.02]
       ">
