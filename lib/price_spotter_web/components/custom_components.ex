@@ -8,9 +8,6 @@ defmodule PriceSpotterWeb.CustomComponents do
 
   import PriceSpotterWeb.Gettext
 
-  attr :has_code, :boolean, required: true
-  attr :ean, :string, required: true
-
   def no_results_found(assigns) do
     ~H"""
     <div class="flex items-center justify-center">
@@ -23,6 +20,9 @@ defmodule PriceSpotterWeb.CustomComponents do
     </div>
     """
   end
+
+  attr :has_code, :boolean, required: true
+  attr :ean, :string, required: true
 
   def render_ean(assigns) do
     ~H"""
