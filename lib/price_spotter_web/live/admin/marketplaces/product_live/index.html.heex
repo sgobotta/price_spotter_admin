@@ -127,6 +127,9 @@
         meta={@meta}
         path={~p"/admin/marketplaces/products"}
         opts={[
+          no_results_content: ~H"""
+          <.no_results_found />
+          """,
           symbol_asc: ~H"""
           <.icon name="hero-chevron-up-solid" class="h-3 w-3 sm:h-5 sm:w-5 text-zinc-500" />
           """,

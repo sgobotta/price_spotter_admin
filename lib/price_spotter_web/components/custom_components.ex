@@ -6,6 +6,21 @@ defmodule PriceSpotterWeb.CustomComponents do
   alias Phoenix.LiveView.JS
   alias PriceSpotterWeb.CoreComponents
 
+  import PriceSpotterWeb.Gettext
+
+  def no_results_found(assigns) do
+    ~H"""
+    <div class="flex items-center justify-center">
+      <CoreComponents.icon
+        id="products-not-found"
+        name="hero-magnifying-glass"
+        class="text-black dark:text-white h-5 w-5 mx-2"
+      />
+      <span><%= gettext("No products found.") %></span>
+    </div>
+    """
+  end
+
   attr :has_code, :boolean, required: true
   attr :ean, :string, required: true
 

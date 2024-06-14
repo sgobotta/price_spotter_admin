@@ -49,7 +49,7 @@
         </h2>
         <h3 class="mt-2 text-xl font-bold text-orange-500 text-left cursor-text">
         </h3>
-        <li class="flex border-0 py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-700 items-center justify-between">
+        <li class="flex border-0 py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 items-center justify-between">
           <div class="md:w-1/3 grid place-items-center">
             <img src={@product.img_url} class="rounded-lg" />
           </div>
@@ -75,7 +75,7 @@
             </div>
           <% end %>
         </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-700 justify-between">
+        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
           <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
             <%= gettext("Supplier") %>
           </span>
@@ -85,7 +85,7 @@
             </div>
           </span>
         </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-700 justify-between">
+        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
           <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
             <%= gettext("Category") %>
           </span>
@@ -95,7 +95,7 @@
             </div>
           </span>
         </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-700 justify-between">
+        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
           <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
             <%= gettext("Price") %>
           </span>
@@ -112,7 +112,7 @@
             </div>
           </span>
         </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-700 justify-between">
+        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
           <div>
             <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
               <%= gettext("EAN") %>
@@ -151,7 +151,7 @@
             </div>
           <% end %>
         </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-700 justify-end">
+        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-end">
           <a
             href={@product.supplier_url}
             target="_blank"
@@ -176,6 +176,8 @@
       <div class="inline-flex w-full justify-evenly font-normal text-zinc-600 dark:text-zinc-400">
         <button
           class={"
+            !shadow-none hover:!shadow-none focus:!shadow-none active:!shadow-none !border-0
+            hover:!bg-transparent focus:!bg-transparent active:!bg-transparent
             #{if @interval == :daily,
               do: "text-base text-zinc-500 font-semibold",
               else: "text-sm hover:text-zinc-500 hover:dark:text-zinc-500 transition-colors duration-500"
@@ -188,6 +190,8 @@
         </button>
         <button
           class={"
+            !shadow-none hover:!shadow-none focus:!shadow-none active:!shadow-none !border-0
+            hover:!bg-transparent focus:!bg-transparent active:!bg-transparent
             #{if @interval == :weekly,
               do: "text-base text-zinc-500 font-semibold",
               else: "text-sm hover:text-zinc-500 hover:dark:text-zinc-500 transition-colors duration-500"
@@ -200,6 +204,8 @@
         </button>
         <button
           class={"
+            !shadow-none hover:!shadow-none focus:!shadow-none active:!shadow-none !border-0
+            hover:!bg-transparent focus:!bg-transparent active:!bg-transparent
             #{if @interval == :monthly,
               do: "text-base text-zinc-500 font-semibold",
               else: "text-sm hover:text-zinc-500 hover:dark:text-zinc-500 transition-colors duration-500"
