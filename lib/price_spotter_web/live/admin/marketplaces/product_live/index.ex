@@ -131,7 +131,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   defp assign_selection_options(socket) do
     socket
-    |> assign(:product_categories, Marketplaces.list_product_categories())
+    |> assign(
+      :product_categories,
+      Marketplaces.list_product_categories_by_user(socket.assigns.current_user)
+      |> Enum.filter(fn category -> category != nil end)
+    )
     |> assign(
       :product_suppliers,
       Marketplaces.list_suppliers_by_user(socket.assigns.current_user)
