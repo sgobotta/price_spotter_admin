@@ -43,7 +43,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _uri, socket) do
+  def handle_params(%{"id" => id}, _uri, %Phoenix.LiveView.Socket{} = socket) do
+    session = Map.get(socket.private.connect_info, :session)
+    IO.inspect(session, label: "///")
+    IO.inspect(NavigationHistory.last_path(session, []), label: "session")
     %Marketplaces.Product{
       name: product_name
     } = product = Marketplaces.get_product!(id)

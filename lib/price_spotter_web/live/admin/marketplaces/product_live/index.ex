@@ -10,6 +10,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   def mount(_params, session, socket) do
     socket = assign_defaults(session, socket)
 
+    IO.inspect(session, label: "----------")
+
     {:ok, assign(socket, %{products: nil, meta: nil})}
   end
 

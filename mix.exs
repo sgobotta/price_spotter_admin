@@ -72,7 +72,8 @@ defmodule PriceSpotter.MixProject do
       {:csv, "~> 2.4"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
-      {:tzdata, "~> 1.1"}
+      {:tzdata, "~> 1.1"},
+      {:navigation_history, "~> 0.4"}
     ]
   end
 
