@@ -3,7 +3,7 @@ defmodule PriceSpotterWeb.ExportController do
 
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(
-        conn,
+        %{assigns: %{current_user: current_user}} = conn,
         %{
           "all_pages" => all_pages?,
           "columns" => columns,
@@ -15,7 +15,10 @@ defmodule PriceSpotterWeb.ExportController do
          params <- maybe_put_max_limit(all_pages?, params, max_limit),
          fields <- parse_fields(params, columns),
          {:ok, {products, _meta}} <-
-           PriceSpotter.Marketplaces.list_products(params),
+           PriceSpotter.Marketplaces.list_products_by_user(
+             params,
+             current_user
+           ),
          csv_data <- csv_content(products, fields),
          datetime <- NaiveDateTime.utc_now(),
          filename <- get_filename(datetime) do
