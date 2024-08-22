@@ -4,6 +4,8 @@ defmodule PriceSpotter.Marketplaces.Product do
   import Ecto.Changeset
   import PriceSpotterWeb.Gettext
 
+  require Logger
+
   @max_limit 10_000
   @default_limit 10
 
@@ -149,14 +151,10 @@ defmodule PriceSpotter.Marketplaces.Product do
     if String.length(ean) in @eans_length do
       changeset
     else
-      add_error(
-        changeset,
-        :ean,
-        dgettext("errors", "must be %{x}, %{y}, or %{z} characters long"),
-        x: 8,
-        y: 13,
-        z: 14
-      )
+      Logger.error("Invalid ean for changeset=#{inspect(changeset)}")
+
+      changeset
+      |> Ecto.Changeset.delete_change(:ean)
     end
   end
 end
