@@ -5,8 +5,9 @@ defmodule PriceSpotter.Marketplaces do
 
   import Ecto.Query, warn: false
   alias PriceSpotter.Repo
+  alias PriceSpotter.Repos.MongoRepo
 
-  alias PriceSpotter.Marketplaces.{Product, Relations, Supplier}
+  alias PriceSpotter.Marketplaces.{Product, ProductPrice, Relations, Supplier}
 
   alias Redis.Stream
 
@@ -343,6 +344,10 @@ defmodule PriceSpotter.Marketplaces do
     end
   end
 
+  # ----------------------------------------------------------------------------
+  # Cache queries
+  #
+
   @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) ::
           Redis.Stream.Entry.t() | list() | any()
   def fetch_last_product_entry(stream_key, _count \\ "*") do
@@ -467,6 +472,40 @@ defmodule PriceSpotter.Marketplaces do
   defp get_stream_name(stream_key), do: "#{get_stage()}_stream_#{stream_key}_v1"
 
   defp get_stage, do: PriceSpotter.Application.stage()
+
+  # ----------------------------------------------------------------------------
+  # Products collection operations
+  #
+
+  @doc """
+  Creates a ProductPrice.
+
+  ## Examples
+
+      iex> record_product_price(%ProductPrice{}, %{field: value})
+      {:ok, %ProductPrice{}}
+
+      iex> record_product_price(%ProductPrice{}, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec record_product_price(Product.t()) ::
+          {:ok, ProductPrice.t()} | {:error, Ecto.Changeset.t()}
+  def record_product_price(%Product{id: product_id, price: price}) do
+    attrs = %{
+      timestamp: :os.system_time(:second),
+      price: price,
+      product_id: product_id
+    }
+
+    %ProductPrice{}
+    |> ProductPrice.changeset(attrs)
+    |> MongoRepo.insert()
+  end
+
+  # ----------------------------------------------------------------------------
+  # Suppliers API
+  #
 
   @doc """
   Returns the list of suppliers.
