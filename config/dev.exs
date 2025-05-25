@@ -12,6 +12,11 @@ config :price_spotter, PriceSpotter.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+# Configure mongodb
+config :price_spotter, PriceSpotter.Repos.MongoRepo,
+  adapter: Mongo.Ecto,
+  mongo_url: "mongodb://localhost:27017/price_spotter_dev"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

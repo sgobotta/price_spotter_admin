@@ -10,8 +10,9 @@ defmodule PriceSpotter.Application do
     children = [
       # Start the Telemetry supervisor
       PriceSpotterWeb.Telemetry,
-      # Start the Ecto repository
+      # Start the Ecto repositories
       PriceSpotter.Repo,
+      PriceSpotter.Repos.MongoRepo,
       # Start the PubSub system
       {Phoenix.PubSub, name: PriceSpotter.PubSub},
       # Start Finch

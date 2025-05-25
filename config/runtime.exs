@@ -66,6 +66,11 @@ if config_env() == :prod do
         ],
         url: [host: host, port: 80]
 
+      # Configure mongodb
+      config :price_spotter, PriceSpotter.Repos.MongoRepo,
+        adapter: Mongo.Ecto,
+        mongo_url: System.fetch_env!("MONGODB_URL")
+
     _stage ->
       database_url =
         System.get_env("DATABASE_URL") ||
