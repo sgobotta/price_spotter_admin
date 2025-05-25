@@ -78,8 +78,13 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
   end
 
   defp load_product(%Redis.Stream.Entry{values: values}) do
-    {:ok, _product} =
+    {:ok, product} =
       PriceSpotter.Marketplaces.load_product(values["product_stream_key"])
+
+    Logger.debug("Recording product price for product with id=#{product.id}")
+
+    {:ok, _product_price} =
+      PriceSpotter.Marketplaces.record_product_price(product)
 
     {:ok, :loaded, %{}}
   end
