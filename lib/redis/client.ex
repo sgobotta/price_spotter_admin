@@ -121,7 +121,7 @@ defmodule Redis.Client do
   defp parse_reply({:ok, []}), do: {:error, :no_result}
   defp parse_reply({:ok, _result} = result), do: result
 
-  defp parse_stream_reply(reply) do
+  def parse_stream_reply(reply) do
     with {:ok, entries} <- parse_reply(reply),
          parsed_entries <- parse_stream_entries(entries) do
       {:ok, parsed_entries}
