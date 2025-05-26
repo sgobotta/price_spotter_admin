@@ -193,18 +193,19 @@ defmodule PriceSpotter.Marketplaces do
   products table.
   """
   def load_product(stream_key) do
-    with %Redis.Stream.Entry{} = entry <- fetch_last_product_entry(stream_key),
+    with %Redis.Stream.Entry{id: entry_id} = entry <-
+           fetch_last_product_entry(stream_key),
          %Ecto.Changeset{valid?: true} = cs <- Product.from_entry!(entry) do
       case upsert_product(cs) do
         {:ok, {:updated, p}} ->
           Logger.debug("Updated product product=#{inspect(p)}")
           # Trace updated product
-          {:ok, p}
+          {:ok, p, entry_id}
 
         {:ok, {:created, p}} ->
           Logger.debug("Created product product=#{inspect(p)}")
           # Trace new added product
-          {:ok, p}
+          {:ok, p, entry_id}
       end
     else
       %Ecto.Changeset{valid?: false} = cs ->
@@ -482,18 +483,24 @@ defmodule PriceSpotter.Marketplaces do
 
   ## Examples
 
-      iex> record_product_price(%ProductPrice{}, %{field: value})
+      iex> record_product_price(%ProductPrice{
+        id: "dd5987f0-8d0a-4d08-bd37-c0dabc7a8bf6",
+        price: Decimal.new("240.05")
+      }, 1748226064)
       {:ok, %ProductPrice{}}
 
-      iex> record_product_price(%ProductPrice{}, %{field: bad_value})
+      iex> record_product_price(%ProductPrice{}, 1748226064)
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec record_product_price(Product.t()) ::
+  @spec record_product_price(Product.t(), non_neg_integer()) ::
           {:ok, ProductPrice.t()} | {:error, Ecto.Changeset.t()}
-  def record_product_price(%Product{id: product_id, price: price}) do
+  def record_product_price(
+        %Product{id: product_id, price: price},
+        timestamp \\ :os.system_time(:millisecond)
+      ) do
     attrs = %{
-      timestamp: :os.system_time(:second),
+      timestamp: timestamp,
       price: price,
       product_id: product_id
     }

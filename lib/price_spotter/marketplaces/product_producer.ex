@@ -78,10 +78,12 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
   end
 
   defp load_product(%Redis.Stream.Entry{values: values}) do
-    {:ok, product} =
+    {:ok, product, entry_id} =
       PriceSpotter.Marketplaces.load_product(values["product_stream_key"])
 
     Logger.debug("Recording product price for product with id=#{product.id}")
+
+    timestamp = String.split(entry_id)
 
     {:ok, _product_price} =
       PriceSpotter.Marketplaces.record_product_price(product)
@@ -98,4 +100,12 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
     do: "#{get_stage()}_stream_new-products_#{supplier_id}_v1"
 
   defp get_stage, do: PriceSpotter.Application.stage()
+
+  @spec parse_entry_id(binary()) :: non_neg_integer()
+  defp parse_entry_id(entry_id) do
+    String.split(entry_id, "-")
+    |> hd
+    |> String.to_integer()
+    |> DateTime.from_unix!(:millisecond)
+  end
 end
