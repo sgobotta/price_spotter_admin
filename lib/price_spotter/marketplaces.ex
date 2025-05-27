@@ -7,7 +7,12 @@ defmodule PriceSpotter.Marketplaces do
   alias PriceSpotter.Repo
   alias PriceSpotter.Repos.MongoRepo
 
-  alias PriceSpotter.Marketplaces.{Product, ProductPrice, Relations, Supplier}
+  alias PriceSpotter.Marketplaces.{
+    Product,
+    ProductDocument,
+    Relations,
+    Supplier
+  }
 
   alias Redis.Stream
 
@@ -479,7 +484,54 @@ defmodule PriceSpotter.Marketplaces do
   #
 
   @doc """
-  Creates a ProductPrice.
+  Returns an `%Ecto.Changeset{}` for tracking product document changes.
+
+  ## Examples
+
+      iex> record_price_changeset(%ProductDocument{}, %{
+        price: Decimal.new("240.02), timestamp: :os.system_time()
+      })
+      %Ecto.Changeset{data: %ProductDocument{}}
+
+  """
+  def record_price_changeset(%ProductDocument{} = product_document, attrs) do
+    ProductDocument.record_price_changeset(product_document, attrs)
+  end
+
+  @doc """
+  Gets a single product document or nil .
+
+  ## Examples
+
+      iex> get_product_document_by_id("15521ec8-88bd-438c-b6fc-e6f956cae824")
+      %ProductDocument{}
+
+      iex> get_product_document_by_id!("48ad0f71-33d0-42d8-a6dc-f3f5c530b9aa")
+      nil
+
+  """
+  @spec get_product_document_by_id(Ecto.UUID.t()) :: ProductDocument.t() | nil
+  def get_product_document_by_id(product_id),
+    do: MongoRepo.get_by(ProductDocument, product_id: product_id)
+
+  @doc """
+  Creates a product document or raises.
+
+  ## Examples
+
+      iex> create_product_document("15521ec8-88bd-438c-b6fc-e6f956cae824")
+      %ProductDocument{}
+
+  """
+  @spec create_product_document(Ecto.UUID.t()) :: ProductDocument.t()
+  def create_product_document(product_id) do
+    %ProductDocument{}
+    |> ProductDocument.changeset(%{product_id: product_id})
+    |> MongoRepo.insert!()
+  end
+
+  @doc """
+  Records a price for a `ProductDocument`.
 
   ## Examples
 
@@ -487,9 +539,9 @@ defmodule PriceSpotter.Marketplaces do
         id: "dd5987f0-8d0a-4d08-bd37-c0dabc7a8bf6",
         price: Decimal.new("240.05")
       }, 1748226064)
-      {:ok, %ProductPrice{}}
+      {:ok, %ProductDocument{}}
 
-      iex> record_product_price(%ProductPrice{}, 1748226064)
+      iex> record_product_price(%ProductDocument{}, 1748226064)
       {:error, %Ecto.Changeset{}}
 
   """
@@ -499,15 +551,24 @@ defmodule PriceSpotter.Marketplaces do
         %Product{id: product_id, price: price},
         timestamp \\ :os.system_time(:millisecond)
       ) do
-    attrs = %{
-      timestamp: timestamp,
-      price: price,
-      product_id: product_id
-    }
+    get_or_create = fn product_id ->
+      case get_product_document_by_id(product_id) do
+        nil ->
+          {:ok, create_product_document(product_id)}
 
-    %ProductPrice{}
-    |> ProductPrice.changeset(attrs)
-    |> MongoRepo.insert()
+        %ProductDocument{} = pd ->
+          {:ok, pd}
+      end
+    end
+
+    with {:ok, %ProductDocument{} = pd} <- get_or_create.(product_id),
+         %Ecto.Changeset{valid?: true} = pp_cs <-
+           record_price_changeset(pd, %{price: price, timestamp: timestamp}) do
+      MongoRepo.update(pp_cs)
+    else
+      %Ecto.Changeset{valid?: false} = cs ->
+        {:error, cs}
+    end
   end
 
   # ----------------------------------------------------------------------------
