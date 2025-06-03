@@ -35,6 +35,11 @@ if config_env() == :prod do
   maybe_ipv6 =
     if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
+  # Configure mongodb
+  config :price_spotter, PriceSpotter.Repos.MongoRepo,
+    adapter: Mongo.Ecto,
+    mongo_url: System.fetch_env!("MONGODB_URL")
+
   config :price_spotter, PriceSpotter.Repo,
     # ssl: true,
     # database: "price_spotter_dev",
