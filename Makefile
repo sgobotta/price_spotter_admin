@@ -45,6 +45,10 @@ docker.stop:
 docker.delete:
 	@docker rm price_spotter_app || true
 
+#🐳 docker.logs: @ Show logs for the price_spotter_app docker instance
+docker.logs:
+	@docker logs price_spotter_app -f
+
 #🐳 docker.run: @ Run the price_spotter_app docker instance
 docker.run: PORT:=5000
 docker.run:
