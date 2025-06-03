@@ -9,18 +9,8 @@ defmodule Mix.Tasks.PriceSpotter.Mongo.Migrate do
   """
   use Mix.Task
 
-  require Logger
-
   @impl Mix.Task
   def run(_args) do
-    Logger.info("Creating mongodb indexes...")
-    {:ok, _} = Application.ensure_all_started(:price_spotter)
-
-    Mongo.Ecto.create_indexes(PriceSpotter.Repos.MongoRepo, :products, [
-      %{key: %{product_id: 1}, name: "product_id", unique: true}
-    ])
-
-    Application.stop(:price_spotter)
-    Logger.info("Finished creating mongodb indexes.")
+    PriceSpotter.Mongo.Migrator.migrate()
   end
 end

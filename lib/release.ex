@@ -42,6 +42,12 @@ defmodule PriceSpotter.Release do
       {:ok, _res, _apps} =
         Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
     end
+
+    migrate_mongo()
+  end
+
+  defp migrate_mongo do
+    PriceSpotter.Mongo.Migrator.migrate()
   end
 
   def rollback(repo, version) do
