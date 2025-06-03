@@ -23,6 +23,7 @@ defmodule PriceSpotter.Marketplaces.ProductDocument do
     |> validate_required([
       :product_id
     ])
+    |> unique_constraint(:product_id)
   end
 
   @spec record_price_changeset(t(), map()) :: Ecto.Changeset.t()
