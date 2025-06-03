@@ -96,8 +96,9 @@ defmodule PriceSpotter.MixProject do
       "check.format": ["format --check-formatted"],
       "check.credo": ["credo --strict"],
       "check.dialyzer": ["dialyzer --format dialyxir"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.setup": ["ecto.create", "migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      migrate: ["ecto.migrate", "price_spotter.mongo.migrate"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.install": ["cmd npm i --prefix assets"],
       "assets.setup": [
