@@ -83,10 +83,11 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
 
     Logger.debug("Recording product price for product with id=#{product.id}")
 
-    timestamp = String.split(entry_id)
-
     {:ok, _product_price} =
-      PriceSpotter.Marketplaces.record_product_price(product)
+      PriceSpotter.Marketplaces.record_product_price(
+        product,
+        timestamp_from_entry_id(entry_id)
+      )
 
     {:ok, :loaded, %{}}
   end
@@ -101,11 +102,10 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
 
   defp get_stage, do: PriceSpotter.Application.stage()
 
-  @spec parse_entry_id(binary()) :: non_neg_integer()
-  defp parse_entry_id(entry_id) do
+  @spec timestamp_from_entry_id(binary()) :: non_neg_integer()
+  defp timestamp_from_entry_id(entry_id) do
     String.split(entry_id, "-")
     |> hd
     |> String.to_integer()
-    |> DateTime.from_unix!(:millisecond)
   end
 end

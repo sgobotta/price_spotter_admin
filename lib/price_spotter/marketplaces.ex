@@ -494,6 +494,7 @@ defmodule PriceSpotter.Marketplaces do
       %Ecto.Changeset{data: %ProductDocument{}}
 
   """
+  @spec record_price_changeset(ProductDocument.t(), map()) :: Ecto.Changeset.t()
   def record_price_changeset(%ProductDocument{} = product_document, attrs) do
     ProductDocument.record_price_changeset(product_document, attrs)
   end
