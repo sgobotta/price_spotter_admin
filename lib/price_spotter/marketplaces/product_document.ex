@@ -39,7 +39,7 @@ defmodule PriceSpotter.Marketplaces.ProductDocument do
 
       %Ecto.Changeset{valid?: false} ->
         Logger.error(
-          "Error while validating price to record: invalid `product_price_attrs` value, attrs=#{product_price_attrs}"
+          "Error while validating price to record: invalid `product_price_attrs` value, attrs=#{inspect(product_price_attrs)}"
         )
 
         change(product_document)

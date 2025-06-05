@@ -357,7 +357,8 @@ defmodule PriceSpotter.Marketplaces do
   @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) ::
           Redis.Stream.Entry.t() | list() | any()
   def fetch_last_product_entry(stream_key, _count \\ "*") do
-    stream_name = get_stream_name("product-history_" <> stream_key)
+    product_stream_key = "product-history_" <> stream_key
+    stream_name = get_stream_name(product_stream_key)
 
     case Redis.Client.fetch_last_stream_entry(stream_name) do
       {:ok, %Redis.Stream.Entry{} = entry} ->
@@ -365,7 +366,7 @@ defmodule PriceSpotter.Marketplaces do
 
       error ->
         Logger.error(
-          "An error occured while fetching last product entry from redis for stream_key=#{stream_key}."
+          "An error occured while fetching last product entry from redis for stream_key=#{stream_name}."
         )
 
         error
@@ -376,7 +377,7 @@ defmodule PriceSpotter.Marketplaces do
   Given a supplier name and an internal id for a product, returns a list of
   redis stream entries for all the avaialble historical data.
   """
-  @spec fetch_product_history(String.t(), String.t()) ::
+  @spec fetch_product_history(String.t(), String.t(), atom()) ::
           {:ok, [Redis.Stream.Entry.t()]} | :error
   def fetch_product_history(supplier_name, internal_id, interval \\ :daily) do
     stream_name =
@@ -394,6 +395,44 @@ defmodule PriceSpotter.Marketplaces do
          filtered_entries <- filter_history_entries(entries, interval),
          history <- map_product_history(filtered_entries) do
       {:ok, history}
+    else
+      error ->
+        Logger.error(
+          "An error occured while fetching product history from redis for supplier_name=#{supplier_name} internal_id=#{internal_id} error=#{inspect(error)}"
+        )
+
+        :error
+    end
+  rescue
+    error ->
+      Logger.error(
+        "Recovered from an while fetching product history from redis error=#{inspect(error)}"
+      )
+
+      :error
+  end
+
+  @doc """
+  Given a supplier name and an internal id for a product, returns a list of
+  product prices.
+  """
+  @spec _fetch_prices_history(String.t(), atom()) ::
+          {:ok, [Redis.Stream.Entry.t()]} | :error
+  def _fetch_product_history(product_id, interval \\ :daily) do
+    before_now = look_into_the_past(-20, interval)
+
+    since =
+      DateTime.utc_now()
+      |> DateTime.add(before_now, :day)
+      |> DateTime.to_unix(:millisecond)
+
+    with %ProductDocument{prices: prices} = pd <- get_product_document_by_id(product_id) do
+      {:ok, history}
+    # with {:ok, entries} <-
+    #        Redis.Client.fetch_reverse_stream_since(stream_name, since),
+    #      filtered_entries <- filter_history_entries(entries, interval),
+    #      history <- map_product_history(filtered_entries) do
+    #   {:ok, history}
     else
       error ->
         Logger.error(

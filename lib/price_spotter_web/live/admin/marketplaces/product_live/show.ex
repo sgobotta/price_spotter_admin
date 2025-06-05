@@ -73,14 +73,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     with %Marketplaces.Product{
            internal_id: internal_id,
            name: product_name,
-           supplier_name: supplier_name
+           supplier_name: supplier_name,
+           id: product_id
          } <- socket.assigns.product,
          {:ok, history} <-
-           Marketplaces.fetch_product_history(
-             supplier_name,
-             internal_id,
+           Marketplaces.fetch_prices_history(
+             product_id,
              socket.assigns.interval
            ) do
+          #  Marketplaces.fetch_product_history(
+          #    supplier_name,
+          #    internal_id,
+          #    socket.assigns.interval
+          #  ) do
       socket = push_event(socket, "reset-dataset", %{label: product_name})
 
       socket =
