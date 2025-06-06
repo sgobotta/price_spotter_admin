@@ -4,12 +4,14 @@ defmodule PriceSpotter.Marketplaces do
   """
 
   import Ecto.Query, warn: false
+  alias PriceSpotter.Marketplaces.ProductPriceDocument
   alias PriceSpotter.Repo
   alias PriceSpotter.Repos.MongoRepo
 
   alias PriceSpotter.Marketplaces.{
     Product,
     ProductDocument,
+    ProductPriceDocument,
     Relations,
     Supplier
   }
@@ -416,9 +418,9 @@ defmodule PriceSpotter.Marketplaces do
   Given a supplier name and an internal id for a product, returns a list of
   product prices.
   """
-  @spec _fetch_prices_history(String.t(), atom()) ::
-          {:ok, [Redis.Stream.Entry.t()]} | :error
-  def _fetch_product_history(product_id, interval \\ :daily) do
+  @spec fetch_prices_history(String.t(), atom()) ::
+          {:ok, [{NaiveDateTime.t(), ProductDocument.t()}]} | :error
+  def fetch_prices_history(product_id, interval \\ :daily) do
     before_now = look_into_the_past(-20, interval)
 
     since =
@@ -426,8 +428,14 @@ defmodule PriceSpotter.Marketplaces do
       |> DateTime.add(before_now, :day)
       |> DateTime.to_unix(:millisecond)
 
-    with %ProductDocument{prices: prices} = pd <- get_product_document_by_id(product_id) do
-      {:ok, history}
+
+    with %ProductDocument{prices: prices} <- get_product_document_by_id(product_id) do
+      prices = filter_history_prices(prices, interval)
+      mapped_prices = map_price_history(prices)
+      IO.inspect(length(mapped_prices), label: "Mapped Prices Length")
+      IO.inspect(mapped_prices, label: "Mapped Prices")
+
+      {:ok, mapped_prices}
     # with {:ok, entries} <-
     #        Redis.Client.fetch_reverse_stream_since(stream_name, since),
     #      filtered_entries <- filter_history_entries(entries, interval),
@@ -436,7 +444,7 @@ defmodule PriceSpotter.Marketplaces do
     else
       error ->
         Logger.error(
-          "An error occured while fetching product history from redis for supplier_name=#{supplier_name} internal_id=#{internal_id} error=#{inspect(error)}"
+          "An error occured while fetching product history from collection product_id=#{product_id} error=#{inspect(error)}"
         )
 
         :error
@@ -444,7 +452,7 @@ defmodule PriceSpotter.Marketplaces do
   rescue
     error ->
       Logger.error(
-        "Recovered from an while fetching product history from redis error=#{inspect(error)}"
+        "Recovered from an error while fetching product history from redis error=#{inspect(error)}"
       )
 
       :error
@@ -475,10 +483,36 @@ defmodule PriceSpotter.Marketplaces do
     )
   end
 
+  @spec filter_history_prices([ProductPriceDocument.t()], atom()) :: [
+          ProductPriceDocument.t()
+        ]
+  defp filter_history_prices(prices, interval) do
+    prices
+    |> group_prices_history_by(interval)
+    |> Enum.map(fn {_datetime, entries} ->
+      entries
+      |> Enum.sort_by(
+        &DateTime.to_date(ProductPriceDocument.get_datetime(&1)),
+        {:desc, Date}
+      )
+      |> hd()
+    end)
+    |> Enum.sort_by(
+      &DateTime.to_date(ProductPriceDocument.get_datetime(&1)),
+      {:asc, Date}
+    )
+  end
+
   @spec group_history_by([Redis.Stream.Entry.t()], interval()) :: map()
   defp group_history_by(entries, :daily) do
     entries
     |> Enum.group_by(&DateTime.to_date(Stream.Entry.get_datetime(&1)))
+  end
+
+  @spec group_prices_history_by([ProductPriceDocument.t()], interval()) :: map()
+  defp group_prices_history_by(prices, :daily) do
+    prices
+    |> Enum.group_by(&DateTime.to_date(ProductPriceDocument.get_datetime(&1)))
   end
 
   defp group_history_by(entries, :monthly) do
@@ -511,6 +545,15 @@ defmodule PriceSpotter.Marketplaces do
         |> Ecto.Changeset.apply_changes()
 
       {datetime, product}
+    end)
+  end
+
+  @spec map_price_history([ProductPriceDocument.t()]) :: [
+          {NaiveDateTime.t(), ProductPriceDocument.t()}
+        ]
+  defp map_price_history(prices) do
+    Enum.map(prices, fn %ProductPriceDocument{timestamp: timestamp} = product_price_document ->
+      {DateTime.to_naive(DateTime.from_unix!(timestamp, :millisecond)), product_price_document}
     end)
   end
 

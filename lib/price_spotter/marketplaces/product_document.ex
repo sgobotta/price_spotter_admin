@@ -53,6 +53,8 @@ defmodule PriceSpotter.Marketplaces.ProductPriceDocument do
 
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{}
+
   @primary_key {:id, :binary_id, autogenerate: true}
   embedded_schema do
     field :price, :decimal
@@ -64,4 +66,8 @@ defmodule PriceSpotter.Marketplaces.ProductPriceDocument do
     |> cast(attrs, [:price, :timestamp])
     |> validate_required([:price, :timestamp])
   end
+
+  @spec get_datetime(t()) :: DateTime.t()
+  def get_datetime(%__MODULE__{timestamp: timestamp}),
+    do: DateTime.from_unix!(timestamp, :millisecond)
 end

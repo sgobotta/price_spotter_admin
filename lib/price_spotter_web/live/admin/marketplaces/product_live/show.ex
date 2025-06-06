@@ -118,12 +118,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @spec build_dataset(String.t(), [
-          {NaiveDateTime.t(), Marketplaces.Product.t()}
+          {NaiveDateTime.t(), Marketplaces.ProductPriceDocument.t()}
         ]) :: [map()]
   defp build_dataset(product_name, product_history) do
     dataset_trend =
       product_history
-      |> Enum.map(fn {_ts, %Marketplaces.Product{price: price}} -> price end)
+      |> Enum.map(fn {_ts, %Marketplaces.ProductPriceDocument{price: price}} -> price end)
       |> Enum.reverse()
       |> get_dataset_trend
 
