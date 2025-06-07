@@ -4,12 +4,14 @@ defmodule PriceSpotter.Marketplaces do
   """
 
   import Ecto.Query, warn: false
+  alias PriceSpotter.Marketplaces.ProductPriceDocument
   alias PriceSpotter.Repo
   alias PriceSpotter.Repos.MongoRepo
 
   alias PriceSpotter.Marketplaces.{
     Product,
     ProductDocument,
+    ProductPriceDocument,
     Relations,
     Supplier
   }
@@ -357,7 +359,8 @@ defmodule PriceSpotter.Marketplaces do
   @spec fetch_last_product_entry(binary, non_neg_integer() | String.t()) ::
           Redis.Stream.Entry.t() | list() | any()
   def fetch_last_product_entry(stream_key, _count \\ "*") do
-    stream_name = get_stream_name("product-history_" <> stream_key)
+    product_stream_key = "product-history_" <> stream_key
+    stream_name = get_stream_name(product_stream_key)
 
     case Redis.Client.fetch_last_stream_entry(stream_name) do
       {:ok, %Redis.Stream.Entry{} = entry} ->
@@ -365,7 +368,7 @@ defmodule PriceSpotter.Marketplaces do
 
       error ->
         Logger.error(
-          "An error occured while fetching last product entry from redis for stream_key=#{stream_key}."
+          "An error occured while fetching last product entry from redis for stream_key=#{stream_name}."
         )
 
         error
@@ -376,7 +379,7 @@ defmodule PriceSpotter.Marketplaces do
   Given a supplier name and an internal id for a product, returns a list of
   redis stream entries for all the avaialble historical data.
   """
-  @spec fetch_product_history(String.t(), String.t()) ::
+  @spec fetch_product_history(String.t(), String.t(), atom()) ::
           {:ok, [Redis.Stream.Entry.t()]} | :error
   def fetch_product_history(supplier_name, internal_id, interval \\ :daily) do
     stream_name =
@@ -411,11 +414,49 @@ defmodule PriceSpotter.Marketplaces do
       :error
   end
 
+  @doc """
+  Given a supplier name and an internal id for a product, returns a list of
+  product prices.
+  """
+  @spec fetch_prices_history(String.t(), atom()) ::
+          {:ok, [{NaiveDateTime.t(), ProductDocument.t()}]} | :error
+  def fetch_prices_history(product_id, interval \\ :daily) do
+    before_now = look_into_the_past(-20, interval)
+
+    since =
+      DateTime.utc_now()
+      |> DateTime.add(before_now, :day)
+      |> DateTime.to_unix(:millisecond)
+
+    case get_product_document_by_id(product_id) do
+      %ProductDocument{id: id} ->
+        query =
+          from ppd in ProductPriceDocument,
+            where: ppd.product_id == ^id and ppd.timestamp > ^since
+
+        prices =
+          MongoRepo.stream(query)
+          |> Enum.to_list()
+          |> filter_history_prices(interval)
+          |> map_price_history()
+
+        {:ok, prices}
+
+      nil ->
+        Logger.error(
+          "An error occured while fetching product history from collection product_id=#{product_id}."
+        )
+
+        :error
+    end
+  end
+
   @spec look_into_the_past(integer(), atom()) :: integer()
   defp look_into_the_past(days, :daily), do: days
   defp look_into_the_past(days, :monthly), do: days * 30
   defp look_into_the_past(days, :weekly), do: days * 7
 
+  @deprecated "Use filter_history_prices"
   @spec filter_history_entries([Redis.Stream.Entry.t()], atom()) :: [
           Redis.Stream.Entry.t()
         ]
@@ -436,6 +477,21 @@ defmodule PriceSpotter.Marketplaces do
     )
   end
 
+  @spec filter_history_prices([ProductPriceDocument.t()], atom()) :: [
+          ProductPriceDocument.t()
+        ]
+  defp filter_history_prices(prices, interval) do
+    prices
+    |> group_prices_history_by(interval)
+    |> Enum.map(fn {_datetime, entries} ->
+      entries
+      |> Enum.sort_by(& &1.timestamp, :desc)
+      |> hd()
+    end)
+    |> Enum.sort_by(& &1.timestamp, :asc)
+  end
+
+  @deprecated "Use group_prices_history_by"
   @spec group_history_by([Redis.Stream.Entry.t()], interval()) :: map()
   defp group_history_by(entries, :daily) do
     entries
@@ -460,6 +516,7 @@ defmodule PriceSpotter.Marketplaces do
     end)
   end
 
+  @deprecated "Use map_price_history"
   @spec map_product_history([Redis.Stream.Entry.t()]) :: [
           {NaiveDateTime.t(), Product.t()}
         ]
@@ -472,6 +529,38 @@ defmodule PriceSpotter.Marketplaces do
         |> Ecto.Changeset.apply_changes()
 
       {datetime, product}
+    end)
+  end
+
+  @spec group_prices_history_by([ProductPriceDocument.t()], interval()) :: map()
+  defp group_prices_history_by(prices, :daily) do
+    prices
+    |> Enum.group_by(&DateTime.to_date(ProductPriceDocument.get_datetime(&1)))
+  end
+
+  defp group_prices_history_by(prices, :weekly) do
+    prices
+    |> Enum.group_by(
+      &(DateTime.to_date(ProductPriceDocument.get_datetime(&1))
+        |> Date.beginning_of_week())
+    )
+  end
+
+  defp group_prices_history_by(prices, :monthly) do
+    prices
+    |> Enum.group_by(
+      &(DateTime.to_date(ProductPriceDocument.get_datetime(&1))
+        |> Date.beginning_of_month())
+    )
+  end
+
+  @spec map_price_history([ProductPriceDocument.t()]) :: [
+          {NaiveDateTime.t(), ProductPriceDocument.t()}
+        ]
+  defp map_price_history(prices) do
+    Enum.map(prices, fn %ProductPriceDocument{timestamp: timestamp} =
+                          product_price_document ->
+      {DateTime.from_unix!(timestamp, :millisecond), product_price_document}
     end)
   end
 
@@ -488,15 +577,23 @@ defmodule PriceSpotter.Marketplaces do
 
   ## Examples
 
-      iex> record_price_changeset(%ProductDocument{}, %{
+      iex> change_product_price_document(%ProductDocument{}, %{
         price: Decimal.new("240.02), timestamp: :os.system_time()
       })
       %Ecto.Changeset{data: %ProductDocument{}}
 
   """
-  @spec record_price_changeset(ProductDocument.t(), map()) :: Ecto.Changeset.t()
-  def record_price_changeset(%ProductDocument{} = product_document, attrs) do
-    ProductDocument.record_price_changeset(product_document, attrs)
+  @spec change_product_price_document(map()) :: Ecto.Changeset.t()
+  def change_product_price_document(attrs) do
+    ProductPriceDocument.changeset(%ProductPriceDocument{}, attrs)
+  end
+
+  @spec create_product_document_price(map()) ::
+          {:ok, ProductPriceDocument.t()} | {:error, Ecto.Changeset.t()}
+  def create_product_document_price(attrs) do
+    attrs
+    |> change_product_price_document()
+    |> MongoRepo.insert()
   end
 
   @doc """
@@ -562,11 +659,14 @@ defmodule PriceSpotter.Marketplaces do
       end
     end
 
-    with {:ok, %ProductDocument{} = pd} <- get_or_create.(product_id),
-         %Ecto.Changeset{valid?: true} = pp_cs <-
-           record_price_changeset(pd, %{price: price, timestamp: timestamp}) do
-      MongoRepo.update(pp_cs)
-    else
+    case get_or_create.(product_id) do
+      {:ok, %ProductDocument{id: product_document_id}} ->
+        create_product_document_price(%{
+          product_id: product_document_id,
+          price: price,
+          timestamp: timestamp
+        })
+
       %Ecto.Changeset{valid?: false} = cs ->
         {:error, cs}
     end
