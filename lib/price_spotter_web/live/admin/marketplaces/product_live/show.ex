@@ -71,14 +71,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   @impl true
   def handle_info(:update_chart, socket) do
     with %Marketplaces.Product{
-           internal_id: internal_id,
            name: product_name,
-           supplier_name: supplier_name
+           id: product_id
          } <- socket.assigns.product,
          {:ok, history} <-
-           Marketplaces.fetch_product_history(
-             supplier_name,
-             internal_id,
+           Marketplaces.fetch_prices_history(
+             product_id,
              socket.assigns.interval
            ) do
       socket = push_event(socket, "reset-dataset", %{label: product_name})
@@ -113,18 +111,23 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @spec build_dataset(String.t(), [
-          {NaiveDateTime.t(), Marketplaces.Product.t()}
+          {NaiveDateTime.t(), Marketplaces.ProductPriceDocument.t()}
         ]) :: [map()]
   defp build_dataset(product_name, product_history) do
     dataset_trend =
       product_history
-      |> Enum.map(fn {_ts, %Marketplaces.Product{price: price}} -> price end)
+      |> Enum.map(fn {_ts, %Marketplaces.ProductPriceDocument{price: price}} ->
+        price
+      end)
       |> Enum.reverse()
       |> get_dataset_trend
 
     {background_color, border_color} = get_chart_colors(dataset_trend)
 
-    Enum.map(product_history, fn {datetime, %Marketplaces.Product{price: price}} ->
+    Enum.map(product_history, fn {datetime,
+                                  %Marketplaces.ProductPriceDocument{
+                                    price: price
+                                  }} ->
       %{
         data_label: get_datetime_label(datetime),
         label: product_name,
