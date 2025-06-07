@@ -1,6 +1,7 @@
 defmodule PriceSpotter.Marketplaces.ProductDocument do
-  alias PriceSpotter.Marketplaces.ProductPriceDocument
   use Ecto.Schema
+
+  alias PriceSpotter.Marketplaces.ProductPriceDocument
 
   import Ecto.Changeset
 
@@ -11,40 +12,16 @@ defmodule PriceSpotter.Marketplaces.ProductDocument do
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "products" do
     field :product_id, :string
-    embeds_many :prices, PriceSpotter.Marketplaces.ProductPriceDocument
+
+    has_many :prices, ProductPriceDocument, foreign_key: :product_id
   end
 
   @doc false
   def changeset(product_document, attrs) do
     product_document
-    |> cast(attrs, [
-      :product_id
-    ])
-    |> validate_required([
-      :product_id
-    ])
+    |> cast(attrs, [:product_id])
+    |> validate_required([:product_id])
     |> unique_constraint(:product_id)
-  end
-
-  @spec record_price_changeset(t(), map()) :: Ecto.Changeset.t()
-  def record_price_changeset(
-        %PriceSpotter.Marketplaces.ProductDocument{prices: prices} =
-          product_document,
-        product_price_attrs
-      ) do
-    case ProductPriceDocument.changeset(product_price_attrs) do
-      %Ecto.Changeset{valid?: true} = ppd_cs ->
-        product_document
-        |> Ecto.Changeset.change(%{prices: prices ++ [ppd_cs]})
-
-      %Ecto.Changeset{valid?: false} ->
-        Logger.error(
-          "Error while validating price to record: invalid `product_price_attrs` value, attrs=#{inspect(product_price_attrs)}"
-        )
-
-        change(product_document)
-        |> add_error(:prices, "Invalid price provided")
-    end
   end
 end
 
@@ -56,15 +33,18 @@ defmodule PriceSpotter.Marketplaces.ProductPriceDocument do
   @type t :: %__MODULE__{}
 
   @primary_key {:id, :binary_id, autogenerate: true}
-  embedded_schema do
+  schema "prices" do
     field :price, :decimal
     field :timestamp, :integer
+
+    belongs_to :product, PriceSpotter.Marketplaces.ProductDocument,
+      type: :string
   end
 
-  def changeset(attrs) do
-    %PriceSpotter.Marketplaces.ProductPriceDocument{}
-    |> cast(attrs, [:price, :timestamp])
-    |> validate_required([:price, :timestamp])
+  def changeset(%__MODULE__{} = product_price_document, attrs) do
+    product_price_document
+    |> cast(attrs, [:price, :timestamp, :product_id])
+    |> validate_required([:price, :timestamp, :product_id])
   end
 
   @spec get_datetime(t()) :: DateTime.t()
