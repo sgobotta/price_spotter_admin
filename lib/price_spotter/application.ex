@@ -21,23 +21,23 @@ defmodule PriceSpotter.Application do
       PriceSpotterWeb.Endpoint,
       # Start a worker by calling: PriceSpotter.Worker.start_link(arg)
       # {PriceSpotter.Worker, arg}
-      {Redix, host: redis_host(), name: :redix, password: redis_pass()},
-      PriceSpotter.Marketplaces.ProductProducer.child_spec(
-        supplier: "la-golosineria",
-        module_name: "LaGolosineriaProducer"
-      ),
-      PriceSpotter.Marketplaces.ProductProducer.child_spec(
-        supplier: "maxiconsumo-burzaco",
-        module_name: "MaxiconsumoBurzacoProducer"
-      ),
-      PriceSpotter.Marketplaces.ProductProducer.child_spec(
-        supplier: "maxiconsumo-burzaco-by-ean",
-        module_name: "MaxiconsumoByEanProducer"
-      ),
-      PriceSpotter.Marketplaces.ProductProducer.child_spec(
-        supplier: "yaguar",
-        module_name: "YaguarByEanProducer"
-      )
+      {Redix, host: redis_host(), name: :redix, password: redis_pass()}
+      # PriceSpotter.Marketplaces.ProductProducer.child_spec(
+      #   supplier: "la-golosineria",
+      #   module_name: "LaGolosineriaProducer"
+      # ),
+      # PriceSpotter.Marketplaces.ProductProducer.child_spec(
+      #   supplier: "maxiconsumo-burzaco",
+      #   module_name: "MaxiconsumoBurzacoProducer"
+      # ),
+      # PriceSpotter.Marketplaces.ProductProducer.child_spec(
+      #   supplier: "maxiconsumo-burzaco-by-ean",
+      #   module_name: "MaxiconsumoByEanProducer"
+      # ),
+      # PriceSpotter.Marketplaces.ProductProducer.child_spec(
+      #   supplier: "yaguar",
+      #   module_name: "YaguarByEanProducer"
+      # )
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
