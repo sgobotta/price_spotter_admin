@@ -644,7 +644,7 @@ defmodule PriceSpotter.Marketplaces do
 
   """
   @spec record_product_price(Product.t(), non_neg_integer()) ::
-          {:ok, ProductPrice.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, ProductPriceDocument.t()} | {:error, Ecto.Changeset.t()}
   def record_product_price(
         %Product{id: product_id, price: price},
         timestamp \\ :os.system_time(:millisecond)
@@ -659,17 +659,26 @@ defmodule PriceSpotter.Marketplaces do
       end
     end
 
-    case get_or_create.(product_id) do
-      {:ok, %ProductDocument{id: product_document_id}} ->
-        create_product_document_price(%{
-          product_id: product_document_id,
-          price: price,
-          timestamp: timestamp
-        })
+    {:ok, %ProductDocument{id: product_document_id}} =
+      get_or_create.(product_id)
 
-      %Ecto.Changeset{valid?: false} = cs ->
-        {:error, cs}
-    end
+    create_product_document_price(%{
+      product_id: product_document_id,
+      price: price,
+      timestamp: timestamp
+    })
+
+    # case get_or_create.(product_id) do
+    #   {:ok, %ProductDocument{id: product_document_id}} ->
+    #     create_product_document_price(%{
+    #       product_id: product_document_id,
+    #       price: price,
+    #       timestamp: timestamp
+    #     })
+
+    #   %Ecto.Changeset{valid?: false} = cs ->
+    #     {:error, cs}
+    # end
   end
 
   # ----------------------------------------------------------------------------
