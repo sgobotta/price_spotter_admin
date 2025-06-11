@@ -37,6 +37,9 @@ env:
 jobs:
   dev:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        mongodb-version: ['8.0']
     services:
       db:
         image: postgres
@@ -59,10 +62,15 @@ jobs:
             --rm \
             --name redis \
             -p ${{ env.REDIS_PORT }}:6379 \
-            -d redis:6-alpine redis-server \
+            -d redis:7.2.1 redis-server \
             --appendonly yes \
             --requirepass ${{ env.REDIS_PASS }} \
             --port ${{ env.REDIS_PORT }}
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
 
       # Run the dev action ----------------------------------------------------
       - uses: actions/checkout@v2.3.4
@@ -81,6 +89,9 @@ jobs:
 
   test:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        mongodb-version: ['8.0']
     services:
       db:
         image: postgres
@@ -103,10 +114,15 @@ jobs:
             --rm \
             --name redis \
             -p ${{ env.REDIS_PORT }}:6379 \
-            -d redis:6-alpine redis-server \
+            -d redis:7.2.1 redis-server \
             --appendonly yes \
             --requirepass ${{ env.REDIS_PASS }} \
             --port ${{ env.REDIS_PORT }}
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
 
       # Run the test action ---------------------------------------------------
       - uses: actions/checkout@v2.3.4
