@@ -133,6 +133,8 @@ runs:
         DB_HOSTNAME: ${{ inputs.POSTGRES_HOSTNAME }}
         DB_PASSWORD: ${{ inputs.POSTGRES_PASSWORD }}
         DB_USERNAME: ${{ inputs.POSTGRES_USER }}
+        # Mongo env
+        MONGODB_URL: ${{ inputs.MONGODB_URL }}
 
     # Test release -------------------------------------------------------------
     - name: Test release
