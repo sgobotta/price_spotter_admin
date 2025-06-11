@@ -38,7 +38,7 @@ if config_env() == :prod do
   # Configure mongodb
   config :price_spotter, PriceSpotter.Repos.MongoRepo,
     adapter: Mongo.Ecto,
-    mongo_url: System.fetch_env!("MONGODB_URL")
+    mongo_url: System.fetch_env!("MONGO_URL")
 
   config :price_spotter, PriceSpotter.Repo,
     # ssl: true,
@@ -70,11 +70,6 @@ if config_env() == :prod do
           transport_options: [socket_opts: [:inet6]]
         ],
         url: [host: host, port: 80]
-
-      # Configure mongodb
-      config :price_spotter, PriceSpotter.Repos.MongoRepo,
-        adapter: Mongo.Ecto,
-        mongo_url: System.fetch_env!("MONGODB_URL")
 
     _stage ->
       database_url =

@@ -31,7 +31,7 @@ inputs:
   REDIS_PASS:
     description: The Redis pass
     required: true
-  MONGODB_URL:
+  MONGO_URL:
     description: The Mongodb pass
     required: true
   STAGE:
@@ -134,7 +134,7 @@ runs:
         DB_PASSWORD: ${{ inputs.POSTGRES_PASSWORD }}
         DB_USERNAME: ${{ inputs.POSTGRES_USER }}
         # Mongo env
-        MONGODB_URL: ${{ inputs.MONGODB_URL }}
+        MONGO_URL: ${{ inputs.MONGO_URL }}
 
     # Test release -------------------------------------------------------------
     - name: Test release
@@ -154,7 +154,7 @@ runs:
         DB_PASSWORD: ${{ inputs.POSTGRES_PASSWORD }}
         DB_USERNAME: ${{ inputs.POSTGRES_USER }}
         # Mongo env
-        MONGODB_URL: ${{ inputs.MONGODB_URL }}
+        MONGO_URL: ${{ inputs.MONGO_URL }}
 
     # Assert application output ------------------------------------------------
     - name: Assert output

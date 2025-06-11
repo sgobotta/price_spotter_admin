@@ -32,7 +32,7 @@ env:
   REDIS_PORT: 6379
   REDIS_PASS: ${{ secrets.REDIS_PASS }}
   # Mongo env
-  MONGODB_URL: mongodb://mongo:27017/price_spotter_local
+  MONGO_URL: mongodb://localhost:27017/price_spotter_local
   # Misc env
   UPLOADS_PATH: priv/static/uploads/
 
@@ -178,5 +178,5 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           REDIS_HOST: ${{ env.REDIS_HOST }}
           REDIS_PASS: ${{ env.REDIS_PASS }}
-          MONGODB_URL: ${{ env.MONGODB_URL }}
+          MONGO_URL: ${{ env.MONGO_URL }}
           UPLOADS_PATH: ${{ env.UPLOADS_PATH }}

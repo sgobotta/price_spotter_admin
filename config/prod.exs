@@ -22,5 +22,10 @@ config :swoosh,
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Configure mongodb
+config :price_spotter, PriceSpotter.Repos.MongoRepo,
+  adapter: Mongo.Ecto,
+  mongo_url: "mongodb://localhost:27017/price_spotter_prod"
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
