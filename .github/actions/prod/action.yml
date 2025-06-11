@@ -31,6 +31,9 @@ inputs:
   REDIS_PASS:
     description: The Redis pass
     required: true
+  MONGODB_URL:
+    description: The Mongodb pass
+    required: true
   STAGE:
     default: local
     description: The production environment
@@ -148,6 +151,8 @@ runs:
         DB_HOSTNAME: ${{ inputs.POSTGRES_HOSTNAME }}
         DB_PASSWORD: ${{ inputs.POSTGRES_PASSWORD }}
         DB_USERNAME: ${{ inputs.POSTGRES_USER }}
+        # Mongo env
+        MONGODB_URL: ${{ inputs.MONGODB_URL }}
 
     # Assert application output ------------------------------------------------
     - name: Assert output
