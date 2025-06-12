@@ -122,6 +122,7 @@ runs:
       working-directory: /opt/release/price_spotter
       shell: bash
       run: |
+        echo ${{ inputs.MONGODB_URL }}
         ./entrypoint.sh setup_db
       env:
         # Application env
