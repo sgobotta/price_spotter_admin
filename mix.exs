@@ -5,7 +5,7 @@ defmodule PriceSpotter.MixProject do
     [
       app: :price_spotter,
       dialyzer: [plt_add_apps: [:mix]],
-      version: "0.2.0",
+      version: "0.3.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
