@@ -32,7 +32,7 @@ inputs:
     description: The Redis pass
     required: true
   MONGO_URL:
-    description: The Mongodb pass
+    description: The Mongodb url
     required: true
   STAGE:
     default: local
@@ -133,6 +133,9 @@ runs:
         DB_HOSTNAME: ${{ inputs.POSTGRES_HOSTNAME }}
         DB_PASSWORD: ${{ inputs.POSTGRES_PASSWORD }}
         DB_USERNAME: ${{ inputs.POSTGRES_USER }}
+        # Redis env
+        REDIS_HOST: ${{ inputs.REDIS_HOST }}
+        REDIS_PASS: ${{ inputs.REDIS_PASS }}
         # Mongo env
         MONGO_URL: ${{ inputs.MONGO_URL }}
 
