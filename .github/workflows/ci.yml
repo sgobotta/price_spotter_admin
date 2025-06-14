@@ -159,6 +159,19 @@ jobs:
           --health-retries 5
 
     steps:
+      # Setup & run Redis -----------------------------------------------------
+      - name: Run redis with a password
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --name redis \
+            -p ${{ env.REDIS_PORT }}:6379 \
+            -d redis:7.2.1 redis-server \
+            --appendonly yes \
+            --requirepass ${{ env.REDIS_PASS }} \
+            --port ${{ env.REDIS_PORT }}
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.0
         with:
