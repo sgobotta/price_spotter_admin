@@ -20,7 +20,6 @@ env:
   # Permissions env
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # General env
-  MIX_ENV: test
   ELIXIR_VERSION: 1.14
   OTP_VERSION: 25.0
   # Postgres env

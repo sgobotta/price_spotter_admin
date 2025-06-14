@@ -128,6 +128,7 @@ runs:
         APP_HOST: 0.0.0.0
         SECRET_KEY_BASE: some-secret-key
         STAGE: local
+        MIX_ENV: ${{ inputs.MIX_ENV }}
         # Postgres env
         DB_DATABASE: price_spotter_prod_local
         DB_HOSTNAME: ${{ inputs.POSTGRES_HOSTNAME }}
