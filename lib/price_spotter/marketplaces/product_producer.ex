@@ -83,11 +83,19 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
 
     Logger.debug("Recording product price for product with id=#{product.id}")
 
-    {:ok, _product_price} =
-      PriceSpotter.Marketplaces.record_product_price(
-        product,
-        timestamp_from_entry_id(entry_id)
-      )
+    case PriceSpotter.Marketplaces.record_product_price(
+           product,
+           timestamp_from_entry_id(entry_id)
+         ) do
+      {:ok,
+       %PriceSpotter.Marketplaces.ProductPriceDocument{id: product_price_id}} ->
+        Logger.debug("Recorded product price with id=#{product_price_id}")
+
+      {:error, %Ecto.Changeset{errors: errors}} ->
+        Logger.error(
+          "There was an error while recording product price for product with id=#{product.id} errors=#{inspect(errors)}"
+        )
+    end
 
     {:ok, :loaded, %{}}
   end
