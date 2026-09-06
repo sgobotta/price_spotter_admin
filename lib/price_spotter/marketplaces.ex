@@ -40,15 +40,20 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   def list_products_by_user(params, user) do
-    from(
-      p in Product,
-      join: s in Supplier,
-      on: s.id == p.supplier_id,
-      join: us in Relations.UserSupplier,
-      on: us.user_id == ^user.id and s.id == us.supplier_id,
-      select: p
-    )
-    |> Flop.validate_and_run(params, for: Product)
+    query =
+      from(
+        p in Product,
+        join: s in Supplier,
+        on: s.id == p.supplier_id,
+        join: us in Relations.UserSupplier,
+        on: us.user_id == ^user.id and s.id == us.supplier_id,
+        select: p
+      )
+
+    with {:ok, flop} <- Flop.validate(params, for: Product) do
+      flop = PriceSpotter.Flop.Helpers.ensure_unique_order(flop)
+      {:ok, Flop.run(query, flop, for: Product)}
+    end
   end
 
   @doc """

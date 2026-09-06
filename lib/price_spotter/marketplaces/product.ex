@@ -30,7 +30,8 @@ defmodule PriceSpotter.Marketplaces.Product do
       :supplier_name,
       :price,
       :price_updated_at,
-      :ean
+      :ean,
+      :id
     ],
     custom_fields: [
       price_updated_since: [
@@ -48,6 +49,12 @@ defmodule PriceSpotter.Marketplaces.Product do
         ecto_type: :decimal
       ]
     ],
+    default_order: %{
+      order_by: [:price_updated_at, :id],
+      order_directions: [:desc, :asc]
+    },
+    pagination_types: [:first, :last],
+    default_pagination_type: :first,
     default_limit: @default_limit,
     max_limit: @max_limit
   }
