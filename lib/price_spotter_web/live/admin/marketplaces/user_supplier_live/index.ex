@@ -7,7 +7,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.UserSupplierLive.Index do
   @impl true
   def mount(_params, session, socket) do
     {:ok,
-     assign(assign_defaults(session, socket), %{users_suppliers: nil, meta: nil})}
+     assign(assign_defaults(session, socket), %{
+       users_suppliers: nil,
+       meta: nil
+     })}
   end
 
   @impl true
