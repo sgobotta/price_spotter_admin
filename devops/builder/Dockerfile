@@ -8,12 +8,17 @@
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20210902-slim - for the release image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bookworm-20260610-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.12.3-erlang-23.3.4-debian-bullseye-20210902-slim
+#   - Ex: hexpm/elixir:1.14.5-erlang-25.3.2.1-debian-bookworm-20260610
 #
-ARG BUILDER_IMAGE="hexpm/elixir:1.14.5-erlang-25.3.2.1-debian-bullseye-20230522"
-ARG RUNNER_IMAGE="debian:bullseye-20210902-slim"
+# Note: bullseye (Debian 11) was previously used here, but its LTS security
+# support has ended and its packages have been pruned from security.debian.org,
+# which broke `apt-get install` in the release stage. Bumped to bookworm
+# (Debian 12), keeping the same Elixir/Erlang version, with the builder and
+# runner pinned to the same dated snapshot so their glibc versions match.
+ARG BUILDER_IMAGE="hexpm/elixir:1.14.5-erlang-25.3.2.1-debian-bookworm-20260610"
+ARG RUNNER_IMAGE="debian:bookworm-20260610-slim"
 ARG SECRET_KEY_BASE
 ARG UPLOADS_PATH
 FROM ${BUILDER_IMAGE} as builder
