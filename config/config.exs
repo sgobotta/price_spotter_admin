@@ -15,7 +15,10 @@ config :flop, repo: PriceSpotter.Repo
 
 config :flop_phoenix,
   pagination: [opts: {PriceSpotterWeb.CoreComponents, :pagination_opts}],
-  table: [opts: {PriceSpotterWeb.CoreComponents, :table_opts}]
+  table: [opts: {PriceSpotterWeb.CoreComponents, :table_opts}],
+  cursor_pagination: [
+    opts: {PriceSpotterWeb.CoreComponents, :cursor_pagination_opts}
+  ]
 
 # Configures the endpoint
 config :price_spotter, PriceSpotterWeb.Endpoint,

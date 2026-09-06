@@ -40,6 +40,12 @@ defmodule PriceSpotterWeb.CoreComponents do
     ]
   end
 
+  def cursor_pagination_opts do
+    [
+      wrapper_attrs: [class: "flex justify-center gap-2 w-full"]
+    ]
+  end
+
   @doc """
   Renders a modal.
 
@@ -823,7 +829,11 @@ defmodule PriceSpotterWeb.CoreComponents do
   attr :color, :string, default: "bg-white"
   attr :text_color, :string, default: "text-black"
 
-  def pill(assigns) do
+  attr :variant, :atom,
+    default: nil,
+    values: [nil, :neutral, :success, :warning, :info, :danger]
+
+  def pill(%{variant: nil} = assigns) do
     ~H"""
     <div class={"
       rounded-md #{@color} px-2 text-xs cursor-default border-[1px] shadow-md
@@ -833,6 +843,39 @@ defmodule PriceSpotterWeb.CoreComponents do
     </div>
     """
   end
+
+  def pill(assigns) do
+    assigns = assign(assigns, :classes, pill_variant_classes(assigns.variant))
+
+    ~H"""
+    <span class={[
+      "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium",
+      @classes
+    ]}>
+      <%= @text %>
+    </span>
+    """
+  end
+
+  defp pill_variant_classes(:neutral),
+    do:
+      "border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+
+  defp pill_variant_classes(:success),
+    do:
+      "border-green-200 bg-green-100 text-zinc-600 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300"
+
+  defp pill_variant_classes(:warning),
+    do:
+      "border-yellow-200 bg-yellow-100 text-zinc-600 dark:border-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300"
+
+  defp pill_variant_classes(:info),
+    do:
+      "border-blue-200 bg-blue-100 text-zinc-600 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
+
+  defp pill_variant_classes(:danger),
+    do:
+      "border-red-200 bg-red-100 text-zinc-600 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
 
   @doc """
   Translates an error message using gettext.

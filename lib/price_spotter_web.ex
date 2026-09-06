@@ -112,6 +112,7 @@ defmodule PriceSpotterWeb do
       # Core UI components and translation
       import PriceSpotterWeb.CoreComponents
       import PriceSpotterWeb.CustomComponents
+      import PriceSpotterWeb.ListComponents
       import PriceSpotterWeb.Gettext
       # Import navigation actions
       import PriceSpotterWeb.Navigation.Components
