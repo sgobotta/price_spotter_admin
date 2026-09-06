@@ -266,9 +266,13 @@ defmodule PriceSpotter.MarketplacesTest do
 
     import PriceSpotter.MarketplacesFixtures
 
-    test "list_users_suppliers/0 returns all users_suppliers" do
-      user_supplier = UsersSuppliersFixtures.create()
-      assert Marketplaces.list_users_suppliers() == [user_supplier]
+    test "list_user_suppliers_for_user/1 returns the user's grants preloaded with supplier" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      user_supplier = UsersSuppliersFixtures.create(%{user_id: user.id})
+
+      assert [result] = Marketplaces.list_user_suppliers_for_user(user)
+      assert result.id == user_supplier.id
+      assert %PriceSpotter.Marketplaces.Supplier{} = result.supplier
     end
 
     test "get_user_supplier!/1 returns the user_supplier with given id" do
@@ -338,6 +342,34 @@ defmodule PriceSpotter.MarketplacesTest do
 
       assert %Ecto.Changeset{} =
                Marketplaces.change_user_supplier(user_supplier)
+    end
+
+    test "create_user_suppliers/2 inserts one row per entry for the given user" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      %{id: supplier_id_1} = PriceSpotter.Marketplaces.SuppliersFixtures.create()
+      %{id: supplier_id_2} = PriceSpotter.Marketplaces.SuppliersFixtures.create()
+
+      assert {:ok, user_suppliers} =
+               Marketplaces.create_user_suppliers(user, [
+                 %{supplier_id: supplier_id_1, role: :consumer},
+                 %{supplier_id: supplier_id_2, role: :maintainer}
+               ])
+
+      assert length(user_suppliers) == 2
+      assert length(Marketplaces.list_user_suppliers_for_user(user)) == 2
+    end
+
+    test "create_user_suppliers/2 rolls back the whole batch when one row is invalid" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      %{id: supplier_id} = PriceSpotter.Marketplaces.SuppliersFixtures.create()
+
+      assert {:error, 1, %Ecto.Changeset{}} =
+               Marketplaces.create_user_suppliers(user, [
+                 %{supplier_id: supplier_id, role: :consumer},
+                 %{supplier_id: nil, role: :maintainer}
+               ])
+
+      assert Marketplaces.list_user_suppliers_for_user(user) == []
     end
   end
 end

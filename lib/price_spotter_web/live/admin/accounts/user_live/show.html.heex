@@ -19,6 +19,14 @@
   <%= gettext("Back to users") %>
 </.back>
 
+<div :if={@current_user.role == :admin} class="mt-8">
+  <.live_component
+    module={PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent}
+    id={"customer-access-#{@user.id}"}
+    user={@user}
+  />
+</div>
+
 <.modal
   :if={@live_action == :edit}
   id="user-modal"

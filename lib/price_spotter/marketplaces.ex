@@ -4,6 +4,7 @@ defmodule PriceSpotter.Marketplaces do
   """
 
   import Ecto.Query, warn: false
+  alias PriceSpotter.Accounts.User
   alias PriceSpotter.Marketplaces.ProductPriceDocument
   alias PriceSpotter.Repo
   alias PriceSpotter.Repos.MongoRepo
@@ -39,7 +40,16 @@ defmodule PriceSpotter.Marketplaces do
     Flop.validate_and_run(Product, params, for: Product)
   end
 
-  def list_products_by_user(params, user) do
+  def list_products_by_user(params, %User{role: :admin}) do
+    query = from(p in Product, select: p)
+
+    with {:ok, flop} <- Flop.validate(params, for: Product) do
+      flop = PriceSpotter.Flop.Helpers.ensure_unique_order(flop)
+      {:ok, Flop.run(query, flop, for: Product)}
+    end
+  end
+
+  def list_products_by_user(params, %User{} = user) do
     query =
       from(
         p in Product,
@@ -58,8 +68,11 @@ defmodule PriceSpotter.Marketplaces do
 
   @doc """
   Given a user, returns a list of all categories available to the user.
+  Admins are not scoped by customer access and see every category.
   """
-  def list_product_categories_by_user(user) do
+  def list_product_categories_by_user(%User{role: :admin}), do: list_product_categories()
+
+  def list_product_categories_by_user(%User{} = user) do
     from(
       p in Product,
       join: s in Supplier,
@@ -716,8 +729,14 @@ defmodule PriceSpotter.Marketplaces do
   @doc """
   Given a user, returns a list of suppliers the user has access to.
   """
-  @spec list_suppliers_by_user(PriceSpotter.Accounts.User.t()) :: [String.t()]
-  def list_suppliers_by_user(user) do
+  @spec list_suppliers_by_user(User.t()) :: [String.t()]
+  def list_suppliers_by_user(%User{role: :admin}) do
+    list_suppliers()
+    |> Enum.map(& &1.name)
+    |> Enum.uniq()
+  end
+
+  def list_suppliers_by_user(%User{} = user) do
     from(
       s in Supplier,
       join: us in Relations.UserSupplier,
@@ -813,16 +832,12 @@ defmodule PriceSpotter.Marketplaces do
   alias PriceSpotter.Marketplaces.Relations.UserSupplier
 
   @doc """
-  Returns the list of users_suppliers.
-
-  ## Examples
-
-      iex> list_users_suppliers()
-      [%UserSupplier{}, ...]
-
+  Returns the list of supplier access grants for a given user, preloaded
+  with their supplier.
   """
-  def list_users_suppliers do
-    Repo.all(UserSupplier)
+  def list_user_suppliers_for_user(%User{} = user) do
+    from(us in UserSupplier, where: us.user_id == ^user.id, preload: [:supplier])
+    |> Repo.all()
   end
 
   @doc """
@@ -917,5 +932,41 @@ defmodule PriceSpotter.Marketplaces do
   """
   def change_user_supplier(%UserSupplier{} = user_supplier, attrs \\ %{}) do
     UserSupplier.changeset(user_supplier, attrs)
+  end
+
+  @doc """
+  Inserts one UserSupplier row per `%{supplier_id:, role:}` entry for the
+  given user, in a single transaction. All-or-nothing: if any row fails
+  validation (bad enum value, duplicate supplier already granted), the whole
+  batch rolls back and the failing row's index + changeset are returned so
+  the caller can flag just that row and let the admin fix and resubmit —
+  acceptable since this is a low-volume admin form (a handful of rows at a
+  time).
+  """
+  @spec create_user_suppliers(User.t(), [map()]) ::
+          {:ok, [UserSupplier.t()]} | {:error, integer(), Ecto.Changeset.t()}
+  def create_user_suppliers(%User{} = user, attrs_list) when is_list(attrs_list) do
+    attrs_list
+    |> Enum.uniq_by(& &1.supplier_id)
+    |> Enum.with_index()
+    |> Enum.reduce(Ecto.Multi.new(), fn {attrs, index}, multi ->
+      changeset =
+        UserSupplier.changeset(%UserSupplier{}, Map.put(attrs, :user_id, user.id))
+
+      Ecto.Multi.insert(multi, {:user_supplier, index}, changeset)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, results} ->
+        user_suppliers =
+          results
+          |> Enum.sort_by(fn {{:user_supplier, index}, _user_supplier} -> index end)
+          |> Enum.map(fn {_key, user_supplier} -> user_supplier end)
+
+        {:ok, user_suppliers}
+
+      {:error, {:user_supplier, index}, changeset, _changes_so_far} ->
+        {:error, index, changeset}
+    end
   end
 end

@@ -22,7 +22,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:email]} type="text" label={gettext("Email")} />
-        <.input field={@form[:password]} type="text" label={gettext("Password")} />
+        <.input field={@form[:password]} type="password" label={gettext("Password")} />
         <.input
           field={@form[:role]}
           type="select"
