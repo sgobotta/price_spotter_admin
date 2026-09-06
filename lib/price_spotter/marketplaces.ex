@@ -699,6 +699,16 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @doc """
+  Returns a Flop-paginated list of suppliers for the admin index page.
+  """
+  def list_suppliers(params) do
+    with {:ok, flop} <- Flop.validate(params, for: Supplier) do
+      flop = PriceSpotter.Flop.Helpers.ensure_unique_order(flop)
+      {:ok, Flop.run(Supplier, flop, for: Supplier)}
+    end
+  end
+
+  @doc """
   Given a user, returns a list of suppliers the user has access to.
   """
   @spec list_suppliers_by_user(PriceSpotter.Accounts.User.t()) :: [String.t()]
@@ -808,6 +818,19 @@ defmodule PriceSpotter.Marketplaces do
   """
   def list_users_suppliers do
     Repo.all(UserSupplier)
+  end
+
+  @doc """
+  Returns a Flop-paginated list of user-suppliers for the admin index page,
+  with the `:user` and `:supplier` associations preloaded.
+  """
+  def list_users_suppliers(params) do
+    query = from(us in UserSupplier, preload: [:user, :supplier])
+
+    with {:ok, flop} <- Flop.validate(params, for: UserSupplier) do
+      flop = PriceSpotter.Flop.Helpers.ensure_unique_order(flop)
+      {:ok, Flop.run(query, flop, for: UserSupplier)}
+    end
   end
 
   @doc """

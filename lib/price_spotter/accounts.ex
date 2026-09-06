@@ -22,6 +22,16 @@ defmodule PriceSpotter.Accounts do
   end
 
   @doc """
+  Returns a Flop-paginated list of users for the admin index page.
+  """
+  def list_users(params) do
+    with {:ok, flop} <- Flop.validate(params, for: User) do
+      flop = PriceSpotter.Flop.Helpers.ensure_unique_order(flop)
+      {:ok, Flop.run(User, flop, for: User)}
+    end
+  end
+
+  @doc """
   Creates a user.
 
   ## Examples

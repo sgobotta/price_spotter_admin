@@ -2,6 +2,20 @@ defmodule PriceSpotter.Marketplaces.Relations.UserSupplier do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {
+    Flop.Schema,
+    filterable: [:role],
+    sortable: [:role, :inserted_at, :id],
+    default_order: %{
+      order_by: [:inserted_at, :id],
+      order_directions: [:desc, :asc]
+    },
+    pagination_types: [:first, :last],
+    default_pagination_type: :first,
+    default_limit: 20,
+    max_limit: 200
+  }
+
   @type t :: %__MODULE__{}
 
   @fields [:role]
