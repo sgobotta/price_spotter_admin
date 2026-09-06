@@ -9,6 +9,17 @@ defmodule PriceSpotter.Accounts.User do
     :admin
   ])
 
+  @derive {
+    Flop.Schema,
+    filterable: [:email, :role],
+    sortable: [:email, :role, :id],
+    default_order: %{order_by: [:email, :id], order_directions: [:asc, :asc]},
+    pagination_types: [:first, :last],
+    default_pagination_type: :first,
+    default_limit: 20,
+    max_limit: 200
+  }
+
   @type t :: %__MODULE__{}
 
   @primary_key {:id, :binary_id, autogenerate: true}

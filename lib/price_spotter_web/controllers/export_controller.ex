@@ -45,7 +45,7 @@ defmodule PriceSpotterWeb.ExportController do
   end
 
   defp maybe_put_max_limit("true", params, max_limit),
-    do: Map.put(params, "limit", max_limit)
+    do: Map.put(params, "first", max_limit)
 
   defp maybe_put_max_limit("false", params, _max_limit), do: params
 

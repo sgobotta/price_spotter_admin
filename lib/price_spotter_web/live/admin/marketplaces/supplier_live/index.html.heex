@@ -7,49 +7,73 @@
   </:actions>
 </.header>
 
-<.table
-  id="suppliers"
-  rows={@streams.suppliers}
-  row_click={
-    fn {_id, supplier} ->
-      JS.navigate(~p"/admin/marketplaces/suppliers/#{supplier}")
-    end
-  }
->
-  <:col :let={{_id, supplier}} label={gettext("Name")}>
-    <%= supplier.name %>
-  </:col>
-  <:action :let={{_id, supplier}}>
-    <div class="sr-only">
-      <.link navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}>
-        <%= gettext("Show") %>
-      </.link>
-    </div>
-  </:action>
-  <:action :let={{_id, supplier}}>
-    <.link
-      id={"suppliers-edit-#{supplier.id}"}
-      patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
-      class="hover:text-teal-500"
-    >
-      <.icon name="hero-pencil-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
-    </.link>
-  </:action>
-  <:action :let={{_id, supplier}}>
-    <.link
-      id={"suppliers-delete-#{supplier.id}"}
-      phx-click={
-        JS.push("delete", value: %{id: supplier.id}) |> hide("##{supplier.id}")
-      }
-      data-confirm={
-        gettext("Delete supplier \"%{name}\"?", name: supplier.name)
-      }
-      class="hover:text-rose-500"
-    >
-      <.icon name="hero-trash-solid" class="h-3 w-3 sm:h-5 sm:w-5 opacity-60" />
-    </.link>
-  </:action>
-</.table>
+<div class="my-4">
+  <.filter_form id="suppliers-filter-form" meta={@meta} fields={@filter_fields} />
+</div>
+
+<%= if @suppliers && @meta do %>
+  <.list_header meta={@meta} path={~p"/admin/marketplaces/suppliers"}>
+    <:col field={:name} label={gettext("Name")} class="flex-1" />
+  </.list_header>
+
+  <.list_group id="suppliers" items={@suppliers}>
+    <:empty_state>
+      <.no_results_found label={gettext("No suppliers found.")} />
+    </:empty_state>
+    <:row :let={supplier}>
+      <.list_row
+        id={"suppliers-#{supplier.id}"}
+        click={JS.navigate(~p"/admin/marketplaces/suppliers/#{supplier}")}
+      >
+        <:leading>
+          <.entity_avatar label={supplier.name} />
+        </:leading>
+        <:title><%= supplier.name %></:title>
+        <:actions>
+          <.link
+            navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}
+            class="sr-only"
+          >
+            <%= gettext("Show") %>
+          </.link>
+          <.link
+            id={"suppliers-edit-#{supplier.id}"}
+            patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
+            class="hover:text-teal-500"
+          >
+            <.icon
+              name="hero-pencil-solid"
+              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
+            />
+          </.link>
+          <.link
+            id={"suppliers-delete-#{supplier.id}"}
+            phx-click={
+              JS.push("delete", value: %{id: supplier.id})
+              |> hide("#suppliers-#{supplier.id}")
+            }
+            data-confirm={
+              gettext("Delete supplier \"%{name}\"?", name: supplier.name)
+            }
+            class="hover:text-rose-500"
+          >
+            <.icon
+              name="hero-trash-solid"
+              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
+            />
+          </.link>
+        </:actions>
+      </.list_row>
+    </:row>
+  </.list_group>
+
+  <div class="my-4 flex w-full justify-center">
+    <Flop.Phoenix.cursor_pagination
+      meta={@meta}
+      path={~p"/admin/marketplaces/suppliers"}
+    />
+  </div>
+<% end %>
 
 <.modal
   :if={@live_action in [:new, :edit]}

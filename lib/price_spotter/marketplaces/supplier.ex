@@ -2,6 +2,17 @@ defmodule PriceSpotter.Marketplaces.Supplier do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {
+    Flop.Schema,
+    filterable: [:name],
+    sortable: [:name, :id],
+    default_order: %{order_by: [:name, :id], order_directions: [:asc, :asc]},
+    pagination_types: [:first, :last],
+    default_pagination_type: :first,
+    default_limit: 20,
+    max_limit: 200
+  }
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "suppliers" do

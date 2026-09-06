@@ -25,7 +25,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          |> assign(%{products: products, meta: meta})
          |> assign_selection_options()
          |> assign_filter_fields()
-         |> assign(:total, meta.total_count)
          |> assign(filter_fields_form: to_form(meta))
          |> assign_header_action()
          |> assign(:section_title, gettext("Products"))
@@ -53,7 +52,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_event("reset-filter", _params, %{assigns: assigns} = socket) do
-    flop = assigns.meta.flop |> Flop.set_page(1) |> Flop.reset_filters()
+    flop =
+      assigns.meta.flop
+      |> Flop.reset_filters()
+      |> Map.merge(%{after: nil, before: nil})
 
     path =
       Flop.Phoenix.build_path(~p"/admin/marketplaces/products", flop,
@@ -68,7 +70,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     product = Marketplaces.get_product!(id)
     {:ok, _} = Marketplaces.delete_product(product)
 
-    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
+    {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
