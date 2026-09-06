@@ -76,5 +76,7 @@ defmodule PriceSpotterWeb.SidebarComponent do
   end
 
   defp active?(nil, _prefix), do: false
-  defp active?(current_path, prefix), do: String.starts_with?(current_path, prefix)
+
+  defp active?(current_path, prefix),
+    do: String.starts_with?(current_path, prefix)
 end

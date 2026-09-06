@@ -195,6 +195,109 @@ defmodule PriceSpotter.MarketplacesTest do
     end
   end
 
+  describe "products by user" do
+    import PriceSpotter.MarketplacesFixtures
+
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+    alias PriceSpotter.Marketplaces.SuppliersFixtures
+
+    test "list_products_by_user/2 returns every product for an admin, regardless of customer access" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      product = product_fixture()
+
+      assert {:ok, {[result], _meta}} =
+               Marketplaces.list_products_by_user(%{}, admin)
+
+      assert result.id == product.id
+    end
+
+    test "list_products_by_user/2 scopes a non-admin user to their granted suppliers" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      other_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      granted_product =
+        product_fixture(%{
+          internal_id: "granted-#{System.unique_integer()}",
+          supplier_id: granted_supplier.id
+        })
+
+      _other_product =
+        product_fixture(%{
+          internal_id: "other-#{System.unique_integer()}",
+          supplier_id: other_supplier.id
+        })
+
+      assert {:ok, {[result], _meta}} =
+               Marketplaces.list_products_by_user(%{}, user)
+
+      assert result.id == granted_product.id
+    end
+
+    test "list_product_categories_by_user/1 returns every category for an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      product_fixture(%{category: "some category"})
+
+      assert Marketplaces.list_product_categories_by_user(admin) == [
+               "some category"
+             ]
+    end
+
+    test "list_product_categories_by_user/1 scopes a non-admin user to their granted suppliers" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      other_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      product_fixture(%{
+        internal_id: "granted-#{System.unique_integer()}",
+        category: "granted category",
+        supplier_id: granted_supplier.id
+      })
+
+      product_fixture(%{
+        internal_id: "other-#{System.unique_integer()}",
+        category: "other category",
+        supplier_id: other_supplier.id
+      })
+
+      assert Marketplaces.list_product_categories_by_user(user) == [
+               "granted category"
+             ]
+    end
+
+    test "list_suppliers_by_user/1 returns every supplier name for an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert Marketplaces.list_suppliers_by_user(admin) == [supplier.name]
+    end
+
+    test "list_suppliers_by_user/1 scopes a non-admin user to their granted suppliers" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      _other_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      assert Marketplaces.list_suppliers_by_user(user) == [
+               granted_supplier.name
+             ]
+    end
+  end
+
   describe "suppliers" do
     alias PriceSpotter.Marketplaces.Supplier
 
@@ -346,8 +449,12 @@ defmodule PriceSpotter.MarketplacesTest do
 
     test "create_user_suppliers/2 inserts one row per entry for the given user" do
       user = PriceSpotter.AccountsFixtures.user_fixture()
-      %{id: supplier_id_1} = PriceSpotter.Marketplaces.SuppliersFixtures.create()
-      %{id: supplier_id_2} = PriceSpotter.Marketplaces.SuppliersFixtures.create()
+
+      %{id: supplier_id_1} =
+        PriceSpotter.Marketplaces.SuppliersFixtures.create()
+
+      %{id: supplier_id_2} =
+        PriceSpotter.Marketplaces.SuppliersFixtures.create()
 
       assert {:ok, user_suppliers} =
                Marketplaces.create_user_suppliers(user, [

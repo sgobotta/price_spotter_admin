@@ -26,7 +26,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
           </tr>
         </thead>
         <tbody>
-          <tr :for={grant <- @grants} class="border-t border-zinc-200 dark:border-zinc-700">
+          <tr
+            :for={grant <- @grants}
+            class="border-t border-zinc-200 dark:border-zinc-700"
+          >
             <td class="py-2"><%= grant.supplier.name %></td>
             <td class="py-2"><%= grant.role %></td>
             <td class="py-2 text-right">
@@ -47,7 +50,12 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
         <%= gettext("No supplier access granted yet.") %>
       </p>
 
-      <form phx-submit="save" phx-target={@myself} class="mt-6 space-y-2">
+      <form
+        id="customer-access-form"
+        phx-submit="save"
+        phx-target={@myself}
+        class="mt-6 space-y-2"
+      >
         <div :for={row <- @draft_rows} class="flex gap-2 items-start">
           <.input
             type="select"
@@ -119,12 +127,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
     ref = String.to_integer(ref)
 
     {:noreply,
-     update(socket, :draft_rows, fn rows -> Enum.reject(rows, &(&1.ref == ref)) end)}
+     update(socket, :draft_rows, fn rows ->
+       Enum.reject(rows, &(&1.ref == ref))
+     end)}
   end
 
   def handle_event("save", %{"rows" => rows_params}, socket) do
     rows_by_ref =
-      Map.new(rows_params, fn {ref, attrs} -> {String.to_integer(ref), attrs} end)
+      Map.new(rows_params, fn {ref, attrs} ->
+        {String.to_integer(ref), attrs}
+      end)
 
     submitted_rows =
       Enum.map(socket.assigns.draft_rows, fn row ->
@@ -151,12 +163,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
 
     case Marketplaces.create_user_suppliers(socket.assigns.user, attrs_list) do
       {:ok, _user_suppliers} ->
+        notify_parent(:customer_access_updated)
+
         {:noreply,
          socket
-         |> assign(:grants, Marketplaces.list_user_suppliers_for_user(socket.assigns.user))
+         |> assign(
+           :grants,
+           Marketplaces.list_user_suppliers_for_user(socket.assigns.user)
+         )
          |> assign(:draft_rows, [empty_row()])
-         |> assign(:row_errors, %{})
-         |> put_flash(:info, gettext("Customer access updated successfully"))}
+         |> assign(:row_errors, %{})}
 
       {:error, index, changeset} ->
         failing_ref = Enum.at(refs, index)
@@ -173,10 +189,17 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
     {:ok, _} = Marketplaces.delete_user_supplier(grant)
 
     {:noreply,
-     assign(socket, :grants, Marketplaces.list_user_suppliers_for_user(socket.assigns.user))}
+     assign(
+       socket,
+       :grants,
+       Marketplaces.list_user_suppliers_for_user(socket.assigns.user)
+     )}
   end
 
-  defp empty_row, do: %{ref: System.unique_integer([:positive]), supplier_id: "", role: ""}
+  defp empty_row,
+    do: %{ref: System.unique_integer([:positive]), supplier_id: "", role: ""}
+
+  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
   defp assign_supplier_options(socket) do
     options = Marketplaces.list_suppliers() |> Enum.map(&{&1.name, &1.id})
@@ -185,8 +208,11 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
 
   defp row_errors(row_errors, ref) do
     case row_errors[ref] do
-      nil -> []
-      changeset -> changeset.errors |> Enum.map(fn {_field, {msg, _opts}} -> msg end)
+      nil ->
+        []
+
+      changeset ->
+        changeset.errors |> Enum.map(fn {_field, {msg, _opts}} -> msg end)
     end
   end
 end

@@ -70,7 +70,8 @@ defmodule PriceSpotter.Marketplaces do
   Given a user, returns a list of all categories available to the user.
   Admins are not scoped by customer access and see every category.
   """
-  def list_product_categories_by_user(%User{role: :admin}), do: list_product_categories()
+  def list_product_categories_by_user(%User{role: :admin}),
+    do: list_product_categories()
 
   def list_product_categories_by_user(%User{} = user) do
     from(
@@ -945,13 +946,17 @@ defmodule PriceSpotter.Marketplaces do
   """
   @spec create_user_suppliers(User.t(), [map()]) ::
           {:ok, [UserSupplier.t()]} | {:error, integer(), Ecto.Changeset.t()}
-  def create_user_suppliers(%User{} = user, attrs_list) when is_list(attrs_list) do
+  def create_user_suppliers(%User{} = user, attrs_list)
+      when is_list(attrs_list) do
     attrs_list
     |> Enum.uniq_by(& &1.supplier_id)
     |> Enum.with_index()
     |> Enum.reduce(Ecto.Multi.new(), fn {attrs, index}, multi ->
       changeset =
-        UserSupplier.changeset(%UserSupplier{}, Map.put(attrs, :user_id, user.id))
+        UserSupplier.changeset(
+          %UserSupplier{},
+          Map.put(attrs, :user_id, user.id)
+        )
 
       Ecto.Multi.insert(multi, {:user_supplier, index}, changeset)
     end)
@@ -960,7 +965,9 @@ defmodule PriceSpotter.Marketplaces do
       {:ok, results} ->
         user_suppliers =
           results
-          |> Enum.sort_by(fn {{:user_supplier, index}, _user_supplier} -> index end)
+          |> Enum.sort_by(fn {{:user_supplier, index}, _user_supplier} ->
+            index
+          end)
           |> Enum.map(fn {_key, user_supplier} -> user_supplier end)
 
         {:ok, user_suppliers}

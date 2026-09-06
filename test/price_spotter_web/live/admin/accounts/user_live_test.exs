@@ -1,6 +1,10 @@
 defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
   use PriceSpotterWeb.ConnCase
 
+  alias PriceSpotter.Marketplaces
+  alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+  alias PriceSpotter.Marketplaces.SuppliersFixtures
+
   import Phoenix.LiveViewTest
   import PriceSpotter.AccountsFixtures
   import PriceSpotterWeb.Gettext
@@ -117,5 +121,120 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       assert html =~ gettext("User updated successfully")
       assert html =~ "some_updated@email"
     end
+  end
+
+  describe "Customer access" do
+    setup [:register_and_log_in_admin, :create_user]
+
+    test "renders empty state when the user has no supplier access", %{
+      conn: conn,
+      user: user
+    } do
+      {:ok, _show_live, html} = live(conn, ~p"/admin/accounts/users/#{user}")
+
+      assert html =~ gettext("Customer access")
+      assert html =~ gettext("No supplier access granted yet.")
+    end
+
+    test "adding another row renders a second set of supplier/role selects",
+         %{conn: conn, user: user} do
+      {:ok, show_live, _html} = live(conn, ~p"/admin/accounts/users/#{user}")
+
+      html =
+        show_live
+        |> element("button", "+ Add another")
+        |> render_click()
+
+      assert length(Regex.scan(~r/id="row-\d+-supplier"/, html)) == 2
+    end
+
+    test "saving a row grants the supplier access to the user", %{
+      conn: conn,
+      user: user
+    } do
+      supplier = SuppliersFixtures.create()
+
+      {:ok, show_live, html} = live(conn, ~p"/admin/accounts/users/#{user}")
+      ref = extract_row_ref(html)
+
+      show_live
+      |> element("#customer-access-form")
+      |> render_submit(%{
+        "rows" => %{
+          to_string(ref) => %{
+            "supplier_id" => supplier.id,
+            "role" => "maintainer"
+          }
+        }
+      })
+
+      html = render(show_live)
+      assert html =~ gettext("Customer access updated successfully")
+      assert html =~ supplier.name
+      assert html =~ "maintainer"
+
+      assert [%{supplier_id: supplier_id, role: :maintainer}] =
+               Marketplaces.list_user_suppliers_for_user(user)
+
+      assert supplier_id == supplier.id
+    end
+
+    test "saving an already-granted supplier surfaces a per-row error and keeps existing grants",
+         %{conn: conn, user: user} do
+      supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: supplier.id,
+        role: :maintainer
+      })
+
+      {:ok, show_live, html} = live(conn, ~p"/admin/accounts/users/#{user}")
+      ref = extract_row_ref(html)
+
+      html =
+        show_live
+        |> element("#customer-access-form")
+        |> render_submit(%{
+          "rows" => %{
+            to_string(ref) => %{
+              "supplier_id" => supplier.id,
+              "role" => "consumer"
+            }
+          }
+        })
+
+      assert html =~ "has already been taken"
+
+      assert [%{role: :maintainer}] =
+               Marketplaces.list_user_suppliers_for_user(user)
+    end
+
+    test "removing a grant deletes it", %{conn: conn, user: user} do
+      supplier = SuppliersFixtures.create()
+
+      user_supplier =
+        UsersSuppliersFixtures.create(%{
+          user_id: user.id,
+          supplier_id: supplier.id
+        })
+
+      {:ok, show_live, _html} = live(conn, ~p"/admin/accounts/users/#{user}")
+
+      html =
+        show_live
+        |> element(
+          "a[phx-click=remove_grant][phx-value-id='#{user_supplier.id}']"
+        )
+        |> render_click()
+
+      assert html =~ gettext("No supplier access granted yet.")
+      assert Marketplaces.list_user_suppliers_for_user(user) == []
+    end
+  end
+
+  defp extract_row_ref(html) do
+    [_, ref] = Regex.run(~r/id="row-(\d+)-supplier"/, html)
+    String.to_integer(ref)
   end
 end
