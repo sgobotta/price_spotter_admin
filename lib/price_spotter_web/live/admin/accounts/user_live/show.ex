@@ -24,6 +24,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Show do
     {:noreply, assign(socket, :user, user)}
   end
 
+  @impl true
+  def handle_info(
+        {PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent,
+         :customer_access_updated},
+        socket
+      ) do
+    {:noreply,
+     put_flash(socket, :info, gettext("Customer access updated successfully"))}
+  end
+
   defp page_title(:show), do: gettext("Show User")
   defp page_title(:edit), do: gettext("Edit User")
 end

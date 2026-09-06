@@ -26,7 +26,11 @@ defmodule PriceSpotterWeb.Router do
   end
 
   live_session :default,
-    on_mount: [{PriceSpotterWeb.Theme, :fetch_theme}] do
+    on_mount: [
+      {PriceSpotterWeb.UserAuth, :mount_current_user},
+      {PriceSpotterWeb.Theme, :fetch_theme},
+      {PriceSpotterWeb.CurrentPathHook, :save_path}
+    ] do
     scope "/", PriceSpotterWeb do
       pipe_through [:browser]
 
@@ -60,17 +64,6 @@ defmodule PriceSpotterWeb.Router do
 
           live "/:id", SupplierLive.Show, :show
           live "/:id/show/edit", SupplierLive.Show, :edit
-        end
-
-        scope "/users_suppliers" do
-          pipe_through [:admin]
-
-          live "/", UserSupplierLive.Index, :index
-          live "/new", UserSupplierLive.Index, :new
-          live "/:id/edit", UserSupplierLive.Index, :edit
-
-          live "/:id", UserSupplierLive.Show, :show
-          live "/:id/show/edit", UserSupplierLive.Show, :edit
         end
       end
 
@@ -119,7 +112,8 @@ defmodule PriceSpotterWeb.Router do
     live_session :redirect_if_user_is_authenticated,
       on_mount: [
         {PriceSpotterWeb.UserAuth, :redirect_if_user_is_authenticated},
-        {PriceSpotterWeb.Theme, :fetch_theme}
+        {PriceSpotterWeb.Theme, :fetch_theme},
+        {PriceSpotterWeb.CurrentPathHook, :save_path}
       ] do
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
@@ -137,13 +131,13 @@ defmodule PriceSpotterWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [
         {PriceSpotterWeb.UserAuth, :ensure_authenticated},
-        {PriceSpotterWeb.Theme, :fetch_theme}
+        {PriceSpotterWeb.Theme, :fetch_theme},
+        {PriceSpotterWeb.CurrentPathHook, :save_path}
       ] do
       live "/users/settings/confirm_email/:token",
            UserSettingsLive,
            :confirm_email
 
-      pipe_through [:admin]
       live "/users/settings", UserSettingsLive, :edit
     end
   end
@@ -156,7 +150,8 @@ defmodule PriceSpotterWeb.Router do
     live_session :current_user,
       on_mount: [
         {PriceSpotterWeb.UserAuth, :mount_current_user},
-        {PriceSpotterWeb.Theme, :fetch_theme}
+        {PriceSpotterWeb.Theme, :fetch_theme},
+        {PriceSpotterWeb.CurrentPathHook, :save_path}
       ] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
