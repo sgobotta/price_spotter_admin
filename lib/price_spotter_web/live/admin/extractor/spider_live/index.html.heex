@@ -52,6 +52,7 @@
         type="button"
         phx-click="toggle_active"
         phx-value-key={spider.name}
+        class="!appearance-none !border-0 !bg-transparent hover:!bg-transparent focus:!bg-transparent !p-0 !shadow-none"
       >
         <.pill
           variant={if spider.active, do: :success, else: :neutral}

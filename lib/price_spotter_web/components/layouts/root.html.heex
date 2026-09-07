@@ -17,52 +17,32 @@
     </script>
   </head>
   <body class="main-bg antialiased text-black dark:text-white">
-    <ul class="
-      relative z-10
-      flex items-center
-      gap-4 justify-end
-      border-r-[1px] border-l-[1px] border-dotted
-      border-zinc-300 dark:border-zinc-700
-    ">
-      <%= if @current_user do %>
-        <li class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100">
-          <%= @current_user.email %>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/settings"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100 font-semibold hover:text-zinc-700 hover:dark:text-zinc-200"
-          >
-            <%= gettext("Settings") %>
-          </.link>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/log_out"}
-            method="delete"
-            class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100 font-semibold hover:text-zinc-700 hover:dark:text-zinc-200 pr-2"
-          >
-            <%= gettext("Log out") %>
-          </.link>
-        </li>
-      <% else %>
-        <li>
-          <.link
-            href={~p"/users/register"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100 font-semibold hover:text-zinc-700 hover:dark:text-zinc-200"
-          >
-            <%= gettext("Register") %>
-          </.link>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/log_in"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100 font-semibold hover:text-zinc-700 hover:dark:text-zinc-200"
-          >
-            <%= gettext("Log in") %>
-          </.link>
-        </li>
-      <% end %>
+    <ul
+      :if={!@current_user}
+      class="
+        relative z-10
+        flex items-center
+        gap-4 justify-end
+        border-r-[1px] border-l-[1px] border-dotted
+        border-zinc-300 dark:border-zinc-700
+      "
+    >
+      <li>
+        <.link
+          href={~p"/users/register"}
+          class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100 font-semibold hover:text-zinc-700 hover:dark:text-zinc-200"
+        >
+          <%= gettext("Register") %>
+        </.link>
+      </li>
+      <li>
+        <.link
+          href={~p"/users/log_in"}
+          class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-zinc-100 font-semibold hover:text-zinc-700 hover:dark:text-zinc-200"
+        >
+          <%= gettext("Log in") %>
+        </.link>
+      </li>
     </ul>
     <%= @inner_content %>
   </body>
