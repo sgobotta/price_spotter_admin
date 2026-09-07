@@ -115,5 +115,51 @@ defmodule PriceSpotter.Extractor.ClientTest do
       assert {:error, %{status: 404, message: "unknown spider"}} =
                Client.trigger_run("unknown")
     end
+
+    test "sends the eans list when given" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{
+                 "dry_run" => true,
+                 "eans" => ["7790070418161", "7790742307279"]
+               }
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      assert {:ok, %{run_id: "run-1"}} =
+               Client.trigger_run("coto-by-ean",
+                 dry_run: true,
+                 eans: ["7790070418161", "7790742307279"]
+               )
+    end
+
+    test "omits eans from the body when the list is empty" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{"dry_run" => false}
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      assert {:ok, _} = Client.trigger_run("coto-by-ean", dry_run: false, eans: [])
+    end
+
+    test "maps a 400 response to an error (unsupported eans override)" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 400, %{"error" => "spider does not support eans"}}
+      end)
+
+      assert {:error, %{status: 400, message: "spider does not support eans"}} =
+               Client.trigger_run("yaguar", eans: ["123"])
+    end
   end
 end
