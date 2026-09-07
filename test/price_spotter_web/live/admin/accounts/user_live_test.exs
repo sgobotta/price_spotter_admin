@@ -41,7 +41,11 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
         |> render_click()
 
       assert html =~ "users-#{user.id}-expand"
-      assert has_element?(index_live, "#users-#{user.id}-expand[aria-hidden='false']")
+
+      assert has_element?(
+               index_live,
+               "#users-#{user.id}-expand[aria-hidden='false']"
+             )
 
       html =
         index_live
@@ -49,7 +53,11 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
         |> render_click()
 
       assert html =~ "users-#{user.id}-expand"
-      assert has_element?(index_live, "#users-#{user.id}-expand[aria-hidden='true']")
+
+      assert has_element?(
+               index_live,
+               "#users-#{user.id}-expand[aria-hidden='true']"
+             )
     end
 
     test "saves new user", %{conn: conn} do

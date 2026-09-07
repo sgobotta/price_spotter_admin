@@ -37,7 +37,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
         |> render_click()
 
       assert html =~ "suppliers-#{supplier.id}-expand"
-      assert has_element?(index_live, "#suppliers-#{supplier.id}-expand[aria-hidden='false']")
+
+      assert has_element?(
+               index_live,
+               "#suppliers-#{supplier.id}-expand[aria-hidden='false']"
+             )
 
       html =
         index_live
@@ -45,7 +49,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
         |> render_click()
 
       assert html =~ "suppliers-#{supplier.id}-expand"
-      assert has_element?(index_live, "#suppliers-#{supplier.id}-expand[aria-hidden='true']")
+
+      assert has_element?(
+               index_live,
+               "#suppliers-#{supplier.id}-expand[aria-hidden='true']"
+             )
     end
 
     test "saves new supplier", %{conn: conn} do
