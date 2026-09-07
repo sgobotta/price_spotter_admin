@@ -172,6 +172,8 @@ defmodule PriceSpotterWeb.ListComponents do
             type="button"
             phx-click={@toggle_event}
             phx-value-key={@toggle_key}
+            aria-expanded={@expanded}
+            aria-controls={"#{@id}-expand"}
             class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
           >
             <CoreComponents.icon
@@ -191,6 +193,8 @@ defmodule PriceSpotterWeb.ListComponents do
 
       <div
         id={"#{@id}-expand"}
+        role="region"
+        aria-hidden={if @expanded, do: "false", else: "true"}
         class={[
           "grid transition-all duration-300 ease-in-out",
           if(@expanded,
@@ -199,14 +203,16 @@ defmodule PriceSpotterWeb.ListComponents do
           )
         ]}
       >
-        <div class="overflow-hidden">
-          <div class={[
-            "mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40",
-            @content_class
-          ]}>
-            <%= render_slot(@content) %>
+        <%= if @expanded do %>
+          <div class="overflow-hidden">
+            <div class={[
+              "mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40",
+              @content_class
+            ]}>
+              <%= render_slot(@content) %>
+            </div>
           </div>
-        </div>
+        <% end %>
       </div>
     </div>
     """

@@ -32,18 +32,18 @@
         <:title><%= supplier.name %></:title>
         <:content>
           <div class="flex items-center justify-end gap-2">
-            <.link navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}>
-              <.button class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700">
-                <%= gettext("Show") %>
-              </.button>
+            <.link
+              navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Show") %>
             </.link>
             <.link
               id={"suppliers-edit-#{supplier.id}"}
               patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
             >
-              <.button class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700">
-                <%= gettext("Edit") %>
-              </.button>
+              <%= gettext("Edit") %>
             </.link>
             <.button
               id={"suppliers-delete-#{supplier.id}"}
