@@ -27,6 +27,10 @@ defmodule PriceSpotter.Extractor do
   @spec watch_run(String.t(), String.t(), String.t(), pid()) ::
           {:ok, pid()} | {:error, term()}
   def watch_run(run_id, stream_url, stream_token, parent_pid \\ self()) do
-    RunWatcher.start_link(run_id, stream_url, stream_token, parent_pid)
+    watcher().start_link(run_id, stream_url, stream_token, parent_pid)
   end
+
+  defp watcher,
+    do:
+      Application.fetch_env!(:price_spotter, :extractor)[:watcher] || RunWatcher
 end

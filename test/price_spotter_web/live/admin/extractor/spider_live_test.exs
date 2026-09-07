@@ -33,17 +33,57 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
     FakeHttpAdapter.stub(fn :get, _url, _headers, nil -> {:ok, 200, spiders} end)
   end
 
+  defp expand(view, key) do
+    view
+    |> element("#spiders-#{key}-toggle-expand")
+    |> render_click()
+  end
+
+  defp expanded?(view, key) do
+    view
+    |> element("#spiders-#{key}-expand")
+    |> render()
+    |> String.contains?("grid-rows-[1fr]")
+  end
+
   describe "as an admin" do
     setup [:register_and_log_in_admin]
 
     test "lists spiders with their schedule and active state", %{conn: conn} do
       stub_list([spider_json(%{})])
 
-      {:ok, _view, html} = live(conn, ~p"/admin/extractor/spiders")
+      {:ok, view, html} = live(conn, ~p"/admin/extractor/spiders")
 
       assert html =~ "coto-by-ean"
       assert html =~ "Every 5 minutes"
-      assert html =~ gettext("Active")
+      refute expanded?(view, "coto-by-ean")
+    end
+
+    test "expands a row to reveal the schedule form, active toggle and run controls",
+         %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+
+      refute expanded?(view, "coto-by-ean")
+
+      html = expand(view, "coto-by-ean")
+
+      assert expanded?(view, "coto-by-ean")
+      assert html =~ "spiders-coto-by-ean-cron-form"
+      assert html =~ "spiders-coto-by-ean-toggle"
+      assert html =~ "spiders-coto-by-ean-run"
+      assert html =~ "hero-chevron-up-solid"
+    end
+
+    test "collapses an expanded row again", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+
+      expand(view, "coto-by-ean")
+      html = expand(view, "coto-by-ean")
+
+      refute expanded?(view, "coto-by-ean")
+      assert html =~ "hero-chevron-down-solid"
     end
 
     test "hides the dry run button for spiders that don't support it", %{
@@ -53,15 +93,30 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         spider_json(%{"name" => "yaguar", "supports_dry_run" => false})
       ])
 
-      {:ok, _view, html} = live(conn, ~p"/admin/extractor/spiders")
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "yaguar")
 
       refute html =~ "spiders-yaguar-dry-run"
       assert html =~ "spiders-yaguar-run"
     end
 
+    test "hides the eans field for spiders that don't support an override", %{
+      conn: conn
+    } do
+      stub_list([
+        spider_json(%{"name" => "yaguar", "supports_ean_override" => false})
+      ])
+
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "yaguar")
+
+      refute html =~ ~s(name="eans")
+    end
+
     test "toggles active via the extractor API", %{conn: conn} do
       stub_list([spider_json(%{})])
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
 
       FakeHttpAdapter.stub(fn :patch, _url, _headers, body ->
         assert Jason.decode!(body) == %{"active" => false}
@@ -79,6 +134,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
     test "saves an edited cron expression", %{conn: conn} do
       stub_list([spider_json(%{})])
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
 
       FakeHttpAdapter.stub(fn :patch, _url, _headers, body ->
         assert Jason.decode!(body) == %{"cron" => "0 * * * *"}
@@ -98,6 +154,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
     } do
       stub_list([spider_json(%{})])
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
 
       FakeHttpAdapter.stub(fn :patch, _url, _headers, _body ->
         {:ok, 400, %{"error" => "cron does not parse"}}
@@ -109,6 +166,99 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> render_click()
 
       assert html =~ "cron does not parse"
+    end
+
+    test "triggers a dry run with a newline-separated list of eans", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/coto-by-ean/run")
+
+        assert Jason.decode!(body) == %{
+                 "dry_run" => true,
+                 "eans" => ["7790070418161", "7790742307279"]
+               }
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> form("#spiders-coto-by-ean-eans-form", %{
+        "eans" => "7790070418161\n7790742307279"
+      })
+      |> render_change()
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-dry-run")
+        |> render_click()
+
+      assert html =~ gettext("Dry run")
+      assert html =~ "2 EANs"
+    end
+
+    test "triggers a plain run with no eans when the field is left blank", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{"dry_run" => false}
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-run")
+        |> render_click()
+
+      assert html =~ gettext("Run")
+    end
+
+    test "keeps the run log inside the row, visible only while it is expanded",
+         %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-run")
+        |> render_click()
+
+      assert html =~ "spiders-coto-by-ean-active-run"
+      assert expanded?(view, "coto-by-ean")
+
+      html = expand(view, "coto-by-ean")
+
+      assert html =~ "spiders-coto-by-ean-active-run"
+      refute expanded?(view, "coto-by-ean")
     end
   end
 

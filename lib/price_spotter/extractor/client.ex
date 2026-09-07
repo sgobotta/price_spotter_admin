@@ -40,8 +40,10 @@ defmodule PriceSpotter.Extractor.Client do
 
   @doc """
   Triggers a single, immediate run of the given spider. Pass `dry_run:
-  true` to run without persisting anything (only valid when the spider
-  supports it).
+  true` to run without persisting anything, and/or `eans: [...]` to run
+  against that exact list instead of the spider's configured source -
+  both only valid when the spider supports them
+  (`Spider.supports_dry_run`/`supports_ean_override`).
   """
   @spec trigger_run(String.t(), keyword()) ::
           {:ok,
@@ -52,7 +54,9 @@ defmodule PriceSpotter.Extractor.Client do
            }}
           | {:error, error()}
   def trigger_run(key, opts \\ []) do
-    body = %{dry_run: Keyword.get(opts, :dry_run, false)}
+    body =
+      %{dry_run: Keyword.get(opts, :dry_run, false)}
+      |> maybe_put_eans(Keyword.get(opts, :eans))
 
     :post
     |> request("/admin/spiders/#{key}/run", body)
@@ -64,6 +68,9 @@ defmodule PriceSpotter.Extractor.Client do
       }
     end)
   end
+
+  defp maybe_put_eans(body, eans) when eans in [nil, []], do: body
+  defp maybe_put_eans(body, eans), do: Map.put(body, :eans, eans)
 
   defp request(method, path), do: do_request(method, path, nil)
 

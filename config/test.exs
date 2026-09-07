@@ -47,6 +47,8 @@ config :mix_test_watch, clear: true
 
 # Route the extractor HTTP client through a fake adapter in tests, instead
 # of the real network. Tests configure the actual response via
-# PriceSpotter.Extractor.FakeHttpAdapter.stub/1.
+# PriceSpotter.Extractor.FakeHttpAdapter.stub/1. The run-stream watcher is
+# faked too, since the real one opens an actual WebSocket connection.
 config :price_spotter, :extractor,
-  adapter: PriceSpotter.Extractor.FakeHttpAdapter
+  adapter: PriceSpotter.Extractor.FakeHttpAdapter,
+  watcher: PriceSpotter.Extractor.FakeRunWatcher

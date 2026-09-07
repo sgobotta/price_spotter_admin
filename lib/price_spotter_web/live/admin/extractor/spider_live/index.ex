@@ -19,8 +19,31 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
     {:ok,
      socket
-     |> assign(page_title: gettext("Extractors"), active_run: nil, log_seq: 0)
+     |> assign(
+       page_title: gettext("Extractors"),
+       active_run: nil,
+       log_seq: 0,
+       eans_drafts: %{},
+       expanded: MapSet.new()
+     )
      |> stream(:run_log, [])}
+  end
+
+  @impl true
+  def handle_event("toggle_expand", %{"key" => key}, socket) do
+    expanded =
+      if MapSet.member?(socket.assigns.expanded, key) do
+        MapSet.delete(socket.assigns.expanded, key)
+      else
+        MapSet.put(socket.assigns.expanded, key)
+      end
+
+    {:noreply, assign(socket, :expanded, expanded)}
+  end
+
+  @impl true
+  def handle_event("update_eans", %{"key" => key, "eans" => eans}, socket) do
+    {:noreply, update(socket, :eans_drafts, &Map.put(&1, key, eans))}
   end
 
   @impl true
@@ -46,8 +69,9 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   @impl true
   def handle_event("run", %{"key" => key, "dry_run" => dry_run}, socket) do
     dry_run? = dry_run == "true"
+    eans = parse_eans(Map.get(socket.assigns.eans_drafts, key))
 
-    case Extractor.trigger_run(key, dry_run: dry_run?) do
+    case Extractor.trigger_run(key, dry_run: dry_run?, eans: eans) do
       {:ok,
        %{run_id: run_id, stream_token: stream_token, stream_url: stream_url}} ->
         case Extractor.watch_run(run_id, stream_url, stream_token, self()) do
@@ -62,6 +86,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
                  spider_name: spider && spider.name,
                  run_id: run_id,
                  dry_run: dry_run?,
+                 eans: eans,
                  status: :running,
                  stats: nil
                },
@@ -120,6 +145,15 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   defp handle_schedule_result({:error, %{message: message}}, socket) do
     {:noreply, put_flash(socket, :error, message)}
+  end
+
+  defp parse_eans(nil), do: []
+
+  defp parse_eans(raw) do
+    raw
+    |> String.split(~r/\r\n|\r|\n/)
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
   end
 
   defp find_spider(spiders, key), do: Enum.find(spiders, &(&1.name == key))
