@@ -1,4 +1,4 @@
-<div class="left-[40rem] fixed inset-y-0 right-0 z-0 hidden lg:block xl:left-[50rem]">
+<div class="left-[calc(50vw+7rem)] fixed inset-y-0 right-0 z-0 hidden lg:block">
   <svg
     viewBox="0 0 1480 957"
     fill="none"
@@ -57,28 +57,5 @@
         "Search, filter and export products and prices from suppliers to your spreadsheets."
       ) %>
     </p>
-    <div class="flex">
-      <div class="w-full sm:w-auto">
-        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-          <.home_shortcut
-            icon="hero-shopping-bag-solid"
-            name={gettext("Products")}
-            navigate_to={~p"/admin/marketplaces/products"}
-          />
-          <%= if @current_user && @current_user.role in [:admin] do %>
-            <.home_shortcut
-              icon="hero-user-solid"
-              name={gettext("Users")}
-              navigate_to={~p"/admin/accounts/users"}
-            />
-            <.home_shortcut
-              icon="hero-building-storefront-solid"
-              name={gettext("Suppliers")}
-              navigate_to={~p"/admin/marketplaces/suppliers"}
-            />
-          <% end %>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
