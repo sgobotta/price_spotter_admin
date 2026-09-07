@@ -257,8 +257,12 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       html = expand(view, "coto-by-ean")
 
-      assert html =~ "spiders-coto-by-ean-active-run"
+      refute html =~ "spiders-coto-by-ean-active-run"
       refute expanded?(view, "coto-by-ean")
+
+      html = expand(view, "coto-by-ean")
+      assert html =~ "spiders-coto-by-ean-active-run"
+      assert expanded?(view, "coto-by-ean")
     end
   end
 
