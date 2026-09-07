@@ -150,7 +150,8 @@ defmodule PriceSpotter.Extractor.ClientTest do
          }}
       end)
 
-      assert {:ok, _} = Client.trigger_run("coto-by-ean", dry_run: false, eans: [])
+      assert {:ok, _} =
+               Client.trigger_run("coto-by-ean", dry_run: false, eans: [])
     end
 
     test "maps a 400 response to an error (unsupported eans override)" do

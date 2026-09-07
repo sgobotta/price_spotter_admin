@@ -31,5 +31,6 @@ defmodule PriceSpotter.Extractor do
   end
 
   defp watcher,
-    do: Application.fetch_env!(:price_spotter, :extractor)[:watcher] || RunWatcher
+    do:
+      Application.fetch_env!(:price_spotter, :extractor)[:watcher] || RunWatcher
 end

@@ -162,7 +162,9 @@
             >
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-                  <%= if @active_run.dry_run, do: gettext("Dry run"), else: gettext("Run") %>
+                  <%= if @active_run.dry_run,
+                    do: gettext("Dry run"),
+                    else: gettext("Run") %>
                   <%= if @active_run.eans != [] do %>
                     · <%= ngettext(
                       "%{count} EAN",
@@ -174,7 +176,9 @@
                 </h3>
                 <.pill
                   variant={
-                    if @active_run.status == :finished, do: :neutral, else: :info
+                    if @active_run.status == :finished,
+                      do: :neutral,
+                      else: :info
                   }
                   text={
                     if @active_run.status == :finished,
