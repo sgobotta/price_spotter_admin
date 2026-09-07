@@ -3,6 +3,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   alias PriceSpotter.Extractor
   alias PriceSpotter.Extractor.Spider
+  alias PriceSpotterWeb.Admin.ExpandableList
 
   @impl true
   def mount(_params, session, socket) do
@@ -24,19 +25,14 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
        active_run: nil,
        log_seq: 0,
        eans_drafts: %{},
-       expanded: MapSet.new()
+       expanded: ExpandableList.new()
      )
      |> stream(:run_log, [])}
   end
 
   @impl true
   def handle_event("toggle_expand", %{"key" => key}, socket) do
-    expanded =
-      if MapSet.member?(socket.assigns.expanded, key) do
-        MapSet.delete(socket.assigns.expanded, key)
-      else
-        MapSet.put(socket.assigns.expanded, key)
-      end
+    expanded = ExpandableList.toggle(socket.assigns.expanded, key)
 
     {:noreply, assign(socket, :expanded, expanded)}
   end

@@ -22,9 +22,10 @@
       <.no_results_found label={gettext("No users found.")} />
     </:empty_state>
     <:row :let={user}>
-      <.list_row
+      <.expandable_list_row
         id={"users-#{user.id}"}
-        click={JS.navigate(~p"/admin/accounts/users/#{user}")}
+        expanded={ExpandableList.expanded?(@expanded, user.id)}
+        toggle_key={user.id}
       >
         <:leading>
           <.entity_avatar label={user.email} />
@@ -36,36 +37,37 @@
             variant={if user.role == :admin, do: :info, else: :neutral}
           />
         </:meta>
-        <:actions>
-          <.link navigate={~p"/admin/accounts/users/#{user}"} class="sr-only">
-            <%= gettext("Show") %>
-          </.link>
-          <.link
-            id={"users-edit-#{user.id}"}
-            patch={~p"/admin/accounts/users/#{user}/edit"}
-            class="hover:text-teal-500"
-          >
-            <.icon
-              name="hero-pencil-solid"
-              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
-            />
-          </.link>
-          <.link
-            id={"users-delete-#{user.id}"}
-            phx-click={
-              JS.push("delete", value: %{id: user.id})
-              |> hide("#users-#{user.id}")
-            }
-            data-confirm={gettext("Delete user \"%{name}\"?", name: user.email)}
-            class="hover:text-rose-500"
-          >
-            <.icon
-              name="hero-trash-solid"
-              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
-            />
-          </.link>
-        </:actions>
-      </.list_row>
+        <:content>
+          <div class="flex items-center justify-end gap-2">
+            <.link
+              navigate={~p"/admin/accounts/users/#{user}"}
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Show") %>
+            </.link>
+            <.link
+              id={"users-edit-#{user.id}"}
+              patch={~p"/admin/accounts/users/#{user}/edit"}
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Edit") %>
+            </.link>
+            <.button
+              id={"users-delete-#{user.id}"}
+              phx-click={
+                JS.push("delete", value: %{id: user.id})
+                |> hide("#users-#{user.id}")
+              }
+              data-confirm={
+                gettext("Delete user \"%{name}\"?", name: user.email)
+              }
+              class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
+            >
+              <%= gettext("Delete") %>
+            </.button>
+          </div>
+        </:content>
+      </.expandable_list_row>
     </:row>
   </.list_group>
 

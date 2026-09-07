@@ -8,6 +8,7 @@ defmodule PriceSpotterWeb.ListComponents do
   use Phoenix.Component
 
   alias PriceSpotterWeb.CoreComponents
+  import PriceSpotterWeb.Gettext
 
   @doc """
   Renders a list of rows inside a bordered container, with an empty state
@@ -111,6 +112,107 @@ defmodule PriceSpotterWeb.ListComponents do
         class="flex shrink-0 items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100"
       >
         <%= render_slot(@actions) %>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a row with a standardized expand/collapse panel.
+  """
+  attr :id, :string, required: true
+  attr :expanded, :boolean, required: true
+  attr :toggle_event, :string, default: "toggle_expand"
+  attr :toggle_key, :string, required: true
+  attr :content_class, :string, default: nil
+
+  slot :leading
+  slot :title, required: true
+  slot :subtitle
+  slot :meta
+  slot :actions
+  slot :content, required: true
+
+  def expandable_list_row(assigns) do
+    ~H"""
+    <div class="flex flex-col px-4 py-3">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="flex items-center gap-3">
+          <div :if={@leading != []} class="shrink-0">
+            <%= render_slot(@leading) %>
+          </div>
+
+          <div class="min-w-0">
+            <div class="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+              <%= render_slot(@title) %>
+            </div>
+            <div
+              :if={@subtitle != []}
+              class="truncate text-xs text-zinc-500 dark:text-zinc-400"
+            >
+              <%= render_slot(@subtitle) %>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div
+            :if={@meta != []}
+            class="hidden shrink-0 flex-wrap items-center justify-end gap-1 sm:flex"
+          >
+            <%= render_slot(@meta) %>
+          </div>
+
+          <div :if={@actions != []} class="flex shrink-0 items-center gap-2">
+            <%= render_slot(@actions) %>
+          </div>
+
+          <CoreComponents.button
+            id={"#{@id}-toggle-expand"}
+            type="button"
+            phx-click={@toggle_event}
+            phx-value-key={@toggle_key}
+            aria-expanded={@expanded}
+            aria-controls={"#{@id}-expand"}
+            class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          >
+            <CoreComponents.icon
+              name={
+                if @expanded,
+                  do: "hero-chevron-up-solid",
+                  else: "hero-chevron-down-solid"
+              }
+              class="h-4 w-4"
+            />
+            <span class="sr-only">
+              <%= if @expanded, do: gettext("Collapse"), else: gettext("Expand") %>
+            </span>
+          </CoreComponents.button>
+        </div>
+      </div>
+
+      <div
+        id={"#{@id}-expand"}
+        role="region"
+        aria-hidden={if @expanded, do: "false", else: "true"}
+        class={[
+          "grid transition-all duration-300 ease-in-out",
+          if(@expanded,
+            do: "grid-rows-[1fr] opacity-100",
+            else: "grid-rows-[0fr] opacity-0"
+          )
+        ]}
+      >
+        <%= if @expanded do %>
+          <div class="overflow-hidden">
+            <div class={[
+              "mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40",
+              @content_class
+            ]}>
+              <%= render_slot(@content) %>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
     """

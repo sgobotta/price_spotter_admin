@@ -3,10 +3,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
 
   alias PriceSpotter.Accounts
   alias PriceSpotter.Accounts.User
+  alias PriceSpotterWeb.Admin.ExpandableList
 
   @impl true
   def mount(_params, session, socket) do
-    {:ok, assign(assign_defaults(session, socket), %{users: nil, meta: nil})}
+    {:ok,
+     assign(assign_defaults(session, socket), %{
+       users: nil,
+       meta: nil,
+       expanded: ExpandableList.new()
+     })}
   end
 
   @impl true
@@ -22,6 +28,12 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
       _error ->
         {:noreply, push_navigate(socket, to: ~p"/admin/accounts/users")}
     end
+  end
+
+  @impl true
+  def handle_event("toggle_expand", %{"key" => key}, socket) do
+    expanded = ExpandableList.toggle(socket.assigns.expanded, key)
+    {:noreply, assign(socket, :expanded, expanded)}
   end
 
   @impl true

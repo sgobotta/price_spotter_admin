@@ -14,193 +14,154 @@
     <.no_results_found label={gettext("No spiders found.")} />
   </:empty_state>
   <:row :let={spider}>
-    <div class="flex flex-col px-4 py-3">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div class="flex items-center gap-3">
-          <.entity_avatar label={spider.name} />
-          <div class="min-w-0">
-            <div class="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              <%= spider.name %>
-            </div>
-            <div class="truncate text-xs text-zinc-500 dark:text-zinc-400">
-              <%= Extractor.humanize_cron(spider.cron) %>
-            </div>
-          </div>
+    <.expandable_list_row
+      id={"spiders-#{spider.name}"}
+      expanded={ExpandableList.expanded?(@expanded, spider.name)}
+      toggle_key={spider.name}
+      content_class="flex flex-col gap-3"
+    >
+      <:leading>
+        <.entity_avatar label={spider.name} />
+      </:leading>
+      <:title><%= spider.name %></:title>
+      <:subtitle><%= Extractor.humanize_cron(spider.cron) %></:subtitle>
+      <:actions>
+        <span
+          id={"spiders-#{spider.name}-status-light"}
+          class={[
+            "h-2.5 w-2.5 shrink-0 rounded-full",
+            if(spider.active,
+              do: "bg-emerald-500",
+              else: "bg-zinc-300 dark:bg-zinc-600"
+            )
+          ]}
+          title={
+            if spider.active, do: gettext("Active"), else: gettext("Inactive")
+          }
+        />
+      </:actions>
+      <:content>
+        <div class="flex flex-wrap items-center gap-2">
+          <form
+            id={"spiders-#{spider.name}-cron-form"}
+            phx-submit="save_cron"
+            class="flex items-center gap-2"
+          >
+            <input type="hidden" name="key" value={spider.name} />
+            <.input
+              type="text"
+              name="cron"
+              value={spider.cron}
+              container_class="w-36"
+            />
+            <.button
+              type="submit"
+              class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Save") %>
+            </.button>
+          </form>
+
+          <button
+            id={"spiders-#{spider.name}-toggle"}
+            type="button"
+            phx-click="toggle_active"
+            phx-value-key={spider.name}
+            class="!appearance-none !border-0 !bg-transparent hover:!bg-transparent focus:!bg-transparent !p-0 !shadow-none"
+          >
+            <.pill
+              variant={if spider.active, do: :success, else: :neutral}
+              text={
+                if spider.active,
+                  do: gettext("Active"),
+                  else: gettext("Inactive")
+              }
+            />
+          </button>
         </div>
 
-        <div class="flex items-center gap-3">
-          <span
-            id={"spiders-#{spider.name}-status-light"}
-            class={[
-              "h-2.5 w-2.5 shrink-0 rounded-full",
-              if(spider.active,
-                do: "bg-emerald-500",
-                else: "bg-zinc-300 dark:bg-zinc-600"
-              )
-            ]}
-            title={
-              if spider.active, do: gettext("Active"), else: gettext("Inactive")
-            }
+        <form
+          :if={spider.supports_ean_override}
+          id={"spiders-#{spider.name}-eans-form"}
+          phx-change="update_eans"
+        >
+          <input type="hidden" name="key" value={spider.name} />
+          <.input
+            type="textarea"
+            name="eans"
+            value={Map.get(@eans_drafts, spider.name, "")}
+            placeholder={gettext("One EAN per line")}
           />
+        </form>
+
+        <div class="flex items-center gap-2">
           <.button
-            id={"spiders-#{spider.name}-toggle-expand"}
+            id={"spiders-#{spider.name}-run"}
             type="button"
-            phx-click="toggle_expand"
+            phx-click="run"
             phx-value-key={spider.name}
+            phx-value-dry_run="false"
             class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
           >
-            <.icon
-              name={
-                if MapSet.member?(@expanded, spider.name),
-                  do: "hero-chevron-up-solid",
-                  else: "hero-chevron-down-solid"
-              }
-              class="h-4 w-4"
-            />
-            <span class="sr-only">
-              <%= if MapSet.member?(@expanded, spider.name),
-                do: gettext("Collapse"),
-                else: gettext("Try") %>
-            </span>
+            <%= gettext("Run now") %>
+          </.button>
+          <.button
+            :if={spider.supports_dry_run}
+            id={"spiders-#{spider.name}-dry-run"}
+            type="button"
+            phx-click="run"
+            phx-value-key={spider.name}
+            phx-value-dry_run="true"
+            class="bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/70"
+          >
+            <%= gettext("Dry run") %>
           </.button>
         </div>
-      </div>
 
-      <div
-        id={"spiders-#{spider.name}-expand"}
-        class={[
-          "grid transition-all duration-300 ease-in-out",
-          if(MapSet.member?(@expanded, spider.name),
-            do: "grid-rows-[1fr] opacity-100",
-            else: "grid-rows-[0fr] opacity-0"
-          )
-        ]}
-      >
-        <div class="overflow-hidden">
-          <div class="mt-3 flex flex-col gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
-            <div class="flex flex-wrap items-center gap-2">
-              <form
-                id={"spiders-#{spider.name}-cron-form"}
-                phx-submit="save_cron"
-                class="flex items-center gap-2"
-              >
-                <input type="hidden" name="key" value={spider.name} />
-                <.input
-                  type="text"
-                  name="cron"
-                  value={spider.cron}
-                  container_class="w-36"
-                />
-                <.button
-                  type="submit"
-                  class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-                >
-                  <%= gettext("Save") %>
-                </.button>
-              </form>
+        <div
+          :if={@active_run && @active_run.spider_key == spider.name}
+          id={"spiders-#{spider.name}-active-run"}
+          class="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+              <%= if @active_run.dry_run,
+                do: gettext("Dry run"),
+                else: gettext("Run") %>
+              <%= if @active_run.eans != [] do %>
+                · <%= ngettext(
+                  "%{count} EAN",
+                  "%{count} EANs",
+                  length(@active_run.eans),
+                  count: length(@active_run.eans)
+                ) %>
+              <% end %>
+            </h3>
+            <.pill
+              variant={
+                if @active_run.status == :finished,
+                  do: :neutral,
+                  else: :info
+              }
+              text={
+                if @active_run.status == :finished,
+                  do: gettext("Finished"),
+                  else: gettext("Running")
+              }
+            />
+          </div>
 
-              <button
-                id={"spiders-#{spider.name}-toggle"}
-                type="button"
-                phx-click="toggle_active"
-                phx-value-key={spider.name}
-                class="!appearance-none !border-0 !bg-transparent hover:!bg-transparent focus:!bg-transparent !p-0 !shadow-none"
-              >
-                <.pill
-                  variant={if spider.active, do: :success, else: :neutral}
-                  text={
-                    if spider.active,
-                      do: gettext("Active"),
-                      else: gettext("Inactive")
-                  }
-                />
-              </button>
-            </div>
-
-            <form
-              :if={spider.supports_ean_override}
-              id={"spiders-#{spider.name}-eans-form"}
-              phx-change="update_eans"
-            >
-              <input type="hidden" name="key" value={spider.name} />
-              <.input
-                type="textarea"
-                name="eans"
-                value={Map.get(@eans_drafts, spider.name, "")}
-                placeholder={gettext("One EAN per line")}
-              />
-            </form>
-
-            <div class="flex items-center gap-2">
-              <.button
-                id={"spiders-#{spider.name}-run"}
-                type="button"
-                phx-click="run"
-                phx-value-key={spider.name}
-                phx-value-dry_run="false"
-                class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-              >
-                <%= gettext("Run now") %>
-              </.button>
-              <.button
-                :if={spider.supports_dry_run}
-                id={"spiders-#{spider.name}-dry-run"}
-                type="button"
-                phx-click="run"
-                phx-value-key={spider.name}
-                phx-value-dry_run="true"
-                class="bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/70"
-              >
-                <%= gettext("Dry run") %>
-              </.button>
-            </div>
-
-            <div
-              :if={@active_run && @active_run.spider_key == spider.name}
-              id={"spiders-#{spider.name}-active-run"}
-              class="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900"
-            >
-              <div class="flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-                  <%= if @active_run.dry_run,
-                    do: gettext("Dry run"),
-                    else: gettext("Run") %>
-                  <%= if @active_run.eans != [] do %>
-                    · <%= ngettext(
-                      "%{count} EAN",
-                      "%{count} EANs",
-                      length(@active_run.eans),
-                      count: length(@active_run.eans)
-                    ) %>
-                  <% end %>
-                </h3>
-                <.pill
-                  variant={
-                    if @active_run.status == :finished,
-                      do: :neutral,
-                      else: :info
-                  }
-                  text={
-                    if @active_run.status == :finished,
-                      do: gettext("Finished"),
-                      else: gettext("Running")
-                  }
-                />
-              </div>
-
-              <div
-                id="run-log"
-                phx-update="stream"
-                class="mt-3 max-h-64 space-y-1 overflow-y-auto rounded-md bg-zinc-50 p-2 font-mono text-xs text-zinc-600 dark:bg-zinc-950 dark:text-zinc-300"
-              >
-                <div :for={{dom_id, entry} <- @streams.run_log} id={dom_id}>
-                  <%= run_log_line(entry) %>
-                </div>
-              </div>
+          <div
+            id="run-log"
+            phx-update="stream"
+            class="mt-3 max-h-64 space-y-1 overflow-y-auto rounded-md bg-zinc-50 p-2 font-mono text-xs text-zinc-600 dark:bg-zinc-950 dark:text-zinc-300"
+          >
+            <div :for={{dom_id, entry} <- @streams.run_log} id={dom_id}>
+              <%= run_log_line(entry) %>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </:content>
+    </.expandable_list_row>
   </:row>
 </.list_group>

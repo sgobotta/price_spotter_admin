@@ -21,49 +21,46 @@
       <.no_results_found label={gettext("No suppliers found.")} />
     </:empty_state>
     <:row :let={supplier}>
-      <.list_row
+      <.expandable_list_row
         id={"suppliers-#{supplier.id}"}
-        click={JS.navigate(~p"/admin/marketplaces/suppliers/#{supplier}")}
+        expanded={ExpandableList.expanded?(@expanded, supplier.id)}
+        toggle_key={supplier.id}
       >
         <:leading>
           <.entity_avatar label={supplier.name} />
         </:leading>
         <:title><%= supplier.name %></:title>
-        <:actions>
-          <.link
-            navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}
-            class="sr-only"
-          >
-            <%= gettext("Show") %>
-          </.link>
-          <.link
-            id={"suppliers-edit-#{supplier.id}"}
-            patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
-            class="hover:text-teal-500"
-          >
-            <.icon
-              name="hero-pencil-solid"
-              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
-            />
-          </.link>
-          <.link
-            id={"suppliers-delete-#{supplier.id}"}
-            phx-click={
-              JS.push("delete", value: %{id: supplier.id})
-              |> hide("#suppliers-#{supplier.id}")
-            }
-            data-confirm={
-              gettext("Delete supplier \"%{name}\"?", name: supplier.name)
-            }
-            class="hover:text-rose-500"
-          >
-            <.icon
-              name="hero-trash-solid"
-              class="h-3 w-3 sm:h-5 sm:w-5 opacity-60"
-            />
-          </.link>
-        </:actions>
-      </.list_row>
+        <:content>
+          <div class="flex items-center justify-end gap-2">
+            <.link
+              navigate={~p"/admin/marketplaces/suppliers/#{supplier}"}
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Show") %>
+            </.link>
+            <.link
+              id={"suppliers-edit-#{supplier.id}"}
+              patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Edit") %>
+            </.link>
+            <.button
+              id={"suppliers-delete-#{supplier.id}"}
+              phx-click={
+                JS.push("delete", value: %{id: supplier.id})
+                |> hide("#suppliers-#{supplier.id}")
+              }
+              data-confirm={
+                gettext("Delete supplier \"%{name}\"?", name: supplier.name)
+              }
+              class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
+            >
+              <%= gettext("Delete") %>
+            </.button>
+          </div>
+        </:content>
+      </.expandable_list_row>
     </:row>
   </.list_group>
 
