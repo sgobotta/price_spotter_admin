@@ -32,6 +32,26 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       assert html =~ user.email
     end
 
+    test "toggles expanded controls for a user", %{conn: conn, user: user} do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
+
+      html =
+        index_live
+        |> element("#users-#{user.id}-toggle-expand")
+        |> render_click()
+
+      assert html =~ "users-#{user.id}-expand"
+      assert html =~ "grid-rows-[1fr]"
+
+      html =
+        index_live
+        |> element("#users-#{user.id}-toggle-expand")
+        |> render_click()
+
+      assert html =~ "users-#{user.id}-expand"
+      assert html =~ "grid-rows-[0fr]"
+    end
+
     test "saves new user", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
@@ -58,6 +78,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
     test "updates user in listing", %{conn: conn, user: user} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
+      index_live
+      |> element("#users-#{user.id}-toggle-expand")
+      |> render_click()
+
       assert index_live |> element("a#users-edit-#{user.id}") |> render_click() =~
                gettext("Edit User")
 
@@ -81,8 +105,12 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
     test "deletes user in listing", %{conn: conn, user: user} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
+      index_live
+      |> element("#users-#{user.id}-toggle-expand")
+      |> render_click()
+
       assert index_live
-             |> element("a#users-delete-#{user.id}")
+             |> element("#users-delete-#{user.id}")
              |> render_click()
 
       refute has_element?(index_live, "#users-#{user.id}")

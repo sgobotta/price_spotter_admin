@@ -25,6 +25,29 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
       assert html =~ supplier.name
     end
 
+    test "toggles expanded controls for a supplier", %{
+      conn: conn,
+      supplier: supplier
+    } do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      html =
+        index_live
+        |> element("#suppliers-#{supplier.id}-toggle-expand")
+        |> render_click()
+
+      assert html =~ "suppliers-#{supplier.id}-expand"
+      assert html =~ "grid-rows-[1fr]"
+
+      html =
+        index_live
+        |> element("#suppliers-#{supplier.id}-toggle-expand")
+        |> render_click()
+
+      assert html =~ "suppliers-#{supplier.id}-expand"
+      assert html =~ "grid-rows-[0fr]"
+    end
+
     test "saves new supplier", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
@@ -52,6 +75,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
 
     test "updates supplier in listing", %{conn: conn, supplier: supplier} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      index_live
+      |> element("#suppliers-#{supplier.id}-toggle-expand")
+      |> render_click()
 
       assert index_live
              |> element("a#suppliers-edit-#{supplier.id}")
@@ -81,8 +108,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
     test "deletes supplier in listing", %{conn: conn, supplier: supplier} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
+      index_live
+      |> element("#suppliers-#{supplier.id}-toggle-expand")
+      |> render_click()
+
       assert index_live
-             |> element("a#suppliers-delete-#{supplier.id}")
+             |> element("#suppliers-delete-#{supplier.id}")
              |> render_click()
 
       refute has_element?(index_live, "#suppliers-#{supplier.id}")
