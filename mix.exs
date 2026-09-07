@@ -30,7 +30,7 @@ defmodule PriceSpotter.MixProject do
   def application do
     [
       mod: {PriceSpotter.Application, []},
-      extra_applications: [:ecto_enum, :logger, :runtime_tools]
+      extra_applications: [:ecto_enum, :logger, :runtime_tools, :inets, :ssl]
     ]
   end
 
@@ -74,7 +74,8 @@ defmodule PriceSpotter.MixProject do
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
       {:tzdata, "~> 1.1"},
-      {:mongodb_ecto, "~> 2.1.1"}
+      {:mongodb_ecto, "~> 2.1.1"},
+      {:websockex, "~> 0.4.3"}
     ]
   end
 
