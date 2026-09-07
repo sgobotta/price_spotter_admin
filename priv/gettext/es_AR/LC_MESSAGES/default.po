@@ -911,11 +911,15 @@ msgstr "Semanal"
 msgid "EAN"
 msgstr "EAN"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:127
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:144
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:108
+#, elixir-autogen, elixir-format
+msgid "No price yet"
+msgstr "Sin precio"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:127
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:173
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:209
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:108
 #, elixir-autogen, elixir-format
 msgid "Unassigned"
 msgstr "No asignado"
