@@ -58,7 +58,10 @@ defmodule PriceSpotterWeb.SidebarComponent do
       />
 
       <div class="mt-auto flex flex-col gap-1 border-t border-dotted border-zinc-300 dark:border-zinc-700 pt-2">
-        <p class="truncate px-3 text-xs text-zinc-500 dark:text-zinc-400" title={@current_user.email}>
+        <p
+          class="truncate px-3 text-xs text-zinc-500 dark:text-zinc-400"
+          title={@current_user.email}
+        >
           <%= @current_user.email %>
         </p>
         <.link
@@ -66,7 +69,10 @@ defmodule PriceSpotterWeb.SidebarComponent do
           method="delete"
           class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 hover:dark:bg-zinc-800 transition-colors duration-200"
         >
-          <.icon name="hero-arrow-right-on-rectangle-solid" class="h-5 w-5 shrink-0" />
+          <.icon
+            name="hero-arrow-right-on-rectangle-solid"
+            class="h-5 w-5 shrink-0"
+          />
           <span><%= gettext("Log out") %></span>
         </.link>
       </div>
