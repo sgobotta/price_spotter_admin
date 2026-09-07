@@ -78,6 +78,12 @@ defmodule PriceSpotterWeb.Router do
         live "/users/:id/show/edit", UserLive.Show, :edit
       end
 
+      scope "/admin/extractor", Admin.Extractor do
+        pipe_through [:require_authenticated_user, :admin]
+
+        live "/spiders", SpiderLive.Index, :index
+      end
+
       get "/products/export", ExportController, :create
     end
   end

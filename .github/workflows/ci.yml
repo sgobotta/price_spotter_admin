@@ -32,6 +32,10 @@ env:
   REDIS_PASS: ${{ secrets.REDIS_PASS }}
   # Mongo env
   MONGO_URL: mongodb://localhost:27017/price_spotter_local
+  # Extractor env
+  EXTRACTOR_BASE_URL: http://localhost:5000
+  EXTRACTOR_WS_BASE_URL: ws://localhost:5000
+  EXTRACTOR_API_TOKEN: ci-test-token
   # Misc env
   UPLOADS_PATH: priv/static/uploads/
 

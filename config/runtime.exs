@@ -31,6 +31,11 @@ config :price_spotter,
   redis_host: System.fetch_env!("REDIS_HOST"),
   redis_pass: System.fetch_env!("REDIS_PASS")
 
+config :price_spotter, :extractor,
+  base_url: System.fetch_env!("EXTRACTOR_BASE_URL"),
+  ws_base_url: System.fetch_env!("EXTRACTOR_WS_BASE_URL"),
+  api_token: System.fetch_env!("EXTRACTOR_API_TOKEN")
+
 if config_env() == :prod do
   maybe_ipv6 =
     if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []

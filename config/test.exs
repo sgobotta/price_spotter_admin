@@ -44,3 +44,9 @@ config :logger, level: :warning
 config :phoenix, :plug_init_mode, :runtime
 
 config :mix_test_watch, clear: true
+
+# Route the extractor HTTP client through a fake adapter in tests, instead
+# of the real network. Tests configure the actual response via
+# PriceSpotter.Extractor.FakeHttpAdapter.stub/1.
+config :price_spotter, :extractor,
+  adapter: PriceSpotter.Extractor.FakeHttpAdapter

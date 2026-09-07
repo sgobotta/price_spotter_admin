@@ -44,6 +44,13 @@ defmodule PriceSpotterWeb.SidebarComponent do
         active={active?(@current_path, "/admin/accounts/users")}
       />
       <.sidebar_link
+        :if={@current_user.role == :admin}
+        navigate={~p"/admin/extractor/spiders"}
+        icon="hero-bolt-solid"
+        label={gettext("Extractors")}
+        active={active?(@current_path, "/admin/extractor")}
+      />
+      <.sidebar_link
         navigate={~p"/users/settings"}
         icon="hero-cog-6-tooth-solid"
         label={gettext("Settings")}
