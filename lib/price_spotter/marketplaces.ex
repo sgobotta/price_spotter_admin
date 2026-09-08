@@ -5,7 +5,6 @@ defmodule PriceSpotter.Marketplaces do
 
   import Ecto.Query, warn: false
   alias PriceSpotter.Accounts.User
-  alias PriceSpotter.Marketplaces.ProductPriceDocument
   alias PriceSpotter.Repo
   alias PriceSpotter.Repos.MongoRepo
 
@@ -13,6 +12,7 @@ defmodule PriceSpotter.Marketplaces do
     Product,
     ProductDocument,
     ProductPriceDocument,
+    ProductPriceSnapshot,
     Relations,
     Supplier
   }
@@ -22,6 +22,8 @@ defmodule PriceSpotter.Marketplaces do
   require Logger
 
   @type interval :: :daily | :weekly | :monthly
+  @homepage_window_hours 24
+  @snapshot_insert_retries 3
 
   @doc """
   Returns the list of products.
@@ -88,6 +90,176 @@ defmodule PriceSpotter.Marketplaces do
 
   def list_product_categories do
     Repo.all(from(p in Product, select: p.category, distinct: p.category))
+  end
+
+  @doc """
+  Returns access-scoped homepage metrics and top movers for the current user.
+  """
+  @spec get_homepage_metrics(User.t()) :: map()
+  def get_homepage_metrics(%User{} = user) do
+    now = NaiveDateTime.utc_now()
+    since = NaiveDateTime.add(now, -@homepage_window_hours * 3600, :second)
+
+    scoped_products_query = scoped_products_query(user)
+
+    total_products =
+      scoped_products_query
+      |> subquery()
+      |> Repo.aggregate(:count, :id)
+
+    scraped_last_24h_query =
+      from p in subquery(scoped_products_query),
+        join: ps in ProductPriceSnapshot,
+        on: ps.product_id == p.id,
+        where: ps.scraped_at >= ^since,
+        select: p.id,
+        distinct: true
+
+    scraped_last_24h =
+      scraped_last_24h_query
+      |> subquery()
+      |> Repo.aggregate(:count, :id)
+
+    movement_query = movement_query(user, since)
+
+    price_increases_24h =
+      movement_query
+      |> where([m], m.current_price > m.previous_price)
+      |> Repo.aggregate(:count, :product_id)
+
+    price_decreases_24h =
+      movement_query
+      |> where([m], m.current_price < m.previous_price)
+      |> Repo.aggregate(:count, :product_id)
+
+    top_price_increase =
+      movement_query
+      |> where([m], m.current_price > m.previous_price)
+      |> order_by([m],
+        desc: fragment("? - ?", m.current_price, m.previous_price)
+      )
+      |> order_by([m], desc: m.current_scraped_at)
+      |> limit(1)
+      |> select_mover_card()
+      |> Repo.one()
+
+    top_price_decrease =
+      movement_query
+      |> where([m], m.current_price < m.previous_price)
+      |> order_by([m],
+        desc: fragment("? - ?", m.previous_price, m.current_price)
+      )
+      |> order_by([m], desc: m.current_scraped_at)
+      |> limit(1)
+      |> select_mover_card()
+      |> Repo.one()
+
+    %{
+      as_of: movement_as_of_timestamp(user),
+      total_products: total_products,
+      products_scraped_last_24h: scraped_last_24h,
+      products_price_increase_last_24h: price_increases_24h,
+      products_price_decrease_last_24h: price_decreases_24h,
+      top_price_increase: top_price_increase,
+      top_price_decrease: top_price_decrease
+    }
+  end
+
+  defp movement_query(%User{} = user, since) do
+    query =
+      from p in subquery(latest_previous_pairs_query(user)),
+        join: product in Product,
+        on: product.id == p.product_id,
+        where: p.current_scraped_at >= ^since,
+        where: not is_nil(p.previous_price),
+        where: p.current_price != p.previous_price,
+        select: %{
+          product_id: p.product_id,
+          supplier_id: p.supplier_id,
+          product_name: product.name,
+          product_image: product.img_url,
+          category_name: product.category,
+          supplier_name: product.supplier_name,
+          current_price: p.current_price,
+          previous_price: p.previous_price,
+          current_scraped_at: p.current_scraped_at
+        }
+
+    from(m in subquery(query))
+  end
+
+  defp latest_previous_pairs_query(%User{} = user) do
+    ranked_query =
+      from ps in ProductPriceSnapshot,
+        join: p in subquery(scoped_products_query(user)),
+        on: p.id == ps.product_id,
+        windows: [
+          pair_window: [
+            partition_by: [ps.product_id, ps.supplier_id],
+            order_by: [desc: ps.scraped_at, desc: ps.id]
+          ]
+        ],
+        select: %{
+          id: ps.id,
+          product_id: ps.product_id,
+          supplier_id: ps.supplier_id,
+          price: ps.price,
+          scraped_at: ps.scraped_at,
+          rank: over(row_number(), :pair_window)
+        }
+
+    from r in subquery(ranked_query),
+      where: r.rank <= 2,
+      group_by: [r.product_id, r.supplier_id],
+      select: %{
+        product_id: r.product_id,
+        supplier_id: r.supplier_id,
+        current_price:
+          max(fragment("CASE WHEN ? = 1 THEN ? END", r.rank, r.price)),
+        previous_price:
+          max(fragment("CASE WHEN ? = 2 THEN ? END", r.rank, r.price)),
+        current_scraped_at:
+          max(fragment("CASE WHEN ? = 1 THEN ? END", r.rank, r.scraped_at))
+      }
+  end
+
+  defp movement_as_of_timestamp(%User{} = user) do
+    from(p in subquery(latest_previous_pairs_query(user)),
+      select: max(p.current_scraped_at)
+    )
+    |> Repo.one()
+  end
+
+  defp select_mover_card(query) do
+    from m in query,
+      select: %{
+        product_name: m.product_name,
+        product_image: m.product_image,
+        supplier_name: m.supplier_name,
+        category_name: m.category_name,
+        current_price: m.current_price,
+        absolute_delta: fragment("? - ?", m.current_price, m.previous_price),
+        percentage_delta:
+          fragment(
+            "CASE WHEN ? = 0 THEN NULL ELSE ((? - ?) / ?) * 100 END",
+            m.previous_price,
+            m.current_price,
+            m.previous_price,
+            m.previous_price
+          )
+      }
+  end
+
+  defp scoped_products_query(%User{role: :admin}) do
+    from(p in Product, select: %{id: p.id})
+  end
+
+  defp scoped_products_query(%User{} = user) do
+    from p in Product,
+      join: us in Relations.UserSupplier,
+      on: us.supplier_id == p.supplier_id and us.user_id == ^user.id,
+      select: %{id: p.id},
+      distinct: true
   end
 
   @doc """
@@ -693,9 +865,13 @@ defmodule PriceSpotter.Marketplaces do
   @spec record_product_price(Product.t(), non_neg_integer()) ::
           {:ok, ProductPriceDocument.t()} | {:error, Ecto.Changeset.t()}
   def record_product_price(
-        %Product{id: product_id, price: price},
+        %Product{id: product_id, price: price, supplier_id: supplier_id},
         timestamp \\ :os.system_time(:millisecond)
       ) do
+    scraped_at =
+      DateTime.from_unix!(timestamp, :millisecond)
+      |> DateTime.to_naive()
+
     get_or_create = fn product_id ->
       case get_product_document_by_id(product_id) do
         nil ->
@@ -709,11 +885,21 @@ defmodule PriceSpotter.Marketplaces do
     {:ok, %ProductDocument{id: product_document_id}} =
       get_or_create.(product_id)
 
-    create_product_document_price(%{
-      product_id: product_document_id,
-      price: price,
-      timestamp: timestamp
-    })
+    with {:ok, _snapshot} <-
+           create_product_price_snapshot_with_retry(%{
+             product_id: product_id,
+             supplier_id: supplier_id,
+             price: price,
+             scraped_at: scraped_at
+           }),
+         {:ok, %ProductPriceDocument{} = price_document} <-
+           create_product_document_price(%{
+             product_id: product_document_id,
+             price: price,
+             timestamp: timestamp
+           }) do
+      {:ok, price_document}
+    end
 
     # case get_or_create.(product_id) do
     #   {:ok, %ProductDocument{id: product_document_id}} ->
@@ -726,6 +912,38 @@ defmodule PriceSpotter.Marketplaces do
     #   %Ecto.Changeset{valid?: false} = cs ->
     #     {:error, cs}
     # end
+  end
+
+  @spec create_product_price_snapshot(map()) ::
+          {:ok, ProductPriceSnapshot.t()} | {:error, Ecto.Changeset.t()}
+  def create_product_price_snapshot(attrs) do
+    %ProductPriceSnapshot{}
+    |> ProductPriceSnapshot.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp create_product_price_snapshot_with_retry(
+         attrs,
+         retries_left \\ @snapshot_insert_retries
+       )
+
+  defp create_product_price_snapshot_with_retry(attrs, retries_left)
+       when retries_left <= 1 do
+    create_product_price_snapshot(attrs)
+  end
+
+  defp create_product_price_snapshot_with_retry(attrs, retries_left) do
+    case create_product_price_snapshot(attrs) do
+      {:ok, _snapshot} = ok ->
+        ok
+
+      {:error, _changeset} ->
+        Logger.warning(
+          "Snapshot insert failed for product_id=#{attrs.product_id} supplier_id=#{attrs.supplier_id}; retrying attempts_left=#{retries_left - 1}"
+        )
+
+        create_product_price_snapshot_with_retry(attrs, retries_left - 1)
+    end
   end
 
   # ----------------------------------------------------------------------------

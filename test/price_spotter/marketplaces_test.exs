@@ -298,6 +298,211 @@ defmodule PriceSpotter.MarketplacesTest do
     end
   end
 
+  describe "homepage metrics" do
+    import PriceSpotter.MarketplacesFixtures
+
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+    alias PriceSpotter.Marketplaces.SuppliersFixtures
+
+    test "get_homepage_metrics/1 computes top movers from latest and previous snapshots" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      supplier = SuppliersFixtures.create()
+      now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+      up_product =
+        product_fixture(%{
+          internal_id: "up-#{System.unique_integer()}",
+          name: "Up Product",
+          supplier_name: supplier.name,
+          supplier_id: supplier.id
+        })
+
+      down_product =
+        product_fixture(%{
+          internal_id: "down-#{System.unique_integer()}",
+          name: "Down Product",
+          supplier_name: supplier.name,
+          supplier_id: supplier.id
+        })
+
+      same_product =
+        product_fixture(%{
+          internal_id: "same-#{System.unique_integer()}",
+          name: "Same Product",
+          supplier_name: supplier.name,
+          supplier_id: supplier.id
+        })
+
+      new_product =
+        product_fixture(%{
+          internal_id: "new-#{System.unique_integer()}",
+          name: "New Product",
+          supplier_name: supplier.name,
+          supplier_id: supplier.id
+        })
+
+      old_product =
+        product_fixture(%{
+          internal_id: "old-#{System.unique_integer()}",
+          name: "Old Product",
+          supplier_name: supplier.name,
+          supplier_id: supplier.id
+        })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: up_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("100.00"),
+                 scraped_at: NaiveDateTime.add(now, -2 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: up_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("130.00"),
+                 scraped_at: NaiveDateTime.add(now, -1 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: down_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("200.00"),
+                 scraped_at: NaiveDateTime.add(now, -3 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: down_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("150.00"),
+                 scraped_at: NaiveDateTime.add(now, -2 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: same_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("90.00"),
+                 scraped_at: NaiveDateTime.add(now, -4 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: same_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("90.00"),
+                 scraped_at: NaiveDateTime.add(now, -1 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: new_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("30.00"),
+                 scraped_at: NaiveDateTime.add(now, -30 * 60, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: old_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("75.00"),
+                 scraped_at: NaiveDateTime.add(now, -30 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: old_product.id,
+                 supplier_id: supplier.id,
+                 price: Decimal.new("80.00"),
+                 scraped_at: NaiveDateTime.add(now, -29 * 3600, :second)
+               })
+
+      metrics = Marketplaces.get_homepage_metrics(admin)
+
+      assert metrics.total_products == 5
+      assert metrics.products_scraped_last_24h == 4
+      assert metrics.products_price_increase_last_24h == 1
+      assert metrics.products_price_decrease_last_24h == 1
+      assert metrics.top_price_increase.product_name == "Up Product"
+      assert metrics.top_price_decrease.product_name == "Down Product"
+      assert metrics.top_price_increase.absolute_delta == Decimal.new("30.00")
+      assert metrics.top_price_decrease.absolute_delta == Decimal.new("-50.00")
+    end
+
+    test "get_homepage_metrics/1 applies customer access scope to counts and cards" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      other_supplier = SuppliersFixtures.create()
+      now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      granted_product =
+        product_fixture(%{
+          internal_id: "granted-#{System.unique_integer()}",
+          name: "Granted Product",
+          supplier_name: granted_supplier.name,
+          supplier_id: granted_supplier.id
+        })
+
+      other_product =
+        product_fixture(%{
+          internal_id: "other-#{System.unique_integer()}",
+          name: "Other Product",
+          supplier_name: other_supplier.name,
+          supplier_id: other_supplier.id
+        })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: granted_product.id,
+                 supplier_id: granted_supplier.id,
+                 price: Decimal.new("100.00"),
+                 scraped_at: NaiveDateTime.add(now, -2 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: granted_product.id,
+                 supplier_id: granted_supplier.id,
+                 price: Decimal.new("120.00"),
+                 scraped_at: NaiveDateTime.add(now, -1 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: other_product.id,
+                 supplier_id: other_supplier.id,
+                 price: Decimal.new("80.00"),
+                 scraped_at: NaiveDateTime.add(now, -2 * 3600, :second)
+               })
+
+      assert {:ok, _} =
+               Marketplaces.create_product_price_snapshot(%{
+                 product_id: other_product.id,
+                 supplier_id: other_supplier.id,
+                 price: Decimal.new("120.00"),
+                 scraped_at: NaiveDateTime.add(now, -1 * 3600, :second)
+               })
+
+      metrics = Marketplaces.get_homepage_metrics(user)
+
+      assert metrics.total_products == 1
+      assert metrics.products_scraped_last_24h == 1
+      assert metrics.products_price_increase_last_24h == 1
+      assert metrics.products_price_decrease_last_24h == 0
+      assert metrics.top_price_increase.product_name == "Granted Product"
+      assert metrics.top_price_decrease == nil
+    end
+  end
+
   describe "suppliers" do
     alias PriceSpotter.Marketplaces.Supplier
 
