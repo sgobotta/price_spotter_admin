@@ -137,6 +137,9 @@
               <.entity_avatar label={product.name} />
             </:leading>
             <:title><%= product.name %></:title>
+            <:subtitle>
+              <%= TimeAgo.time_ago(product.price_updated_at) %>
+            </:subtitle>
             <:meta>
               <.pill
                 text={
@@ -155,9 +158,6 @@
                 variant={:info}
               />
             </:meta>
-            <:trailing>
-              <%= TimeAgo.time_ago(product.price_updated_at) %>
-            </:trailing>
             <:actions>
               <a
                 :if={product.supplier_url != nil}
