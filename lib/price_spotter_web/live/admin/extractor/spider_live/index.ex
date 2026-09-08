@@ -213,7 +213,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   defp put_cron_feedback(socket, key, cron) do
     if String.trim(cron) == "" do
-      clear_cron_feedback(socket, key)
+      clear_cron_feedback(socket, key, keep_draft: true)
     else
       case Extractor.preview_cron(cron) do
         {:ok, summary} ->
@@ -233,9 +233,17 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     end
   end
 
-  defp clear_cron_feedback(socket, key) do
+  defp clear_cron_feedback(socket, key, opts \\ []) do
+    keep_draft = Keyword.get(opts, :keep_draft, false)
+
+    socket =
+      if keep_draft do
+        socket
+      else
+        update(socket, :cron_drafts, &Map.delete(&1, key))
+      end
+
     socket
-    |> update(:cron_drafts, &Map.delete(&1, key))
     |> update(:cron_previews, &Map.delete(&1, key))
     |> update(:cron_errors, &Map.delete(&1, key))
   end
