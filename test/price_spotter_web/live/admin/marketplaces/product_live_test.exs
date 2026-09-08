@@ -66,13 +66,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ product.category
     end
 
-    test "does not render unassigned category chip and shows dash for missing price", %{
-      conn: conn,
-      user: user
-    } do
+    test "does not render unassigned category chip and shows dash for missing price",
+         %{
+           conn: conn,
+           user: user
+         } do
       product =
         product_fixture(%{
           category: nil,
+          internal_id: "missing-price-#{System.unique_integer([:positive])}",
           price: nil
         })
 
