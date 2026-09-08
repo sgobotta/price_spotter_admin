@@ -5,6 +5,8 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
 
   @impl true
   def render(assigns) do
+    assigns = assign_new(assigns, :form_id, fn -> "user-form" end)
+
     ~H"""
     <div>
       <.header>
@@ -16,7 +18,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent do
 
       <.simple_form
         for={@form}
-        id="user-form"
+        id={@form_id}
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
