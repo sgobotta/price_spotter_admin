@@ -90,17 +90,12 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       |> element("#users-#{user.id}-toggle-expand")
       |> render_click()
 
-      assert index_live |> element("a#users-edit-#{user.id}") |> render_click() =~
-               gettext("Edit User")
-
-      assert_patch(index_live, ~p"/admin/accounts/users/#{user}/edit")
-
       assert index_live
-             |> form("#user-form", user: @invalid_attrs)
+             |> form("#user-form-#{user.id}", user: @invalid_attrs)
              |> render_change() =~ dgettext("errors", "can't be blank")
 
       assert index_live
-             |> form("#user-form", user: @update_attrs)
+             |> form("#user-form-#{user.id}", user: @update_attrs)
              |> render_submit()
 
       assert_patch(index_live, ~p"/admin/accounts/users")
@@ -110,6 +105,63 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       assert html =~ "some_updated@email"
     end
 
+    test "expanded row does not render separate show/edit actions", %{
+      conn: conn,
+      user: user
+    } do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
+
+      index_live
+      |> element("#users-#{user.id}-toggle-expand")
+      |> render_click()
+
+      refute has_element?(index_live, "a#users-edit-#{user.id}")
+
+      refute has_element?(
+               index_live,
+               "a[href='/admin/accounts/users/#{user.id}']"
+             )
+
+      assert has_element?(index_live, "#user-form-#{user.id}")
+    end
+
+    test "customer access can be managed from the expanded row", %{
+      conn: conn,
+      user: user
+    } do
+      supplier = SuppliersFixtures.create()
+
+      {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
+
+      html =
+        index_live
+        |> element("#users-#{user.id}-toggle-expand")
+        |> render_click()
+
+      ref = extract_row_ref(html)
+
+      index_live
+      |> element("#customer-access-form-#{user.id}")
+      |> render_submit(%{
+        "rows" => %{
+          to_string(ref) => %{
+            "supplier_id" => supplier.id,
+            "role" => "maintainer"
+          }
+        }
+      })
+
+      html = render(index_live)
+      assert html =~ gettext("Customer access updated successfully")
+      assert html =~ supplier.name
+      assert html =~ "maintainer"
+
+      assert [%{supplier_id: supplier_id, role: :maintainer}] =
+               Marketplaces.list_user_suppliers_for_user(user)
+
+      assert supplier_id == supplier.id
+    end
+
     test "deletes user in listing", %{conn: conn, user: user} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
@@ -117,8 +169,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       |> element("#users-#{user.id}-toggle-expand")
       |> render_click()
 
+      html =
+        index_live
+        |> element("#users-delete-#{user.id}")
+        |> render_click()
+
+      assert html =~ gettext("Delete user")
+      assert html =~ user.email
+
       assert index_live
-             |> element("#users-delete-#{user.id}")
+             |> element("#delete-user-modal button[phx-click='delete']")
              |> render_click()
 
       refute has_element?(index_live, "#users-#{user.id}")
