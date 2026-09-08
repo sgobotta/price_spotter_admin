@@ -261,7 +261,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         })
         |> render_submit()
 
-      assert html =~ "EAN configuration saved"
+      assert html =~ gettext("EAN configuration saved")
 
       FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
         assert Jason.decode!(body) == %{
@@ -294,7 +294,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         })
         |> render_submit()
 
-      assert html =~ "EAN configuration saved"
+      assert html =~ gettext("EAN configuration saved")
       refute html =~ "Unknown EANs"
     end
 

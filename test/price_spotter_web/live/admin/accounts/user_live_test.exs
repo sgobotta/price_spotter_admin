@@ -238,7 +238,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
 
       html =
         show_live
-        |> element("button", "+ Add another")
+        |> element("button", gettext("+ Add another"))
         |> render_click()
 
       assert length(Regex.scan(~r/id="row-\d+-supplier"/, html)) == 2
