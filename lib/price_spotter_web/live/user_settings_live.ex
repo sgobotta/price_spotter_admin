@@ -35,6 +35,9 @@ defmodule PriceSpotterWeb.UserSettingsLive do
             value={@email_form_current_password}
             required
           />
+          <button type="submit" class="sr-only">
+            <%= gettext("Save email") %>
+          </button>
         </.simple_form>
       </div>
       <div>
@@ -90,7 +93,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
 
         <.simple_form
           for={%{}}
-          as={:password_confirmation}
           id="password_confirmation_form"
           phx-submit="confirm_password_update"
         >
@@ -98,7 +100,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
             id="current_password_for_password_confirmation"
             name="current_password"
             type="password"
-            value={@password_confirmation_current_password}
             label={gettext("Current password")}
             errors={@password_confirmation_errors}
             required
@@ -147,7 +148,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:pending_password_params, nil)
       |> assign(:show_password_confirmation_modal, false)
-      |> assign(:password_confirmation_current_password, nil)
       |> assign(:password_confirmation_errors, [])
       |> assign(:trigger_submit, false)
       |> assign(:page_title, gettext("Account Settings"))
@@ -212,7 +212,12 @@ defmodule PriceSpotterWeb.UserSettingsLive do
       |> Map.put(:action, :validate)
       |> to_form()
 
-    {:noreply, assign(socket, password_form: password_form)}
+    {:noreply,
+     socket
+     |> assign(:password_form, password_form)
+     |> assign(:pending_password_params, nil)
+     |> assign(:show_password_confirmation_modal, false)
+     |> assign(:password_confirmation_errors, [])}
   end
 
   def handle_event("update_password", params, socket) do
@@ -227,7 +232,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
        |> assign(:password_form, to_form(changeset))
        |> assign(:pending_password_params, user_params)
        |> assign(:show_password_confirmation_modal, true)
-       |> assign(:password_confirmation_current_password, nil)
        |> assign(:password_confirmation_errors, [])}
     else
       {:noreply,
@@ -243,7 +247,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
     {:noreply,
      socket
      |> assign(:show_password_confirmation_modal, false)
-     |> assign(:password_confirmation_current_password, nil)
      |> assign(:password_confirmation_errors, [])
      |> assign(:pending_password_params, nil)}
   end
@@ -269,7 +272,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
            |> assign(:password_form, password_form)
            |> assign(:show_password_confirmation_modal, false)
            |> assign(:pending_password_params, nil)
-           |> assign(:password_confirmation_current_password, nil)
            |> assign(:password_confirmation_errors, [])}
 
         {:error, changeset} ->
@@ -282,7 +284,6 @@ defmodule PriceSpotterWeb.UserSettingsLive do
            socket
            |> assign(:password_form, to_form(changeset))
            |> assign(:show_password_confirmation_modal, true)
-           |> assign(:password_confirmation_current_password, current_password)
            |> assign(:password_confirmation_errors, current_password_errors)}
       end
     end
