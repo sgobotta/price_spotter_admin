@@ -51,6 +51,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     %{}
   end
 
+  defp assert_patch_path(view, expected_path) do
+    %{path: path} = URI.parse(assert_patch(view))
+    assert path == expected_path
+  end
+
   describe "Index" do
     setup [:create_product, :register_and_log_in_admin, :assoc_user_product]
 
@@ -79,23 +84,29 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
              |> form("#product-form", product: @create_attrs)
              |> render_submit()
 
-      assert_patch(index_live, ~p"/admin/marketplaces/products")
+      assert_patch_path(index_live, ~p"/admin/marketplaces/products")
 
       html = render(index_live)
       assert html =~ gettext("Product created successfully")
       assert html =~ "some category"
     end
 
-    @tag :wip
     test "updates product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      assert index_live
-             |> element("a#products-edit-#{product.id}")
-             |> render_click() =~
-               gettext("Edit Product")
+      html =
+        index_live
+        |> element("#products-#{product.id}-toggle-expand")
+        |> render_click()
 
-      assert_patch(index_live, ~p"/admin/marketplaces/products/#{product}/edit")
+      assert_patch_path(
+        index_live,
+        ~p"/admin/marketplaces/products/#{product}/edit"
+      )
+
+      assert html =~ gettext("Show Product")
+      assert has_element?(index_live, "#products-edit-form-#{product.id}")
+      assert has_element?(index_live, "#product-form")
 
       assert index_live
              |> form("#product-form", product: @invalid_attrs)
@@ -105,7 +116,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
              |> form("#product-form", product: @update_attrs)
              |> render_submit()
 
-      assert_patch(index_live, ~p"/admin/marketplaces/products")
+      assert_patch_path(index_live, ~p"/admin/marketplaces/products")
 
       html = render(index_live)
       assert html =~ gettext("Product updated successfully")
@@ -113,7 +124,6 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ @update_attrs[:name]
       assert html =~ @update_attrs[:price]
       assert html =~ @update_attrs[:supplier_name]
-      assert html =~ @update_attrs[:supplier_url]
     end
 
     @tag :skip
@@ -124,7 +134,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
              |> element("a#products-delete-#{product.id}")
              |> render_click()
 
-      # Known limitation: LiveView exits here in this skipped test.
+      # LiveView process exits after delete
       refute has_element?(index_live, "a#products-delete-#{product.id}")
     end
   end

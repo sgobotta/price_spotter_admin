@@ -1,133 +1,128 @@
-<.header>
-  <:actions>
-    <%= if Accounts.can_edit_products?(@current_user) do %>
-      <.link
-        phx-click={
-          JS.push("delete", value: %{id: @product.id})
-          |> hide("##{@product.id}")
-        }
-        data-confirm={
-          gettext("Delete product \"%{name}\"?", name: @product.name)
-        }
-        class=""
-      >
-        <.button class="bg-rose-500 hover:bg-rose-400">
-          <%= gettext("Delete product") %>
-          <span>
-            <.icon name="hero-trash-solid" class="h-5 w-5 opacity-60" />
-          </span>
-        </.button>
-      </.link>
-    <% end %>
-  </:actions>
-  <:actions>
-    <%= if Accounts.can_edit_products?(@current_user) do %>
-      <.link
-        id="edit-button"
-        patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
-        phx-click={JS.push_focus()}
-      >
-        <.button><%= gettext("Edit Product") %></.button>
-      </.link>
-    <% end %>
-  </:actions>
-</.header>
+<div class="xl:mx-32">
+  <div class="my-4">
+    <.header>
+      <%= @product.name %>
+      <:subtitle>
+        <%= gettext(
+          "Detailed view with current product metadata and price trend."
+        ) %>
+      </:subtitle>
+      <:actions>
+        <%= if Accounts.can_edit_products?(@current_user) do %>
+          <.link
+            id="edit-button"
+            patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
+            phx-click={JS.push_focus()}
+          >
+            <.button class="bg-zinc-700 text-zinc-100 hover:bg-zinc-600 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300">
+              <%= gettext("Edit Product") %>
+            </.button>
+          </.link>
+        <% end %>
+      </:actions>
+      <:actions>
+        <%= if Accounts.can_edit_products?(@current_user) do %>
+          <.link
+            phx-click={
+              JS.push("delete", value: %{id: @product.id})
+              |> hide("##{@product.id}")
+            }
+            data-confirm={
+              gettext("Delete product \"%{name}\"?", name: @product.name)
+            }
+          >
+            <.button class="bg-rose-500 text-zinc-100 hover:bg-rose-400">
+              <%= gettext("Delete product") %>
+              <.icon name="hero-trash-solid" class="ml-1 h-4 w-4" />
+            </.button>
+          </.link>
+        <% end %>
+      </:actions>
+    </.header>
+  </div>
 
-<div
-  id={@product.id}
-  class="p-4 xs:w-full sm:w-2/3 md:w-2/3 lg:w-1/2 xl:w-1/3 w-full cursor-default flex justify-self-center"
->
-  <div
-    class="p-4 rounded-lg card-bg shadow-zinc-500 dark:shadow-zinc-500 shadow-md duration-500
-    border-zinc-300 dark:border-zinc-700 border-[1px]"
-    id={"products-#{@product.id}-card"}
-  >
-    <div class="flex items-center justify-between">
-      <div class="text-left w-full">
-        <h2 class="text-zinc-700 dark:text-zinc-100 text-lg font-medium border-b border-orange-500">
-          <%= @product.name %>
-        </h2>
-        <h3 class="mt-2 text-xl font-bold text-orange-500 text-left cursor-text">
-        </h3>
-        <li class="flex border-0 py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 items-center justify-between">
-          <div class="md:w-1/3 grid place-items-center">
-            <img src={@product.img_url} class="rounded-lg" />
+  <div id={@product.id} class="my-8 grid gap-6 lg:grid-cols-3">
+    <section class="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 lg:col-span-2">
+      <div class="flex flex-col gap-3 border-b border-zinc-200 p-4 dark:border-zinc-700 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">
+          <%= gettext("Product information") %>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <.pill
+            text={String.replace(@product.supplier_name, "-", " ")}
+            variant={:danger}
+          />
+          <.pill
+            text={maybe_render_category(@product.category)}
+            variant={:info}
+          />
+          <.pill
+            text={
+              if @product.price == nil,
+                do: gettext("No price yet"),
+                else: render_price(@product.price)
+            }
+            variant={if @product.price == nil, do: :warning, else: :success}
+          />
+        </div>
+      </div>
+
+      <div class="grid gap-6 p-4 sm:p-6 md:grid-cols-2">
+        <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+          <div class="aspect-square w-full overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
+            <img
+              :if={@product.img_url != nil}
+              src={@product.img_url}
+              alt={gettext("%{name} image", name: @product.name)}
+              class="h-full w-full object-cover"
+            />
+          </div>
+        </div>
+
+        <dl class="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
+          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
+            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <%= gettext("Supplier") %>
+            </dt>
+            <dd class="text-sm text-zinc-700 dark:text-zinc-200">
+              <%= String.replace(@product.supplier_name, "-", " ") %>
+            </dd>
           </div>
 
-          <%= if @product.price != nil do %>
-            <div class="
-              bg-gradient-to-tr
-              from-zinc-400/75 to-zinc-300/75
-              dark:from-zinc-400 dark:to-zinc-300
-              w-32 h-32
-              rounded-full
-              shadow-2xl shadow-zinc-400/50
-              group-hover:shadow-lg
-              border-zinc-400 border-dashed border-2
-              group-hover:-rotate-180 duration-1000 group-hover:border-dotted group-hover:border-[1px]
-              flex justify-center items-center
-            ">
-              <div>
-                <h1 class="text-white dark:text-white text-2xl">
-                  <%= render_price(@product.price) %>
-                </h1>
-              </div>
-            </div>
-          <% end %>
-        </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
-          <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
-            <%= gettext("Supplier") %>
-          </span>
-          <span class="">
-            <div class="bg-red-200 border-[1px] border-red-100 px-3 py-1 rounded-full text-xs font-medium text-zinc-500 md:block text-center shadow-inner-lg">
-              <%= String.replace(@product.supplier_name, "-", " ") %>
-            </div>
-          </span>
-        </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
-          <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
-            <%= gettext("Category") %>
-          </span>
-          <span class="">
-            <div class="bg-blue-200 border-[1px] border-blue-100 px-3 py-1 rounded-full text-xs font-medium text-zinc-500 md:block text-center shadow-inner-lg">
+          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
+            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <%= gettext("Category") %>
+            </dt>
+            <dd class="text-sm text-zinc-700 dark:text-zinc-200">
               <%= maybe_render_category(@product.category) %>
-            </div>
-          </span>
-        </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
-          <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
-            <%= gettext("Price") %>
-          </span>
-          <span class="">
-            <div class={"
-              border-[1px] px-3 py-1 rounded-full text-xs font-medium text-zinc-500 md:block text-center shadow-inner-lg
-              #{if @product.price == nil, do: "bg-yellow-200 border-yellow-100", else: "bg-green-200 border-green-100"}
-            "}>
+            </dd>
+          </div>
+
+          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
+            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <%= gettext("Price") %>
+            </dt>
+            <dd class="text-sm text-zinc-700 dark:text-zinc-200">
               <%= if @product.price == nil do %>
                 <%= gettext("No price yet") %>
               <% else %>
-                $<%= @product.price %>
+                <%= render_price(@product.price) %>
               <% end %>
-            </div>
-          </span>
-        </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-between">
-          <div>
-            <span class="text-zinc-600 dark:text-zinc-400 font-medium w-1/2 md:w-1/3 self-center">
+            </dd>
+          </div>
+
+          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
+            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
               <%= gettext("EAN") %>
-            </span>
-          </div>
-          <div id="ean-code">
-            <.render_ean
-              ean={format_ean_string(@product.ean)}
-              has_code={@product.ean !== nil}
-            />
-            <input id="#ean_code" type="hidden" value={@product.ean} />
-          </div>
-          <%= if @product.ean do %>
-            <div>
+            </dt>
+            <dd class="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-200">
+              <.render_ean
+                ean={format_ean_string(@product.ean)}
+                has_code={@product.ean != nil}
+              />
+              <input id="ean_code" type="hidden" value={@product.ean} />
               <span
+                :if={@product.ean != nil}
                 tabindex="0"
                 id="copy-ean-code"
                 data-to="#ean_code"
@@ -135,109 +130,135 @@
                 phx-click="copy_ean"
                 phx-window-keydown="copy_ean"
                 phx-key="enter"
+                class="cursor-pointer"
               >
                 <%= if @copy_clicked do %>
                   <.icon
                     name="hero-clipboard-document-check"
-                    class="text-teal-500 dark:text-teal-500 h-5 w-5"
+                    class="h-5 w-5 text-teal-500"
                   />
                 <% else %>
                   <.icon
                     name="hero-clipboard-document"
-                    class="text-zinc-500 dark:text-zinc-500 h-5 w-5 hover:text-blue-500"
+                    class="h-5 w-5 text-zinc-500 hover:text-blue-500 dark:text-zinc-400"
                   />
                 <% end %>
               </span>
-            </div>
-          <% end %>
-        </li>
-        <li class="flex border-b py-1 border-dashed border-b-zinc-200 dark:border-b-zinc-600 justify-end">
-          <a
-            href={@product.supplier_url}
-            target="_blank"
-            class="hover:text-sky-500 hover:opacity-100 text-zinc-600 dark:text-zinc-400 italic text-sm"
-          >
-            <.icon name="hero-link-solid" class="h-4 w-4 opacity-60" />
-            <span class="">
+            </dd>
+          </div>
+
+          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
+            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
               <%= gettext("External link") %>
-            </span>
-          </a>
-        </li>
+            </dt>
+            <dd class="text-sm">
+              <a
+                :if={@product.supplier_url != nil}
+                href={@product.supplier_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-zinc-600 hover:text-sky-500 dark:text-zinc-300"
+              >
+                <.icon name="hero-link-solid" class="h-4 w-4" />
+                <%= gettext("Open") %>
+              </a>
+              <span
+                :if={@product.supplier_url == nil}
+                class="text-zinc-500 dark:text-zinc-400"
+              >
+                <%= gettext("Unavailable") %>
+              </span>
+            </dd>
+          </div>
+        </dl>
       </div>
-    </div>
-    <div class="my-4 flex justify-end">
-      <p class="text-sm italic text-zinc-600 dark:text-zinc-400 text-left">
-        <%= gettext("Last price") %>: <%= TimeAgo.time_ago(
-          @product.price_updated_at
-        ) %>
-      </p>
-    </div>
-    <div class="w-full cursor-default mt-4">
-      <div class="inline-flex w-full justify-evenly font-normal text-zinc-600 dark:text-zinc-400">
-        <button
-          class={"
-            !shadow-none hover:!shadow-none focus:!shadow-none active:!shadow-none !border-0
-            hover:!bg-transparent focus:!bg-transparent active:!bg-transparent
-            #{if @interval == :daily,
-              do: "text-base text-zinc-500 font-semibold",
-              else: "text-sm hover:text-zinc-500 hover:dark:text-zinc-500 transition-colors duration-500"
-              }
-          "}
-          phx-click="interval_change"
-          phx-value-interval={:daily}
-        >
-          <%= gettext("Daily") %>
-        </button>
-        <button
-          class={"
-            !shadow-none hover:!shadow-none focus:!shadow-none active:!shadow-none !border-0
-            hover:!bg-transparent focus:!bg-transparent active:!bg-transparent
-            #{if @interval == :weekly,
-              do: "text-base text-zinc-500 font-semibold",
-              else: "text-sm hover:text-zinc-500 hover:dark:text-zinc-500 transition-colors duration-500"
-              }
-          "}
-          phx-click="interval_change"
-          phx-value-interval={:weekly}
-        >
-          <%= gettext("Weekly") %>
-        </button>
-        <button
-          class={"
-            !shadow-none hover:!shadow-none focus:!shadow-none active:!shadow-none !border-0
-            hover:!bg-transparent focus:!bg-transparent active:!bg-transparent
-            #{if @interval == :monthly,
-              do: "text-base text-zinc-500 font-semibold",
-              else: "text-sm hover:text-zinc-500 hover:dark:text-zinc-500 transition-colors duration-500"
-              }
-          "}
-          phx-click="interval_change"
-          phx-value-interval={:monthly}
-        >
-          <%= gettext("Monthly") %>
-        </button>
+    </section>
+
+    <section class="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
+          <%= gettext("Price history") %>
+        </h2>
+        <span class="text-xs italic text-zinc-500 dark:text-zinc-400">
+          <%= gettext("Last price") %>: <%= TimeAgo.time_ago(
+            @product.price_updated_at
+          ) %>
+        </span>
       </div>
-      <%= render_chart(@socket) %>
-    </div>
+
+      <div class="mb-4 rounded-lg border border-zinc-200 p-1 dark:border-zinc-700">
+        <div class="grid grid-cols-3 gap-1">
+          <button
+            class={[
+              "rounded-md px-2 py-1 text-sm transition-colors",
+              if(@interval == :daily,
+                do:
+                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
+                else:
+                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              )
+            ]}
+            phx-click="interval_change"
+            phx-value-interval={:daily}
+          >
+            <%= gettext("Daily") %>
+          </button>
+          <button
+            class={[
+              "rounded-md px-2 py-1 text-sm transition-colors",
+              if(@interval == :weekly,
+                do:
+                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
+                else:
+                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              )
+            ]}
+            phx-click="interval_change"
+            phx-value-interval={:weekly}
+          >
+            <%= gettext("Weekly") %>
+          </button>
+          <button
+            class={[
+              "rounded-md px-2 py-1 text-sm transition-colors",
+              if(@interval == :monthly,
+                do:
+                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
+                else:
+                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              )
+            ]}
+            phx-click="interval_change"
+            phx-value-interval={:monthly}
+          >
+            <%= gettext("Monthly") %>
+          </button>
+        </div>
+      </div>
+
+      <div class="h-64 w-full">
+        <%= render_chart(@socket) %>
+      </div>
+    </section>
   </div>
+
+  <.back navigate={~p"/admin/marketplaces/products"}>
+    <%= gettext("Back to products") %>
+  </.back>
+
+  <.modal
+    :if={@live_action == :edit}
+    id="product-modal"
+    show
+    on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}
+  >
+    <.live_component
+      module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
+      id={@product.id}
+      title={@page_title}
+      action={@live_action}
+      product={@product}
+      patch={~p"/admin/marketplaces/products/#{@product}"}
+    />
+  </.modal>
 </div>
-
-<.back navigate={~p"/admin/marketplaces/products"}>
-  <%= gettext("Back to products") %>
-</.back>
-
-<.modal
-  :if={@live_action == :edit}
-  id="product-modal"
-  show
-  on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}
->
-  <.live_component
-    module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
-    id={@product.id}
-    title={@page_title}
-    action={@live_action}
-    product={@product}
-    patch={~p"/admin/marketplaces/products/#{@product}"}
-  />
-</.modal>
