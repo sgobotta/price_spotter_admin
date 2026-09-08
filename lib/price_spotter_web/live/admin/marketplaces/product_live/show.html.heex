@@ -105,7 +105,7 @@
               #{if @product.price == nil, do: "bg-yellow-200 border-yellow-100", else: "bg-green-200 border-green-100"}
             "}>
               <%= if @product.price == nil do %>
-                <%= gettext("Unassigned") %>
+                <%= gettext("No price yet") %>
               <% else %>
                 $<%= @product.price %>
               <% end %>

@@ -141,7 +141,7 @@
               <.pill
                 text={
                   if product.price == nil,
-                    do: gettext("Unassigned"),
+                    do: gettext("No price yet"),
                     else: "$#{product.price}"
                 }
                 variant={if product.price == nil, do: :warning, else: :success}
