@@ -11,7 +11,8 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
      assign(assign_defaults(session, socket), %{
        users: nil,
        meta: nil,
-       expanded: ExpandableList.new()
+       expanded: ExpandableList.new(),
+       delete_user: nil
      })}
   end
 
@@ -34,6 +35,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
   def handle_event("toggle_expand", %{"key" => key}, socket) do
     expanded = ExpandableList.toggle(socket.assigns.expanded, key)
     {:noreply, assign(socket, :expanded, expanded)}
+  end
+
+  @impl true
+  def handle_event("prompt_delete", %{"id" => id}, socket) do
+    {:noreply, assign(socket, :delete_user, Accounts.get_user!(id))}
+  end
+
+  @impl true
+  def handle_event("cancel_delete", _params, socket) do
+    {:noreply, assign(socket, :delete_user, nil)}
   end
 
   @impl true
@@ -68,7 +79,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
     user = Accounts.get_user!(id)
     {:ok, _} = Accounts.delete_user(user)
 
-    {:noreply, push_patch(socket, to: ~p"/admin/accounts/users")}
+    {:noreply,
+     socket
+     |> assign(:delete_user, nil)
+     |> push_patch(to: ~p"/admin/accounts/users")}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -96,6 +110,16 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.Index do
         socket
       ) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(
+        {PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent,
+         :customer_access_updated},
+        socket
+      ) do
+    {:noreply,
+     put_flash(socket, :info, gettext("Customer access updated successfully"))}
   end
 
   defp filter_fields do

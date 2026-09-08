@@ -1001,6 +1001,6 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:41
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:34
 #: lib/price_spotter_web/live/admin/marketplaces/user_supplier_live/index.html.heex:48
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Show"
-msgstr ""
+msgstr "Show"
