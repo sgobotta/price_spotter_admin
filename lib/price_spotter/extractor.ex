@@ -74,6 +74,13 @@ defmodule PriceSpotter.Extractor do
   defdelegate humanize_cron(cron), to: CronHumanizer, as: :humanize
 
   @doc """
+  Live preview of a cron expression. Returns `{:ok, text}` for valid
+  expressions and `{:error, :invalid}` otherwise.
+  """
+  @spec preview_cron(String.t()) :: {:ok, String.t()} | {:error, :invalid}
+  defdelegate preview_cron(cron), to: CronHumanizer, as: :preview
+
+  @doc """
   Starts (linked to the caller) a process that streams a run's live
   progress into the caller as `{:extractor_run_event, run_id, message}`.
   """

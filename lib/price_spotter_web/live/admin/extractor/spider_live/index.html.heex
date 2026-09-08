@@ -24,7 +24,7 @@
         <.entity_avatar label={spider.name} />
       </:leading>
       <:title><%= spider.name %></:title>
-      <:subtitle><%= Extractor.humanize_cron(spider.cron) %></:subtitle>
+      <:subtitle><%= cron_summary(spider, @cron_previews) %></:subtitle>
       <:actions>
         <span
           id={"spiders-#{spider.name}-status-light"}
@@ -44,14 +44,21 @@
         <div class="flex flex-wrap items-center gap-2">
           <form
             id={"spiders-#{spider.name}-cron-form"}
+            phx-change="preview_cron"
             phx-submit="save_cron"
-            class="flex items-center gap-2"
+            class="flex items-start gap-2"
           >
             <input type="hidden" name="key" value={spider.name} />
             <.input
               type="text"
               name="cron"
-              value={spider.cron}
+              value={Map.get(@cron_drafts, spider.name, spider.cron)}
+              errors={
+                case Map.get(@cron_errors, spider.name) do
+                  nil -> []
+                  message -> [message]
+                end
+              }
               container_class="w-36"
             />
             <.button
