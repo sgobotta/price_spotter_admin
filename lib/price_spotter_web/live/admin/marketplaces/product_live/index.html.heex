@@ -141,7 +141,21 @@
             <:leading>
               <.entity_avatar label={product.name} />
             </:leading>
-            <:title><%= product.name %></:title>
+            <:title>
+              <span class="block truncate"><%= product.name %></span>
+            </:title>
+            <:subtitle>
+              <div class="flex flex-wrap items-center gap-1">
+                <.pill
+                  text={String.replace(product.supplier_name, "-", " ")}
+                  variant={:danger}
+                />
+                <.pill
+                  text={maybe_render_category(product.category)}
+                  variant={:info}
+                />
+              </div>
+            </:subtitle>
             <:meta>
               <.pill
                 text={
@@ -150,14 +164,6 @@
                     else: "$#{product.price}"
                 }
                 variant={if product.price == nil, do: :warning, else: :success}
-              />
-              <.pill
-                text={String.replace(product.supplier_name, "-", " ")}
-                variant={:danger}
-              />
-              <.pill
-                text={maybe_render_category(product.category)}
-                variant={:info}
               />
             </:meta>
             <:trailing>

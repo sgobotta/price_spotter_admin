@@ -82,12 +82,12 @@ defmodule PriceSpotterWeb.ListComponents do
       </div>
 
       <div class="min-w-0 flex-1">
-        <div class="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+        <div class="text-sm font-medium text-zinc-800 dark:text-zinc-200">
           <%= render_slot(@title) %>
         </div>
         <div
           :if={@subtitle != []}
-          class="truncate text-xs text-zinc-500 dark:text-zinc-400"
+          class="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
         >
           <%= render_slot(@subtitle) %>
         </div>
