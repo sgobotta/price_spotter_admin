@@ -26,4 +26,15 @@ defmodule PriceSpotter.Extractor.CronHumanizerTest do
       assert CronHumanizer.humanize("60 25 * * *") == "60 25 * * *"
     end
   end
+
+  describe "preview/1" do
+    test "returns a humanized summary for a valid cron expression" do
+      assert CronHumanizer.preview("0 9 * * 1") ==
+               {:ok, "At 09:00, only on Monday"}
+    end
+
+    test "returns an error tuple for an invalid expression" do
+      assert CronHumanizer.preview("not a cron") == {:error, :invalid}
+    end
+  end
 end

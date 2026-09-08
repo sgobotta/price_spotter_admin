@@ -147,6 +147,50 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> render_submit()
 
       assert html =~ "Every hour"
+      assert html =~ "Schedule saved successfully."
+    end
+
+    test "shows a live preview while editing the cron expression", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "0 9 * * 1"})
+        |> render_change()
+
+      assert html =~ "At 09:00, only on Monday"
+    end
+
+    test "gently warns when the cron preview is invalid", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "not a cron"})
+        |> render_change()
+
+      assert html =~ "Please check the cron format."
+    end
+
+    test "does not attempt to save an invalid cron expression", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :patch, _url, _headers, _body ->
+        flunk("invalid cron submissions should not call the extractor API")
+      end)
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "not a cron"})
+        |> render_submit()
+
+      assert html =~ "Please check the cron format."
     end
 
     test "flashes the extractor's error message on a failed schedule update", %{

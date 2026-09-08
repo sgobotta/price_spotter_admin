@@ -13,4 +13,12 @@ defmodule PriceSpotter.Extractor.CronHumanizer do
     CronstrueEx.ParseError -> cron
     MatchError -> cron
   end
+
+  @spec preview(String.t()) :: {:ok, String.t()} | {:error, :invalid}
+  def preview(cron) when is_binary(cron) do
+    {:ok, CronstrueEx.to_string(cron, use_24_hour_time_format: true)}
+  rescue
+    CronstrueEx.ParseError -> {:error, :invalid}
+    MatchError -> {:error, :invalid}
+  end
 end

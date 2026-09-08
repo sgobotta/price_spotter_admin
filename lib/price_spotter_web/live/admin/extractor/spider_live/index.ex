@@ -25,6 +25,9 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
        active_run: nil,
        log_seq: 0,
        eans_drafts: %{},
+       cron_drafts: %{},
+       cron_previews: %{},
+       cron_errors: %{},
        expanded: ExpandableList.new()
      )
      |> stream(:run_log, [])}
@@ -51,15 +54,45 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
       %Spider{active: active} ->
         key
         |> Extractor.update_schedule(%{active: !active})
-        |> handle_schedule_result(socket)
+        |> handle_toggle_result(socket)
     end
   end
 
   @impl true
+  def handle_event("preview_cron", %{"key" => key, "cron" => cron}, socket) do
+    {:noreply,
+     socket
+     |> update(:cron_drafts, &Map.put(&1, key, cron))
+     |> put_cron_feedback(key, cron)}
+  end
+
+  @impl true
   def handle_event("save_cron", %{"key" => key, "cron" => cron}, socket) do
-    key
-    |> Extractor.update_schedule(%{cron: cron})
-    |> handle_schedule_result(socket)
+    if String.trim(cron) == "" do
+      {:noreply,
+       socket
+       |> put_cron_error(
+         key,
+         gettext("Please enter a cron expression so we can save the schedule.")
+       )}
+    else
+      case Extractor.preview_cron(cron) do
+        {:ok, _summary} ->
+          key
+          |> Extractor.update_schedule(%{cron: cron})
+          |> handle_cron_save_result(socket, key)
+
+        {:error, :invalid} ->
+          {:noreply,
+           socket
+           |> put_cron_error(
+             key,
+             gettext(
+               "We couldn't read that schedule yet. Please check the cron format."
+             )
+           )}
+      end
+    end
   end
 
   @impl true
@@ -135,12 +168,26 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     end
   end
 
-  defp handle_schedule_result({:ok, updated_spider}, socket) do
+  defp handle_toggle_result({:ok, updated_spider}, socket) do
     {:noreply, update_spider(socket, updated_spider)}
   end
 
-  defp handle_schedule_result({:error, %{message: message}}, socket) do
+  defp handle_toggle_result({:error, %{message: message}}, socket) do
     {:noreply, put_flash(socket, :error, message)}
+  end
+
+  defp handle_cron_save_result({:ok, updated_spider}, socket, key) do
+    {:noreply,
+     socket
+     |> update_spider(updated_spider)
+     |> clear_cron_feedback(key)
+     |> put_flash(:info, gettext("Schedule saved successfully."))}
+  end
+
+  defp handle_cron_save_result({:error, %{message: message}}, socket, key) do
+    {:noreply,
+     socket
+     |> put_cron_error(key, message)}
   end
 
   defp parse_eans(nil), do: []
@@ -162,6 +209,46 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
       end)
 
     assign(socket, :spiders, spiders)
+  end
+
+  defp put_cron_feedback(socket, key, cron) do
+    if String.trim(cron) == "" do
+      clear_cron_feedback(socket, key)
+    else
+      case Extractor.preview_cron(cron) do
+        {:ok, summary} ->
+          socket
+          |> update(:cron_previews, &Map.put(&1, key, summary))
+          |> update(:cron_errors, &Map.delete(&1, key))
+
+        {:error, :invalid} ->
+          put_cron_error(
+            socket,
+            key,
+            gettext(
+              "We couldn't read that schedule yet. Please check the cron format."
+            )
+          )
+      end
+    end
+  end
+
+  defp clear_cron_feedback(socket, key) do
+    socket
+    |> update(:cron_drafts, &Map.delete(&1, key))
+    |> update(:cron_previews, &Map.delete(&1, key))
+    |> update(:cron_errors, &Map.delete(&1, key))
+  end
+
+  defp put_cron_error(socket, key, message) do
+    socket
+    |> update(:cron_previews, &Map.delete(&1, key))
+    |> update(:cron_errors, &Map.put(&1, key, message))
+    |> put_flash(:error, message)
+  end
+
+  defp cron_summary(%{name: name, cron: cron}, previews) do
+    Map.get(previews, name, Extractor.humanize_cron(cron))
   end
 
   defp run_log_line(%{status: "finished"}), do: gettext("Finished")
