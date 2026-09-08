@@ -46,7 +46,10 @@ defmodule PriceSpotter.ExtractorTest do
       spider = %Spider{name: "coto-by-ean", type: "by_ean", input_config: %{}}
 
       assert {:error,
-              %{reason: :invalid_format, details: %{invalid_eans: invalid_eans}}} =
+              %{
+                reason: :invalid_format,
+                details: %{invalid_eans: invalid_eans}
+              }} =
                Extractor.save_input_config(spider, "ABC,1234")
 
       assert invalid_eans == ["ABC", "1234"]
@@ -56,8 +59,14 @@ defmodule PriceSpotter.ExtractorTest do
       spider = %Spider{name: "coto-by-ean", type: "by_ean", input_config: %{}}
 
       assert {:error,
-              %{reason: :unknown_eans, details: %{unknown_eans: unknown_eans}}} =
-               Extractor.save_input_config(spider, "7790070418161,99999999")
+              %{
+                reason: :unknown_eans,
+                details: %{unknown_eans: unknown_eans}
+              }} =
+               Extractor.save_input_config(
+                 spider,
+                 "7790070418161,99999999"
+               )
 
       assert unknown_eans == ["99999999"]
     end
@@ -66,14 +75,15 @@ defmodule PriceSpotter.ExtractorTest do
       spider = %Spider{name: "coto-by-ean", type: "by_ean", input_config: %{}}
 
       large_unknowns =
-        1..1_250
-        |> Enum.map(fn idx ->
+        Enum.map_join(1..1_250, ",", fn idx ->
           "9" <> String.pad_leading(Integer.to_string(idx), 12, "0")
         end)
-        |> Enum.join(",")
 
       assert {:error,
-              %{reason: :unknown_eans, details: %{unknown_eans: unknown_eans}}} =
+              %{
+                reason: :unknown_eans,
+                details: %{unknown_eans: unknown_eans}
+              }} =
                Extractor.save_input_config(spider, large_unknowns)
 
       assert length(unknown_eans) == 1_250
