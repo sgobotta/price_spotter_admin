@@ -4,7 +4,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
   import Phoenix.LiveViewTest
   import PriceSpotterWeb.Gettext
 
+  alias Decimal, as: D
   alias PriceSpotter.Extractor.FakeHttpAdapter
+  alias PriceSpotter.Marketplaces.Product
+  alias PriceSpotter.Repo
 
   setup do
     on_exit(fn ->
@@ -19,6 +22,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       %{
         "id" => "1",
         "name" => "coto-by-ean",
+        "type" => "by_ean",
         "cron" => "*/5 * * * *",
         "active" => true,
         "next_run_time" => "2026-09-06T18:45:00-03:00",
@@ -48,6 +52,30 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
   describe "as an admin" do
     setup [:register_and_log_in_admin]
+
+    setup do
+      Repo.insert!(%Product{
+        ean: "7790070418161",
+        category: "beverages",
+        img_url: "https://example.com/1.jpg",
+        internal_id: "known-1",
+        supplier_name: "coto",
+        name: "Known Product 1",
+        price: D.new("1.0")
+      })
+
+      Repo.insert!(%Product{
+        ean: "7790742307279",
+        category: "beverages",
+        img_url: "https://example.com/2.jpg",
+        internal_id: "known-2",
+        supplier_name: "coto",
+        name: "Known Product 2",
+        price: D.new("2.0")
+      })
+
+      :ok
+    end
 
     test "lists spiders with their schedule and active state", %{conn: conn} do
       stub_list([spider_json(%{})])
@@ -100,11 +128,24 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       assert html =~ "spiders-yaguar-run"
     end
 
+    test "shows the eans field when the extractor omits type", %{conn: conn} do
+      stub_list([Map.delete(spider_json(%{}), "type")])
+
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "coto-by-ean")
+
+      assert html =~ ~s(id="spiders-coto-by-ean-eans-form")
+    end
+
     test "hides the eans field for spiders that don't support an override", %{
       conn: conn
     } do
       stub_list([
-        spider_json(%{"name" => "yaguar", "supports_ean_override" => false})
+        spider_json(%{
+          "name" => "yaguar",
+          "type" => "by_keyword",
+          "supports_ean_override" => false
+        })
       ])
 
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
@@ -237,7 +278,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       view
       |> form("#spiders-coto-by-ean-eans-form", %{
-        "eans" => "7790070418161\n7790742307279"
+        "eans" => "7790070418161,\n7790742307279"
       })
       |> render_change()
 
@@ -248,6 +289,57 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       assert html =~ gettext("Dry run")
       assert html =~ "2 EANs"
+    end
+
+    test "saves a normalized EAN configuration for by_ean spiders", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-eans-form", %{
+          "eans" => "7790070418161, 7790742307279\n7790070418161"
+        })
+        |> render_submit()
+
+      assert html =~ "EAN configuration saved"
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{
+                 "dry_run" => false,
+                 "eans" => ["7790070418161", "7790742307279"]
+               }
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> element("#spiders-coto-by-ean-run")
+      |> render_click()
+    end
+
+    test "saves EANs that are not yet in the product catalog", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-eans-form", %{
+          "eans" => "8445291121867,7891000389300"
+        })
+        |> render_submit()
+
+      assert html =~ "EAN configuration saved"
+      refute html =~ "Unknown EANs"
     end
 
     test "triggers a plain run with no eans when the field is left blank", %{
@@ -307,6 +399,101 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       html = expand(view, "coto-by-ean")
       assert html =~ "spiders-coto-by-ean-active-run"
       assert expanded?(view, "coto-by-ean")
+    end
+
+    test "shows a stop button only while the run is active", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "coto-by-ean")
+
+      refute html =~ "spiders-coto-by-ean-stop-run"
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-run")
+        |> render_click()
+
+      assert html =~ "spiders-coto-by-ean-stop-run"
+      assert html =~ gettext("Running")
+    end
+
+    test "requests to stop a running extractor and shows stopping feedback", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> element("#spiders-coto-by-ean-run")
+      |> render_click()
+
+      FakeHttpAdapter.stub(fn :post, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/runs/run-1/stop")
+        assert Jason.decode!(body) == %{}
+        {:ok, 202, %{"status" => "stopping"}}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-stop-run")
+        |> render_click()
+
+      assert html =~
+               gettext(
+                 "Stop requested. Waiting for the extractor to finish the run."
+               )
+
+      assert html =~ gettext("Stopping")
+    end
+
+    test "shows extractor error when stop request fails", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> element("#spiders-coto-by-ean-run")
+      |> render_click()
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 400, %{"error" => "run is not stoppable"}}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-stop-run")
+        |> render_click()
+
+      assert html =~ "run is not stoppable"
+      assert html =~ gettext("Running")
     end
   end
 

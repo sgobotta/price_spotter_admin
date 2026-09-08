@@ -120,7 +120,6 @@
       <.list_header meta={@meta} path={~p"/admin/marketplaces/products"}>
         <:col field={:name} label={gettext("Product")} class="flex-1" />
         <:col field={:price} label={gettext("Last Price")} />
-        <:col field={:price_updated_at} label={gettext("Last Update")} />
         <:col field={:supplier_name} label={gettext("Supplier")} />
       </.list_header>
 
@@ -145,15 +144,20 @@
               <span class="block truncate"><%= product.name %></span>
             </:title>
             <:subtitle>
-              <div class="flex flex-wrap items-center gap-1">
-                <.pill
-                  text={String.replace(product.supplier_name, "-", " ")}
-                  variant={:danger}
-                />
-                <.pill
-                  text={maybe_render_category(product.category)}
-                  variant={:info}
-                />
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                  <%= TimeAgo.time_ago(product.price_updated_at) %>
+                </span>
+                <div class="flex flex-wrap items-center gap-1">
+                  <.pill
+                    text={String.replace(product.supplier_name, "-", " ")}
+                    variant={:danger}
+                  />
+                  <.pill
+                    text={maybe_render_category(product.category)}
+                    variant={:info}
+                  />
+                </div>
               </div>
             </:subtitle>
             <:meta>
@@ -166,9 +170,6 @@
                 variant={if product.price == nil, do: :warning, else: :success}
               />
             </:meta>
-            <:trailing>
-              <%= TimeAgo.time_ago(product.price_updated_at) %>
-            </:trailing>
             <:content>
               <div class="flex flex-col gap-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">

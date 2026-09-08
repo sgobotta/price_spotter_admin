@@ -12,10 +12,14 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     socket =
       case Extractor.list_spiders() do
         {:ok, spiders} ->
-          assign(socket, spiders: spiders, load_error: nil)
+          assign(socket,
+            spiders: spiders,
+            eans_drafts: eans_drafts_from_spiders(spiders),
+            load_error: nil
+          )
 
         {:error, %{message: message}} ->
-          assign(socket, spiders: [], load_error: message)
+          assign(socket, spiders: [], eans_drafts: %{}, load_error: message)
       end
 
     {:ok,
@@ -24,10 +28,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
        page_title: gettext("Extractors"),
        active_run: nil,
        log_seq: 0,
-       eans_drafts: %{},
        cron_drafts: %{},
        cron_previews: %{},
        cron_errors: %{},
+       eans_errors: %{},
        expanded: ExpandableList.new()
      )
      |> stream(:run_log, [])}
@@ -42,7 +46,40 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   @impl true
   def handle_event("update_eans", %{"key" => key, "eans" => eans}, socket) do
-    {:noreply, update(socket, :eans_drafts, &Map.put(&1, key, eans))}
+    {:noreply,
+     socket
+     |> update(:eans_drafts, &Map.put(&1, key, eans))
+     |> update(:eans_errors, &Map.delete(&1, key))}
+  end
+
+  @impl true
+  def handle_event("save_eans", %{"key" => key, "eans" => eans}, socket) do
+    case find_spider(socket.assigns.spiders, key) do
+      nil ->
+        {:noreply, socket}
+
+      spider ->
+        case Extractor.save_input_config(spider, eans) do
+          {:ok, %{eans: normalized_eans}} ->
+            {:noreply,
+             socket
+             |> update(
+               :eans_drafts,
+               &Map.put(&1, key, Enum.join(normalized_eans, "\n"))
+             )
+             |> update(:eans_errors, &Map.delete(&1, key))
+             |> put_flash(:info, gettext("EAN configuration saved"))}
+
+          {:error, %{reason: :not_supported, message: message}} ->
+            {:noreply, put_flash(socket, :error, message)}
+
+          {:error, %{details: details}} ->
+            {:noreply,
+             socket
+             |> update(:eans_drafts, &Map.put(&1, key, eans))
+             |> update(:eans_errors, &Map.put(&1, key, details))}
+        end
+    end
   end
 
   @impl true
@@ -98,7 +135,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   @impl true
   def handle_event("run", %{"key" => key, "dry_run" => dry_run}, socket) do
     dry_run? = dry_run == "true"
-    eans = parse_eans(Map.get(socket.assigns.eans_drafts, key))
+    eans = Extractor.parse_eans(Map.get(socket.assigns.eans_drafts, key))
 
     case Extractor.trigger_run(key, dry_run: dry_run?, eans: eans) do
       {:ok,
@@ -140,6 +177,35 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   end
 
   @impl true
+  def handle_event("stop_run", _params, %{assigns: %{active_run: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("stop_run", _params, socket) do
+    %{run_id: run_id} = socket.assigns.active_run
+
+    case Extractor.stop_run(run_id) do
+      {:ok, _resp} ->
+        {:noreply,
+         socket
+         |> assign(
+           :active_run,
+           Map.put(socket.assigns.active_run, :status, :stopping)
+         )
+         |> put_flash(
+           :info,
+           gettext(
+             "Stop requested. Waiting for the extractor to finish the run."
+           )
+         )}
+
+      {:error, %{message: message}} ->
+        {:noreply, put_flash(socket, :error, message)}
+    end
+  end
+
+  @impl true
   def handle_info({:extractor_run_event, run_id, msg}, socket) do
     case socket.assigns.active_run do
       %{run_id: ^run_id} = active_run ->
@@ -147,7 +213,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
         updated_run = %{
           active_run
-          | status: if(status == "finished", do: :finished, else: :running),
+          | status: run_status(status),
             stats: msg["stats"]
         }
 
@@ -189,17 +255,14 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
      socket
      |> put_cron_error(key, message)}
   end
-
-  defp parse_eans(nil), do: []
-
-  defp parse_eans(raw) do
-    raw
-    |> String.split(~r/\r\n|\r|\n/)
-    |> Enum.map(&String.trim/1)
-    |> Enum.reject(&(&1 == ""))
-  end
-
   defp find_spider(spiders, key), do: Enum.find(spiders, &(&1.name == key))
+
+  defp eans_drafts_from_spiders(spiders) do
+    Map.new(spiders, fn spider ->
+      eans = get_in(spider.input_config || %{}, ["eans"]) || []
+      {spider.name, Enum.join(eans, "\n")}
+    end)
+  end
 
   defp update_spider(socket, %Spider{name: name} = updated) do
     spiders =
@@ -259,7 +322,9 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     Map.get(previews, name, Extractor.humanize_cron(cron))
   end
 
-  defp run_log_line(%{status: "finished"}), do: gettext("Finished")
+  defp run_log_line(%{status: status})
+       when status in ["finished", "stopped", "cancelled", "canceled"],
+       do: gettext("Finished")
   defp run_log_line(%{item: nil, stats: stats}), do: format_stats(stats)
 
   defp run_log_line(%{item: item, stats: stats}),
@@ -269,4 +334,12 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   defp format_stats(stats),
     do: stats |> Enum.map_join(", ", fn {k, v} -> "#{k}: #{v}" end)
+
+  defp run_status(status)
+       when status in ["finished", "stopped", "cancelled", "canceled"],
+       do: :finished
+
+  defp run_status("stopping"), do: :stopping
+
+  defp run_status(_status), do: :running
 end

@@ -69,6 +69,16 @@ defmodule PriceSpotter.Extractor.Client do
     end)
   end
 
+  @doc """
+  Requests an in-flight run to stop.
+  """
+  @spec stop_run(String.t()) :: {:ok, map()} | {:error, error()}
+  def stop_run(run_id) do
+    :post
+    |> request("/admin/spiders/runs/#{run_id}/stop", %{})
+    |> handle_response(fn body -> body || %{} end)
+  end
+
   defp maybe_put_eans(body, eans) when eans in [nil, []], do: body
   defp maybe_put_eans(body, eans), do: Map.put(body, :eans, eans)
 

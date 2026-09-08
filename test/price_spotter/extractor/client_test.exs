@@ -35,7 +35,7 @@ defmodule PriceSpotter.Extractor.ClientTest do
          ]}
       end)
 
-      assert {:ok, [%Spider{name: "coto-by-ean", active: true}]} =
+      assert {:ok, [%Spider{name: "coto-by-ean", active: true, type: "by_ean"}]} =
                Client.list_spiders()
     end
 
@@ -161,6 +161,27 @@ defmodule PriceSpotter.Extractor.ClientTest do
 
       assert {:error, %{status: 400, message: "spider does not support eans"}} =
                Client.trigger_run("yaguar", eans: ["123"])
+    end
+  end
+
+  describe "stop_run/1" do
+    test "requests a stop for the given run id" do
+      FakeHttpAdapter.stub(fn :post, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/runs/run-1/stop")
+        assert Jason.decode!(body) == %{}
+        {:ok, 202, %{"status" => "stopping"}}
+      end)
+
+      assert {:ok, %{"status" => "stopping"}} = Client.stop_run("run-1")
+    end
+
+    test "maps a failed stop request to an error" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 404, %{"error" => "run not found"}}
+      end)
+
+      assert {:error, %{status: 404, message: "run not found"}} =
+               Client.stop_run("missing-run")
     end
   end
 end
