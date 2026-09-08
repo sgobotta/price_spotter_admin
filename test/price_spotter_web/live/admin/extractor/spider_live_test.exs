@@ -264,6 +264,101 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       assert html =~ "spiders-coto-by-ean-active-run"
       assert expanded?(view, "coto-by-ean")
     end
+
+    test "shows a stop button only while the run is active", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "coto-by-ean")
+
+      refute html =~ "spiders-coto-by-ean-stop-run"
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-run")
+        |> render_click()
+
+      assert html =~ "spiders-coto-by-ean-stop-run"
+      assert html =~ gettext("Running")
+    end
+
+    test "requests to stop a running extractor and shows stopping feedback", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> element("#spiders-coto-by-ean-run")
+      |> render_click()
+
+      FakeHttpAdapter.stub(fn :post, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/runs/run-1/stop")
+        assert Jason.decode!(body) == %{}
+        {:ok, 202, %{"status" => "stopping"}}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-stop-run")
+        |> render_click()
+
+      assert html =~
+               gettext(
+                 "Stop requested. Waiting for the extractor to finish the run."
+               )
+
+      assert html =~ gettext("Stopping")
+    end
+
+    test "shows extractor error when stop request fails", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> element("#spiders-coto-by-ean-run")
+      |> render_click()
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 400, %{"error" => "run is not stoppable"}}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-stop-run")
+        |> render_click()
+
+      assert html =~ "run is not stoppable"
+      assert html =~ gettext("Running")
+    end
   end
 
   describe "as a non-admin user" do

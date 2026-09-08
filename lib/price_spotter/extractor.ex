@@ -12,6 +12,7 @@ defmodule PriceSpotter.Extractor do
   defdelegate list_spiders, to: Client
   defdelegate update_schedule(key, attrs), to: Client
   defdelegate trigger_run(key, opts \\ []), to: Client
+  defdelegate stop_run(run_id), to: Client
 
   @doc """
   Human-readable summary of a cron expression, falling back to the raw
