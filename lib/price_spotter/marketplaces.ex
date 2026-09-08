@@ -23,6 +23,7 @@ defmodule PriceSpotter.Marketplaces do
 
   @type interval :: :daily | :weekly | :monthly
   @homepage_window_hours 24
+  @snapshot_insert_retries 3
 
   @doc """
   Returns the list of products.
@@ -96,9 +97,8 @@ defmodule PriceSpotter.Marketplaces do
   """
   @spec get_homepage_metrics(User.t()) :: map()
   def get_homepage_metrics(%User{} = user) do
-    since =
-      NaiveDateTime.utc_now()
-      |> NaiveDateTime.add(-@homepage_window_hours * 3600, :second)
+    now = NaiveDateTime.utc_now()
+    since = NaiveDateTime.add(now, -@homepage_window_hours * 3600, :second)
 
     scoped_products_query = scoped_products_query(user)
 
@@ -120,7 +120,7 @@ defmodule PriceSpotter.Marketplaces do
       |> subquery()
       |> Repo.aggregate(:count, :id)
 
-    movement_query = movement_query(user)
+    movement_query = movement_query(user, since)
 
     price_increases_24h =
       movement_query
@@ -165,11 +165,7 @@ defmodule PriceSpotter.Marketplaces do
     }
   end
 
-  defp movement_query(%User{} = user) do
-    since =
-      NaiveDateTime.utc_now()
-      |> NaiveDateTime.add(-@homepage_window_hours * 3600, :second)
-
+  defp movement_query(%User{} = user, since) do
     query =
       from p in subquery(latest_previous_pairs_query(user)),
         join: product in Product,
@@ -844,6 +840,10 @@ defmodule PriceSpotter.Marketplaces do
         %Product{id: product_id, price: price, supplier_id: supplier_id},
         timestamp \\ :os.system_time(:millisecond)
       ) do
+    scraped_at =
+      DateTime.from_unix!(timestamp, :millisecond)
+      |> DateTime.to_naive()
+
     get_or_create = fn product_id ->
       case get_product_document_by_id(product_id) do
         nil ->
@@ -857,20 +857,18 @@ defmodule PriceSpotter.Marketplaces do
     {:ok, %ProductDocument{id: product_document_id}} =
       get_or_create.(product_id)
 
-    with {:ok, %ProductPriceDocument{} = price_document} <-
+    with {:ok, _snapshot} <-
+           create_product_price_snapshot_with_retry(%{
+             product_id: product_id,
+             supplier_id: supplier_id,
+             price: price,
+             scraped_at: scraped_at
+           }),
+         {:ok, %ProductPriceDocument{} = price_document} <-
            create_product_document_price(%{
              product_id: product_document_id,
              price: price,
              timestamp: timestamp
-           }),
-         {:ok, _snapshot} <-
-           create_product_price_snapshot(%{
-             product_id: product_id,
-             supplier_id: supplier_id,
-             price: price,
-             scraped_at:
-               DateTime.from_unix!(timestamp, :millisecond)
-               |> DateTime.to_naive()
            }) do
       {:ok, price_document}
     end
@@ -894,6 +892,30 @@ defmodule PriceSpotter.Marketplaces do
     %ProductPriceSnapshot{}
     |> ProductPriceSnapshot.changeset(attrs)
     |> Repo.insert()
+  end
+
+  defp create_product_price_snapshot_with_retry(
+         attrs,
+         retries_left \\ @snapshot_insert_retries
+       )
+
+  defp create_product_price_snapshot_with_retry(attrs, retries_left)
+       when retries_left <= 1 do
+    create_product_price_snapshot(attrs)
+  end
+
+  defp create_product_price_snapshot_with_retry(attrs, retries_left) do
+    case create_product_price_snapshot(attrs) do
+      {:ok, _snapshot} = ok ->
+        ok
+
+      {:error, _changeset} ->
+        Logger.warning(
+          "Snapshot insert failed for product_id=#{attrs.product_id} supplier_id=#{attrs.supplier_id}; retrying attempts_left=#{retries_left - 1}"
+        )
+
+        create_product_price_snapshot_with_retry(attrs, retries_left - 1)
+    end
   end
 
   # ----------------------------------------------------------------------------

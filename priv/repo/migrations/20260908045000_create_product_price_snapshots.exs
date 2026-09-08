@@ -26,6 +26,5 @@ defmodule PriceSpotter.Repo.Migrations.CreateProductPriceSnapshots do
            )
 
     create index(:products, [:supplier_id])
-    create index(:users_suppliers, [:supplier_id, :user_id])
   end
 end
