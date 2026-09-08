@@ -49,8 +49,7 @@ defmodule PriceSpotter.ExtractorTest do
               %{
                 reason: :invalid_format,
                 details: %{invalid_eans: invalid_eans}
-              }} =
-               Extractor.save_input_config(spider, "ABC,1234")
+              }} = Extractor.save_input_config(spider, "ABC,1234")
 
       assert invalid_eans == ["ABC", "1234"]
     end
@@ -83,8 +82,7 @@ defmodule PriceSpotter.ExtractorTest do
               %{
                 reason: :unknown_eans,
                 details: %{unknown_eans: unknown_eans}
-              }} =
-               Extractor.save_input_config(spider, large_unknowns)
+              }} = Extractor.save_input_config(spider, large_unknowns)
 
       assert length(unknown_eans) == 1_250
     end
