@@ -154,6 +154,7 @@
                     variant={:danger}
                   />
                   <.pill
+                    :if={product.category != nil}
                     text={maybe_render_category(product.category)}
                     variant={:info}
                   />
@@ -164,10 +165,10 @@
               <.pill
                 text={
                   if product.price == nil,
-                    do: gettext("No price yet"),
+                    do: "–",
                     else: "$#{product.price}"
                 }
-                variant={if product.price == nil, do: :warning, else: :success}
+                variant={if product.price == nil, do: :neutral, else: :success}
               />
             </:meta>
             <:content>
@@ -177,11 +178,11 @@
                     <.pill
                       text={
                         if product.price == nil,
-                          do: gettext("No price yet"),
+                          do: "–",
                           else: "$#{product.price}"
                       }
                       variant={
-                        if product.price == nil, do: :warning, else: :success
+                        if product.price == nil, do: :neutral, else: :success
                       }
                     />
                     <.pill
@@ -189,6 +190,7 @@
                       variant={:danger}
                     />
                     <.pill
+                      :if={product.category != nil}
                       text={maybe_render_category(product.category)}
                       variant={:info}
                     />

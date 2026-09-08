@@ -137,7 +137,7 @@ defmodule PriceSpotterWeb.ListComponents do
 
   def expandable_list_row(assigns) do
     ~H"""
-    <div class="flex flex-col px-4 py-3">
+    <div id={@id} class="flex flex-col px-4 py-3">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div class="flex items-center gap-3">
           <div :if={@leading != []} class="shrink-0">
