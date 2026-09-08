@@ -107,6 +107,21 @@ defmodule PriceSpotter.Marketplaces do
   def get_product!(id), do: Repo.get!(Product, id)
 
   @doc """
+  Returns all products sharing the same EAN.
+  """
+  @spec list_products_by_ean(String.t()) :: [Product.t()]
+  def list_products_by_ean(ean) when is_binary(ean) do
+    from(
+      p in Product,
+      where: p.ean == ^ean,
+      order_by: [asc: p.supplier_name, asc: p.name]
+    )
+    |> Repo.all()
+  end
+
+  def list_products_by_ean(_ean), do: []
+
+  @doc """
   Given an internal id returns a product if exists.
 
     ## Examples

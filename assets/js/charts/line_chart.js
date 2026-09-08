@@ -6,33 +6,13 @@ import Chart from 'chart.js/auto'
 // A wrapper of Chart.js that configures the realtime line chart.
 export default class {
   constructor(ctx) {
-    this.colors = [
-      'rgba(74, 222, 128, 1)'
-    ]
-
     const config = {
       type: 'line',
       data: {datasets: [], labels: []},
       options: {
-        datasets: {
-          // https://www.chartjs.org/docs/3.6.0/charts/line.html#dataset-properties
-          line: {
-            tension: 0.09
-          }
-        },
-        plugins: {
-          // https://nagix.github.io/chartjs-plugin-streaming/2.0.0/guide/options.html
-          streaming: {
-            delay: 1500,
-            duration: 60 * 1000
-          }
-        },
+        spanGaps: false,
         scales: {
-          x: {
-            // chartjs-plugin-streaming
-            suggestedMax: 200,
-            suggestedMin: 50
-          },
+          x: {},
           y: {
             suggestedMax: 50000,
             suggestedMin: 500
@@ -44,28 +24,24 @@ export default class {
     this.chart = new Chart(ctx, config)
   }
 
-  resetDataset(label) {
-    const dataset = this._findDataset(label)
-    if (dataset) {
-      dataset.data = []
-    }
-    this.chart.config.data.labels = []
-    this.chart.update()
-  }
+  setData(labels, datasets) {
+    this.chart.config.data.labels = labels
+    this.chart.config.data.datasets = datasets.map((dataset) => {
+      return Object.assign({}, dataset, {
+        fill: false,
+        tension: 0.09
+      })
+    })
 
-  addPoint(data_label, label, value, backgroundColor, borderColor) {   
-    this.chart.config.data.labels.push(data_label)
-    const dataset = this._findDataset(label) || this._createDataset(
-      label, backgroundColor, borderColor
-    )
-    dataset.data.push({x: Date.now(), y: value})
-    
-    const numericYValues = dataset.data.map(point => parseFloat(point.y))
-    const suggestedMin = Math.min(...numericYValues);
-    const suggestedMax = Math.max(...numericYValues);
-    this.chart.config.options.scales.y.suggestedMin = suggestedMin - 500
-    this.chart.config.options.scales.y.suggestedMax = suggestedMax + 500
-    
+    const numericValues = this._extractNumericValues(datasets)
+
+    if (numericValues.length > 0) {
+      const suggestedMin = Math.min(...numericValues)
+      const suggestedMax = Math.max(...numericValues)
+      this.chart.config.options.scales.y.suggestedMin = suggestedMin - 500
+      this.chart.config.options.scales.y.suggestedMax = suggestedMax + 500
+    }
+
     this.chart.update()
   }
 
@@ -73,19 +49,13 @@ export default class {
     this.chart.destroy()
   }
 
-  _findDataset(label) {
-    return this.chart.data.datasets.find((dataset) => dataset.label === label)
-  }
-
-  _createDataset(label, backgroundColor, borderColor) {
-    const newDataset = {
-      backgroundColor,
-      borderColor,
-      data: [],
-      fill: 'origin',
-      label
-    }
-    this.chart.data.datasets.push(newDataset)
-    return newDataset
+  _extractNumericValues(datasets) {
+    return datasets
+      .reduce((acc, dataset) => {
+        return acc.concat(dataset.data)
+      }, [])
+      .filter((value) => value !== null && value !== undefined)
+      .map((value) => parseFloat(value))
+      .filter((value) => !Number.isNaN(value))
   }
 }

@@ -7,20 +7,11 @@ export default {
   mounted() {
     this.chart = new RealtimeLineChart(this.el)
 
-    this.handleEvent('reset-dataset', ({ label }) => {
-      this.chart.resetDataset(label)
-    })
-
-    this.handleEvent('new-point', ({
-      background_color,
-      border_color,
-      data_label,
-      label,
-      value
+    this.handleEvent('set-chart-data', ({
+      labels,
+      datasets
     }) => {
-      this.chart.addPoint(
-        data_label, label, value, background_color, border_color
-      )
+      this.chart.setData(labels, datasets)
     })
   }
 }
