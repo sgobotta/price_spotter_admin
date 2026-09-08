@@ -5,45 +5,70 @@ defmodule PriceSpotterWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
-    <.header class="text-center">
-      <%= gettext("Account Settings") %>
-      <:subtitle>
-        <%= gettext("Manage your account email address and password settings") %>
-      </:subtitle>
-    </.header>
+    <div class="mx-auto w-full max-w-4xl space-y-8">
+      <.header>
+        <%= gettext("Account Settings") %>
+        <:subtitle>
+          <%= gettext("Manage your account email address and password settings") %>
+        </:subtitle>
+      </.header>
 
-    <div class="space-y-12 divide-y">
-      <div>
-        <.simple_form
+      <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-zinc-800 dark:text-zinc-200">
+            <%= gettext("Email Address") %>
+          </h2>
+          <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <%= gettext("Update where we'll send account notifications.") %>
+          </p>
+        </div>
+
+        <.form
+          :let={f}
           for={@email_form}
           id="email_form"
           phx-submit="update_email"
           phx-change="validate_email"
+          class="space-y-4"
         >
           <.input
-            field={@email_form[:email]}
+            field={f[:email]}
             type="email"
             label={gettext("Email")}
             required
+            container_class="max-w-xl"
           />
           <.input
-            field={@email_form[:current_password]}
+            field={f[:current_password]}
             name="current_password"
             id="current_password_for_email"
             type="password"
             label={gettext("Current password")}
             value={@email_form_current_password}
             required
+            container_class="max-w-xl"
           />
-          <:actions>
+
+          <div class="pt-2">
             <.button phx-disable-with={gettext("Changing...")}>
               <%= gettext("Change Email") %>
             </.button>
-          </:actions>
-        </.simple_form>
-      </div>
-      <div>
-        <.simple_form
+          </div>
+        </.form>
+      </section>
+
+      <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-zinc-800 dark:text-zinc-200">
+            <%= gettext("Password") %>
+          </h2>
+          <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <%= gettext("Use a strong password you don't use elsewhere.") %>
+          </p>
+        </div>
+
+        <.form
+          :let={f}
           for={@password_form}
           id="password_form"
           action={~p"/users/log_in?_action=password_updated"}
@@ -51,40 +76,45 @@ defmodule PriceSpotterWeb.UserSettingsLive do
           phx-change="validate_password"
           phx-submit="update_password"
           phx-trigger-action={@trigger_submit}
+          class="space-y-4"
         >
           <.input
-            field={@password_form[:email]}
+            field={f[:email]}
             type="hidden"
             id="hidden_user_email"
             value={@current_email}
           />
           <.input
-            field={@password_form[:password]}
+            field={f[:password]}
             type="password"
             label={gettext("New password")}
             required
+            container_class="max-w-xl"
           />
           <.input
-            field={@password_form[:password_confirmation]}
+            field={f[:password_confirmation]}
             type="password"
             label={gettext("Confirm new password")}
+            container_class="max-w-xl"
           />
           <.input
-            field={@password_form[:current_password]}
+            field={f[:current_password]}
             name="current_password"
             type="password"
             label={gettext("Current password")}
             id="current_password_for_password"
             value={@current_password}
             required
+            container_class="max-w-xl"
           />
-          <:actions>
+
+          <div class="pt-2">
             <.button phx-disable-with={gettext("Changing...")}>
               <%= gettext("Change Password") %>
             </.button>
-          </:actions>
-        </.simple_form>
-      </div>
+          </div>
+        </.form>
+      </section>
     </div>
     """
   end

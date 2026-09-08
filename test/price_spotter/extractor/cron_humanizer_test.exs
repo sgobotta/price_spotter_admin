@@ -4,32 +4,24 @@ defmodule PriceSpotter.Extractor.CronHumanizerTest do
   alias PriceSpotter.Extractor.CronHumanizer
 
   describe "humanize/1" do
-    test "every N minutes" do
+    test "renders common interval schedules" do
       assert CronHumanizer.humanize("*/5 * * * *") == "Every 5 minutes"
-      assert CronHumanizer.humanize("*/1 * * * *") == "Every 1 minute"
-    end
-
-    test "every N hours" do
       assert CronHumanizer.humanize("0 */2 * * *") == "Every 2 hours"
-      assert CronHumanizer.humanize("0 */1 * * *") == "Every 1 hour"
     end
 
-    test "daily at midnight" do
-      assert CronHumanizer.humanize("0 0 * * *") == "Daily at midnight"
+    test "renders daily schedules with 24 hour format" do
+      assert CronHumanizer.humanize("0 3 * * *") == "At 03:00"
+      assert CronHumanizer.humanize("15 14 * * *") == "At 14:15"
     end
 
-    test "hourly at a fixed minute" do
-      assert CronHumanizer.humanize("0 * * * *") == "Every hour"
-      assert CronHumanizer.humanize("30 * * * *") == "Every hour, at minute 30"
+    test "renders weekday schedules" do
+      assert CronHumanizer.humanize("0 9 * * 1") == "At 09:00, only on Monday"
+
+      assert CronHumanizer.humanize("30 8 * * 1-5") ==
+               "At 08:30, Monday through Friday"
     end
 
-    test "daily at a fixed time" do
-      assert CronHumanizer.humanize("30 14 * * *") == "Daily at 14:30"
-      assert CronHumanizer.humanize("5 9 * * *") == "Daily at 09:05"
-    end
-
-    test "falls back to the raw string for anything else" do
-      assert CronHumanizer.humanize("*/5 * * * 1-5") == "*/5 * * * 1-5"
+    test "falls back to raw cron for invalid expressions" do
       assert CronHumanizer.humanize("not a cron") == "not a cron"
       assert CronHumanizer.humanize("60 25 * * *") == "60 25 * * *"
     end

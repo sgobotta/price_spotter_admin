@@ -74,6 +74,7 @@ defmodule PriceSpotter.MixProject do
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
       {:tzdata, "~> 1.1"},
+      {:cronstrue_ex, "~> 0.1.0"},
       {:mongodb_ecto, "~> 2.1.1"},
       {:websockex, "~> 0.4.3"}
     ]

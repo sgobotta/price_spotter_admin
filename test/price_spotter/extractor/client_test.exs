@@ -35,7 +35,7 @@ defmodule PriceSpotter.Extractor.ClientTest do
          ]}
       end)
 
-      assert {:ok, [%Spider{name: "coto-by-ean", active: true}]} =
+      assert {:ok, [%Spider{name: "coto-by-ean", active: true, type: "by_ean"}]} =
                Client.list_spiders()
     end
 

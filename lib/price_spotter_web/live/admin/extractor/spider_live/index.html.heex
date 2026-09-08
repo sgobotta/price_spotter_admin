@@ -81,17 +81,42 @@
         </div>
 
         <form
-          :if={spider.supports_ean_override}
+          :if={Spider.ean_configurable?(spider)}
           id={"spiders-#{spider.name}-eans-form"}
           phx-change="update_eans"
+          phx-submit="save_eans"
         >
           <input type="hidden" name="key" value={spider.name} />
           <.input
             type="textarea"
             name="eans"
             value={Map.get(@eans_drafts, spider.name, "")}
-            placeholder={gettext("One EAN per line")}
+            placeholder={gettext("One EAN per line or comma separated")}
           />
+          <p
+            :if={
+              Map.has_key?(@eans_errors, spider.name) and
+                Map.get(Map.get(@eans_errors, spider.name), :invalid_eans, []) !=
+                  []
+            }
+            class="mt-1 text-sm text-rose-600 dark:text-rose-300"
+          >
+            <%= gettext("Invalid EAN format: %{eans}",
+              eans:
+                Enum.join(
+                  Map.get(Map.get(@eans_errors, spider.name), :invalid_eans, []),
+                  ", "
+                )
+            ) %>
+          </p>
+          <div class="mt-2">
+            <.button
+              type="submit"
+              class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Save EANs") %>
+            </.button>
+          </div>
         </form>
 
         <div class="flex items-center gap-2">
