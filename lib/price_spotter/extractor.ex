@@ -12,14 +12,12 @@ defmodule PriceSpotter.Extractor do
   alias PriceSpotter.Extractor.RunWatcher
   alias PriceSpotter.Extractor.Spider
   alias PriceSpotter.Extractor.SpiderConfig
-  alias PriceSpotter.Marketplaces.Product
   alias PriceSpotter.Repo
 
   @ean_lengths [8, 13, 14]
-  @batch_size 500
 
   @type eans_config_error :: %{
-          reason: :invalid_format | :unknown_eans | :not_supported,
+          reason: :invalid_format | :not_supported,
           message: String.t(),
           details: map()
         }
@@ -40,7 +38,7 @@ defmodule PriceSpotter.Extractor do
   @spec save_input_config(Spider.t(), String.t() | nil) ::
           {:ok, %{eans: [String.t()]}} | {:error, eans_config_error()}
   def save_input_config(%Spider{} = spider, raw_eans) do
-    if spider.type == "by_ean" do
+    if Spider.ean_configurable?(spider) do
       with {:ok, eans} <- normalize_and_validate_eans(raw_eans),
            {:ok, _config} <-
              upsert_spider_config(spider.name, %{"eans" => eans}) do
@@ -124,7 +122,7 @@ defmodule PriceSpotter.Extractor do
 
     case validate_ean_formats(eans) do
       [] ->
-        validate_known_eans(eans)
+        {:ok, eans}
 
       invalid_eans ->
         {:error,
@@ -141,34 +139,6 @@ defmodule PriceSpotter.Extractor do
       not String.match?(ean, ~r/^\d+$/) or
         String.length(ean) not in @ean_lengths
     end)
-  end
-
-  defp validate_known_eans(eans) do
-    known_eans =
-      eans
-      |> Enum.chunk_every(@batch_size)
-      |> Enum.flat_map(fn batch ->
-        from(p in Product,
-          where: p.ean in ^batch and not is_nil(p.ean),
-          select: p.ean,
-          distinct: true
-        )
-        |> Repo.all()
-      end)
-      |> MapSet.new()
-
-    unknown_eans = Enum.reject(eans, &MapSet.member?(known_eans, &1))
-
-    if unknown_eans == [] do
-      {:ok, eans}
-    else
-      {:error,
-       %{
-         reason: :unknown_eans,
-         message: "Some EAN values are unknown",
-         details: %{unknown_eans: unknown_eans}
-       }}
-    end
   end
 
   defp dedupe_preserving_order(values) do

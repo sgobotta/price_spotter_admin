@@ -81,7 +81,7 @@
         </div>
 
         <form
-          :if={spider.type == "by_ean"}
+          :if={Spider.ean_configurable?(spider)}
           id={"spiders-#{spider.name}-eans-form"}
           phx-change="update_eans"
           phx-submit="save_eans"
@@ -105,22 +105,6 @@
               eans:
                 Enum.join(
                   Map.get(Map.get(@eans_errors, spider.name), :invalid_eans, []),
-                  ", "
-                )
-            ) %>
-          </p>
-          <p
-            :if={
-              Map.has_key?(@eans_errors, spider.name) and
-                Map.get(Map.get(@eans_errors, spider.name), :unknown_eans, []) !=
-                  []
-            }
-            class="mt-1 text-sm text-rose-600 dark:text-rose-300"
-          >
-            <%= gettext("Unknown EANs: %{eans}",
-              eans:
-                Enum.join(
-                  Map.get(Map.get(@eans_errors, spider.name), :unknown_eans, []),
                   ", "
                 )
             ) %>

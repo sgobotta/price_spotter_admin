@@ -128,6 +128,15 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       assert html =~ "spiders-yaguar-run"
     end
 
+    test "shows the eans field when the extractor omits type", %{conn: conn} do
+      stub_list([Map.delete(spider_json(%{}), "type")])
+
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "coto-by-ean")
+
+      assert html =~ ~s(id="spiders-coto-by-ean-eans-form")
+    end
+
     test "hides the eans field for spiders that don't support an override", %{
       conn: conn
     } do
@@ -273,7 +282,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       |> render_click()
     end
 
-    test "renders unknown EAN validation errors when saving", %{conn: conn} do
+    test "saves EANs that are not yet in the product catalog", %{conn: conn} do
       stub_list([spider_json(%{})])
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
       expand(view, "coto-by-ean")
@@ -281,11 +290,12 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       html =
         view
         |> form("#spiders-coto-by-ean-eans-form", %{
-          "eans" => "7790070418161,99999999"
+          "eans" => "8445291121867,7891000389300"
         })
         |> render_submit()
 
-      assert html =~ "Unknown EANs: 99999999"
+      assert html =~ "EAN configuration saved"
+      refute html =~ "Unknown EANs"
     end
 
     test "triggers a plain run with no eans when the field is left blank", %{

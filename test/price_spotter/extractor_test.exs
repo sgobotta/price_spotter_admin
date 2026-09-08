@@ -1,37 +1,21 @@
 defmodule PriceSpotter.ExtractorTest do
   use PriceSpotter.DataCase, async: false
 
-  alias Decimal, as: D
   alias PriceSpotter.Extractor
   alias PriceSpotter.Extractor.Spider
-  alias PriceSpotter.Marketplaces.Product
-  alias PriceSpotter.Repo
-
-  setup do
-    Repo.insert!(%Product{
-      ean: "7790070418161",
-      category: "beverages",
-      img_url: "https://example.com/1.jpg",
-      internal_id: "known-1",
-      supplier_name: "coto",
-      name: "Known Product 1",
-      price: D.new("1.0")
-    })
-
-    Repo.insert!(%Product{
-      ean: "7790742307279",
-      category: "beverages",
-      img_url: "https://example.com/2.jpg",
-      internal_id: "known-2",
-      supplier_name: "coto",
-      name: "Known Product 2",
-      price: D.new("2.0")
-    })
-
-    :ok
-  end
 
   describe "save_input_config/2" do
+    test "accepts spiders that only advertise supports_ean_override" do
+      spider = %Spider{
+        name: "coto-by-ean",
+        supports_ean_override: true,
+        input_config: %{}
+      }
+
+      assert {:ok, %{eans: ["7790070418161"]}} =
+               Extractor.save_input_config(spider, "7790070418161")
+    end
+
     test "normalizes comma/newline values and deduplicates" do
       spider = %Spider{name: "coto-by-ean", type: "by_ean", input_config: %{}}
 
@@ -54,37 +38,28 @@ defmodule PriceSpotter.ExtractorTest do
       assert invalid_eans == ["ABC", "1234"]
     end
 
-    test "returns structured unknown EAN errors" do
+    test "saves EANs that are not yet in the product catalog" do
       spider = %Spider{name: "coto-by-ean", type: "by_ean", input_config: %{}}
 
-      assert {:error,
-              %{
-                reason: :unknown_eans,
-                details: %{unknown_eans: unknown_eans}
-              }} =
+      assert {:ok, %{eans: ["8445291121867", "7891000389300"]}} =
                Extractor.save_input_config(
                  spider,
-                 "7790070418161,99999999"
+                 "8445291121867,7891000389300"
                )
-
-      assert unknown_eans == ["99999999"]
     end
 
-    test "handles large payloads by returning unknown values cleanly" do
+    test "handles large payloads by persisting all values" do
       spider = %Spider{name: "coto-by-ean", type: "by_ean", input_config: %{}}
 
-      large_unknowns =
+      large_eans =
         Enum.map_join(1..1_250, ",", fn idx ->
           "9" <> String.pad_leading(Integer.to_string(idx), 12, "0")
         end)
 
-      assert {:error,
-              %{
-                reason: :unknown_eans,
-                details: %{unknown_eans: unknown_eans}
-              }} = Extractor.save_input_config(spider, large_unknowns)
+      assert {:ok, %{eans: saved_eans}} =
+               Extractor.save_input_config(spider, large_eans)
 
-      assert length(unknown_eans) == 1_250
+      assert length(saved_eans) == 1_250
     end
   end
 

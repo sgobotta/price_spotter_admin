@@ -40,7 +40,7 @@ defmodule PriceSpotter.Extractor.Spider do
     %__MODULE__{
       id: json["id"],
       name: json["name"],
-      type: json["type"],
+      type: json["type"] || inferred_type(json["supports_ean_override"]),
       cron: json["cron"],
       active: json["active"],
       next_run_time: json["next_run_time"],
@@ -49,4 +49,16 @@ defmodule PriceSpotter.Extractor.Spider do
       input_config: json["input_config"] || %{}
     }
   end
+
+  @doc """
+  True when the spider accepts a persisted EAN list. The extractor API
+  may omit `type` and only send `supports_ean_override`.
+  """
+  @spec ean_configurable?(t()) :: boolean()
+  def ean_configurable?(%__MODULE__{supports_ean_override: true}), do: true
+  def ean_configurable?(%__MODULE__{type: "by_ean"}), do: true
+  def ean_configurable?(_spider), do: false
+
+  defp inferred_type(true), do: "by_ean"
+  defp inferred_type(_supports_ean_override), do: nil
 end
