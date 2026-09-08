@@ -347,14 +347,27 @@ defmodule PriceSpotter.Marketplaces do
     end)
     # Create or update Supplier
     |> Ecto.Multi.run(:maybe_create_supplier, fn
-      _repo,
+      repo,
       %{
         maybe_create_product:
           {_product_op, %Product{supplier_name: supplier_name}},
         supplier: nil
       } ->
-        {:ok, %Supplier{} = s} = create_supplier(%{name: supplier_name})
-        {:ok, {:created, s}}
+        case create_supplier(%{name: supplier_name}) do
+          {:ok, %Supplier{} = s} ->
+            {:ok, {:created, s}}
+
+          {:error, %Ecto.Changeset{} = cs} ->
+            # If another process created the supplier first, recover by loading
+            # it from the DB.
+            case repo.one(from(s in Supplier, where: s.name == ^supplier_name)) do
+              %Supplier{} = s ->
+                {:ok, {:noop, s}}
+
+              nil ->
+                {:error, cs}
+            end
+        end
 
       _repo, %{supplier: %Supplier{} = s} ->
         {:ok, {:noop, s}}
