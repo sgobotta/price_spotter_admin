@@ -123,13 +123,15 @@ defmodule PriceSpotterWeb.ListComponents do
   attr :id, :string, required: true
   attr :expanded, :boolean, required: true
   attr :toggle_event, :string, default: "toggle_expand"
-  attr :toggle_key, :string, required: true
+  attr :toggle_key, :any, required: true
+  attr :toggle_patch, :any, default: nil
   attr :content_class, :string, default: nil
 
   slot :leading
   slot :title, required: true
   slot :subtitle
   slot :meta
+  slot :trailing
   slot :actions
   slot :content, required: true
 
@@ -163,11 +165,38 @@ defmodule PriceSpotterWeb.ListComponents do
             <%= render_slot(@meta) %>
           </div>
 
+          <div
+            :if={@trailing != []}
+            class="hidden shrink-0 text-xs italic text-zinc-500 dark:text-zinc-400 sm:block"
+          >
+            <%= render_slot(@trailing) %>
+          </div>
+
           <div :if={@actions != []} class="flex shrink-0 items-center gap-2">
             <%= render_slot(@actions) %>
           </div>
 
+          <.link
+            :if={@toggle_patch}
+            id={"#{@id}-toggle-expand"}
+            patch={@toggle_patch}
+            aria-expanded={@expanded}
+            aria-controls={"#{@id}-expand"}
+            class="inline-flex items-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          >
+            <CoreComponents.icon
+              name={
+                if @expanded,
+                  do: "hero-chevron-up-solid",
+                  else: "hero-chevron-down-solid"
+              }
+              class="h-4 w-4"
+            />
+            <%= if @expanded, do: gettext("Collapse"), else: gettext("Details") %>
+          </.link>
+
           <CoreComponents.button
+            :if={!@toggle_patch}
             id={"#{@id}-toggle-expand"}
             type="button"
             phx-click={@toggle_event}
