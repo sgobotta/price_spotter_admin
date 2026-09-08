@@ -28,6 +28,8 @@ export default class {
     this.chart.config.data.labels = labels
     this.chart.config.data.datasets = datasets.map((dataset) => {
       return Object.assign({}, dataset, {
+        backgroundColor: dataset.background_color,
+        borderColor: dataset.border_color,
         fill: false,
         tension: 0.09
       })

@@ -70,21 +70,22 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_info(:update_chart, socket) do
-    with %Marketplaces.Product{
-           ean: ean
-         } = product <- socket.assigns.product do
-      products =
-        case ean do
-          nil -> [product]
-          _ean -> Marketplaces.list_products_by_ean(ean)
-        end
+    case socket.assigns.product do
+      %Marketplaces.Product{
+        ean: ean
+      } = product ->
+        products =
+          case ean do
+            nil -> [product]
+            _ean -> Marketplaces.list_products_by_ean(ean)
+          end
 
-      chart_data = build_chart_data(products, socket.assigns.interval)
+        chart_data = build_chart_data(products, socket.assigns.interval)
 
-      socket = push_event(socket, "set-chart-data", chart_data)
+        socket = push_event(socket, "set-chart-data", chart_data)
 
-      {:noreply, socket}
-    else
+        {:noreply, socket}
+
       _error ->
         {:noreply,
          push_event(socket, "set-chart-data", %{
@@ -184,15 +185,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   defp get_dataset_trend([]), do: :bullish
   defp get_dataset_trend([_price]), do: :bullish
 
-  defp get_dataset_trend([last_price, price | _rest])
-       when last_price == price do
-    :notrend
+  defp get_dataset_trend([last_price, price | _rest]) do
+    case Decimal.compare(last_price, price) do
+      :eq -> :notrend
+      :gt -> :bullish
+      :lt -> :bearish
+    end
   end
-
-  defp get_dataset_trend([last_price, price | _rest]) when last_price > price,
-    do: :bullish
-
-  defp get_dataset_trend(_price_history), do: :bearish
 
   defp get_chart_colors(:notrend),
     do: {"rgba(203, 213, 225, 1)", "rgba(100, 116, 139, 1)"}
