@@ -74,16 +74,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    expanded_product_id =
-      case Integer.parse(id) do
-        {product_id, ""} -> product_id
-        _other -> nil
-      end
+    product = Marketplaces.get_product!(id)
 
     socket
     |> assign(:page_title, gettext("Edit Product"))
-    |> assign(:expanded_product_id, expanded_product_id)
-    |> assign(:product, Marketplaces.get_product!(id))
+    |> assign(:expanded_product_id, product.id)
+    |> assign(:product, product)
   end
 
   defp apply_action(socket, :new, _params) do

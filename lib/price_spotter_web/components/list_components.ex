@@ -123,7 +123,7 @@ defmodule PriceSpotterWeb.ListComponents do
   attr :id, :string, required: true
   attr :expanded, :boolean, required: true
   attr :toggle_event, :string, default: "toggle_expand"
-  attr :toggle_key, :string, required: true
+  attr :toggle_key, :any, required: true
   attr :toggle_patch, :any, default: nil
   attr :content_class, :string, default: nil
 

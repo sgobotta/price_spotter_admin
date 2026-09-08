@@ -225,6 +225,7 @@
                     :if={product.supplier_url != nil}
                     href={product.supplier_url}
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
                   >
                     <%= gettext("Supplier page") %>
@@ -275,7 +276,7 @@
       title={@page_title}
       action={@live_action}
       product={@product}
-      patch={~p"/admin/marketplaces/products"}
+      patch={products_index_path(@meta)}
     />
   </.modal>
 </div>
