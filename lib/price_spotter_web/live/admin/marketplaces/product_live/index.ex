@@ -74,20 +74,29 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    expanded_product_id =
+      case Integer.parse(id) do
+        {product_id, ""} -> product_id
+        _other -> nil
+      end
+
     socket
     |> assign(:page_title, gettext("Edit Product"))
+    |> assign(:expanded_product_id, expanded_product_id)
     |> assign(:product, Marketplaces.get_product!(id))
   end
 
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, gettext("New Product"))
+    |> assign(:expanded_product_id, nil)
     |> assign(:product, %Product{})
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, gettext("Listing Products"))
+    |> assign(:expanded_product_id, nil)
     |> assign(:product, nil)
   end
 
@@ -213,6 +222,30 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   defp can_edit_products?(user), do: Accounts.can_edit_products?(user)
   defp can_delete_products?(user), do: Accounts.can_edit_products?(user)
+
+  defp expanded_product?(expanded_product_id, product_id),
+    do: expanded_product_id == product_id
+
+  defp products_index_path(meta) do
+    Flop.Phoenix.build_path(~p"/admin/marketplaces/products", meta.flop,
+      backend: meta.backend
+    )
+  end
+
+  defp product_edit_path(product_id, meta) do
+    Flop.Phoenix.build_path(
+      ~p"/admin/marketplaces/products/#{product_id}/edit",
+      meta.flop,
+      backend: meta.backend
+    )
+  end
+
+  defp toggle_expand_path(product_id, expanded_product_id, meta) do
+    case expanded_product?(expanded_product_id, product_id) do
+      true -> products_index_path(meta)
+      false -> product_edit_path(product_id, meta)
+    end
+  end
 
   defp render_header_action(assigns) do
     ~H"""

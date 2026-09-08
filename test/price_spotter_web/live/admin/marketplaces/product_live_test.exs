@@ -86,12 +86,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ "some category"
     end
 
-    @tag :wip
     test "updates product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
       assert index_live
-             |> element("a#products-edit-#{product.id}")
+             |> element("#products-#{product.id}-toggle-expand")
              |> render_click() =~
                gettext("Edit Product")
 
