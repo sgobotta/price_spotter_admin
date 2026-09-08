@@ -7,51 +7,60 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <.header>
+      <.header :if={@variant != :inline}>
         <%= @title %>
         <:subtitle>
           <%= gettext("Use this form to manage product records in your database.") %>
         </:subtitle>
       </.header>
 
-      <.simple_form
+      <.form
         for={@form}
         id="product-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:category]} type="text" label={gettext("Category")} />
-        <.input field={@form[:img_url]} type="text" label={gettext("Img url")} />
-        <.input field={@form[:ean]} type="number" label={gettext("EAN")} />
-        <.input
-          field={@form[:internal_id]}
-          type="text"
-          label={gettext("Internal id")}
-        />
-        <.input
-          field={@form[:supplier_name]}
-          type="text"
-          label={gettext("Supplier name")}
-        />
-        <.input field={@form[:name]} type="text" label={gettext("Name")} />
-        <.input
-          field={@form[:price]}
-          type="number"
-          label={gettext("Price")}
-          step="any"
-        />
-        <.input
-          field={@form[:supplier_url]}
-          type="text"
-          label={gettext("Supplier url")}
-        />
-        <:actions>
+        <div class={fields_class(@variant)}>
+          <.input field={@form[:name]} type="text" label={gettext("Name")} />
+          <.input
+            field={@form[:price]}
+            type="number"
+            label={gettext("Price")}
+            step="any"
+          />
+          <.input field={@form[:category]} type="text" label={gettext("Category")} />
+          <.input
+            field={@form[:supplier_name]}
+            type="text"
+            label={gettext("Supplier name")}
+          />
+          <.input field={@form[:ean]} type="number" label={gettext("EAN")} />
+          <.input
+            field={@form[:internal_id]}
+            type="text"
+            label={gettext("Internal id")}
+          />
+          <.input
+            field={@form[:img_url]}
+            type="text"
+            label={gettext("Img url")}
+            container_class={span_class(@variant)}
+          />
+          <.input
+            field={@form[:supplier_url]}
+            type="text"
+            label={gettext("Supplier url")}
+            container_class={span_class(@variant)}
+          />
+        </div>
+
+        <div class={actions_class(@variant)}>
           <.button phx-disable-with={gettext("Saving...")}>
             <%= gettext("Save Product") %>
           </.button>
-        </:actions>
-      </.simple_form>
+        </div>
+      </.form>
     </div>
     """
   end
@@ -63,6 +72,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
+     |> assign_new(:variant, fn -> :modal end)
      |> assign_form(changeset)}
   end
 
@@ -115,4 +125,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  defp fields_class(:inline), do: "grid grid-cols-1 gap-3 sm:grid-cols-2"
+  defp fields_class(_variant), do: "mt-2 space-y-8"
+
+  defp actions_class(:inline), do: "mt-4 flex items-center justify-end"
+  defp actions_class(_variant), do: "mt-6 flex items-center justify-end"
+
+  defp span_class(:inline), do: "sm:col-span-2"
+  defp span_class(_variant), do: ""
 end

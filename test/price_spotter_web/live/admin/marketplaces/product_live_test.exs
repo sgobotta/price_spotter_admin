@@ -104,7 +104,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
         ~p"/admin/marketplaces/products/#{product}/edit"
       )
 
-      assert html =~ gettext("Edit Product")
+      assert html =~ gettext("Show Product")
       assert has_element?(index_live, "#products-edit-form-#{product.id}")
       assert has_element?(index_live, "#product-form")
 
