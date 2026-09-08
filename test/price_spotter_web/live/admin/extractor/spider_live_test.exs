@@ -4,7 +4,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
   import Phoenix.LiveViewTest
   import PriceSpotterWeb.Gettext
 
+  alias Decimal, as: D
   alias PriceSpotter.Extractor.FakeHttpAdapter
+  alias PriceSpotter.Marketplaces.Product
+  alias PriceSpotter.Repo
 
   setup do
     on_exit(fn ->
@@ -19,6 +22,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       %{
         "id" => "1",
         "name" => "coto-by-ean",
+        "type" => "by_ean",
         "cron" => "*/5 * * * *",
         "active" => true,
         "next_run_time" => "2026-09-06T18:45:00-03:00",
@@ -48,6 +52,30 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
   describe "as an admin" do
     setup [:register_and_log_in_admin]
+
+    setup do
+      Repo.insert!(%Product{
+        ean: "7790070418161",
+        category: "beverages",
+        img_url: "https://example.com/1.jpg",
+        internal_id: "known-1",
+        supplier_name: "coto",
+        name: "Known Product 1",
+        price: D.new("1.0")
+      })
+
+      Repo.insert!(%Product{
+        ean: "7790742307279",
+        category: "beverages",
+        img_url: "https://example.com/2.jpg",
+        internal_id: "known-2",
+        supplier_name: "coto",
+        name: "Known Product 2",
+        price: D.new("2.0")
+      })
+
+      :ok
+    end
 
     test "lists spiders with their schedule and active state", %{conn: conn} do
       stub_list([spider_json(%{})])
@@ -104,7 +132,11 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       conn: conn
     } do
       stub_list([
-        spider_json(%{"name" => "yaguar", "supports_ean_override" => false})
+        spider_json(%{
+          "name" => "yaguar",
+          "type" => "by_keyword",
+          "supports_ean_override" => false
+        })
       ])
 
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
@@ -193,7 +225,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       view
       |> form("#spiders-coto-by-ean-eans-form", %{
-        "eans" => "7790070418161\n7790742307279"
+        "eans" => "7790070418161,\n7790742307279"
       })
       |> render_change()
 
@@ -204,6 +236,56 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       assert html =~ gettext("Dry run")
       assert html =~ "2 EANs"
+    end
+
+    test "saves a normalized EAN configuration for by_ean spiders", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-eans-form", %{
+          "eans" => "7790070418161, 7790742307279\n7790070418161"
+        })
+        |> render_submit()
+
+      assert html =~ "EAN configuration saved"
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{
+                 "dry_run" => false,
+                 "eans" => ["7790070418161", "7790742307279"]
+               }
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      view
+      |> element("#spiders-coto-by-ean-run")
+      |> render_click()
+    end
+
+    test "renders unknown EAN validation errors when saving", %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-eans-form", %{
+          "eans" => "7790070418161,99999999"
+        })
+        |> render_submit()
+
+      assert html =~ "Unknown EANs: 99999999"
     end
 
     test "triggers a plain run with no eans when the field is left blank", %{

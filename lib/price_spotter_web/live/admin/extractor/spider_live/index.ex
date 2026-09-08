@@ -12,10 +12,14 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     socket =
       case Extractor.list_spiders() do
         {:ok, spiders} ->
-          assign(socket, spiders: spiders, load_error: nil)
+          assign(socket,
+            spiders: spiders,
+            eans_drafts: eans_drafts_from_spiders(spiders),
+            load_error: nil
+          )
 
         {:error, %{message: message}} ->
-          assign(socket, spiders: [], load_error: message)
+          assign(socket, spiders: [], eans_drafts: %{}, load_error: message)
       end
 
     {:ok,
@@ -24,7 +28,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
        page_title: gettext("Extractors"),
        active_run: nil,
        log_seq: 0,
-       eans_drafts: %{},
+       eans_errors: %{},
        expanded: ExpandableList.new()
      )
      |> stream(:run_log, [])}
@@ -39,7 +43,37 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   @impl true
   def handle_event("update_eans", %{"key" => key, "eans" => eans}, socket) do
-    {:noreply, update(socket, :eans_drafts, &Map.put(&1, key, eans))}
+    {:noreply,
+     socket
+     |> update(:eans_drafts, &Map.put(&1, key, eans))
+     |> update(:eans_errors, &Map.delete(&1, key))}
+  end
+
+  @impl true
+  def handle_event("save_eans", %{"key" => key, "eans" => eans}, socket) do
+    case find_spider(socket.assigns.spiders, key) do
+      nil ->
+        {:noreply, socket}
+
+      spider ->
+        case Extractor.save_input_config(spider, eans) do
+          {:ok, %{eans: normalized_eans}} ->
+            {:noreply,
+             socket
+             |> update(
+               :eans_drafts,
+               &Map.put(&1, key, Enum.join(normalized_eans, "\n"))
+             )
+             |> update(:eans_errors, &Map.delete(&1, key))
+             |> put_flash(:info, gettext("EAN configuration saved"))}
+
+          {:error, %{details: details}} ->
+            {:noreply,
+             socket
+             |> update(:eans_drafts, &Map.put(&1, key, eans))
+             |> update(:eans_errors, &Map.put(&1, key, details))}
+        end
+    end
   end
 
   @impl true
@@ -65,7 +99,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   @impl true
   def handle_event("run", %{"key" => key, "dry_run" => dry_run}, socket) do
     dry_run? = dry_run == "true"
-    eans = parse_eans(Map.get(socket.assigns.eans_drafts, key))
+    eans = Extractor.parse_eans(Map.get(socket.assigns.eans_drafts, key))
 
     case Extractor.trigger_run(key, dry_run: dry_run?, eans: eans) do
       {:ok,
@@ -143,16 +177,14 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     {:noreply, put_flash(socket, :error, message)}
   end
 
-  defp parse_eans(nil), do: []
-
-  defp parse_eans(raw) do
-    raw
-    |> String.split(~r/\r\n|\r|\n/)
-    |> Enum.map(&String.trim/1)
-    |> Enum.reject(&(&1 == ""))
-  end
-
   defp find_spider(spiders, key), do: Enum.find(spiders, &(&1.name == key))
+
+  defp eans_drafts_from_spiders(spiders) do
+    Map.new(spiders, fn spider ->
+      eans = get_in(spider.input_config || %{}, ["eans"]) || []
+      {spider.name, Enum.join(eans, "\n")}
+    end)
+  end
 
   defp update_spider(socket, %Spider{name: name} = updated) do
     spiders =
