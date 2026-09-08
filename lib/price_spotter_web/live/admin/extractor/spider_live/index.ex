@@ -144,6 +144,35 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   end
 
   @impl true
+  def handle_event("stop_run", _params, %{assigns: %{active_run: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("stop_run", _params, socket) do
+    %{run_id: run_id} = socket.assigns.active_run
+
+    case Extractor.stop_run(run_id) do
+      {:ok, _resp} ->
+        {:noreply,
+         socket
+         |> assign(
+           :active_run,
+           Map.put(socket.assigns.active_run, :status, :stopping)
+         )
+         |> put_flash(
+           :info,
+           gettext(
+             "Stop requested. Waiting for the extractor to finish the run."
+           )
+         )}
+
+      {:error, %{message: message}} ->
+        {:noreply, put_flash(socket, :error, message)}
+    end
+  end
+
+  @impl true
   def handle_info({:extractor_run_event, run_id, msg}, socket) do
     case socket.assigns.active_run do
       %{run_id: ^run_id} = active_run ->
@@ -151,7 +180,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
         updated_run = %{
           active_run
-          | status: if(status == "finished", do: :finished, else: :running),
+          | status: run_status(status),
             stats: msg["stats"]
         }
 
@@ -199,7 +228,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     assign(socket, :spiders, spiders)
   end
 
-  defp run_log_line(%{status: "finished"}), do: gettext("Finished")
+  defp run_log_line(%{status: status})
+       when status in ["finished", "stopped", "cancelled", "canceled"],
+       do: gettext("Finished")
+
   defp run_log_line(%{item: nil, stats: stats}), do: format_stats(stats)
 
   defp run_log_line(%{item: item, stats: stats}),
@@ -209,4 +241,12 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   defp format_stats(stats),
     do: stats |> Enum.map_join(", ", fn {k, v} -> "#{k}: #{v}" end)
+
+  defp run_status(status)
+       when status in ["finished", "stopped", "cancelled", "canceled"],
+       do: :finished
+
+  defp run_status("stopping"), do: :stopping
+
+  defp run_status(_status), do: :running
 end

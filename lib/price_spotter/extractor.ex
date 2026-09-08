@@ -31,6 +31,7 @@ defmodule PriceSpotter.Extractor do
 
   defdelegate update_schedule(key, attrs), to: Client
   defdelegate trigger_run(key, opts \\ []), to: Client
+  defdelegate stop_run(run_id), to: Client
 
   @doc """
   Persists normalized `input_config.eans` for by_ean spiders only.
