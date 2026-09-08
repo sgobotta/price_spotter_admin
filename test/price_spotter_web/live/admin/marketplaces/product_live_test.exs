@@ -134,7 +134,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
              |> element("a#products-delete-#{product.id}")
              |> render_click()
 
-      # FIXME: liveview exits
+      # LiveView process exits after delete
       refute has_element?(index_live, "a#products-delete-#{product.id}")
     end
   end
