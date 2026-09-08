@@ -66,6 +66,29 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ product.category
     end
 
+    test "does not render unassigned category chip and shows dash for missing price", %{
+      conn: conn,
+      user: user
+    } do
+      product =
+        product_fixture(%{
+          category: nil,
+          price: nil
+        })
+
+      Marketplaces.create_user_supplier(%{
+        user_id: user.id,
+        supplier_id: product.supplier_id,
+        role: :maintainer
+      })
+
+      {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/products")
+
+      refute html =~ gettext("Unassigned")
+      refute html =~ gettext("No price yet")
+      assert html =~ "–"
+    end
+
     test "saves new product", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
