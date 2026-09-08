@@ -138,8 +138,8 @@ defmodule PriceSpotter.Extractor do
 
   defp validate_ean_formats(eans) do
     Enum.filter(eans, fn ean ->
-      String.match?(ean, ~r/^\d+$/) == false ||
-        String.length(ean) in @ean_lengths == false
+      not String.match?(ean, ~r/^\d+$/) or
+        String.length(ean) not in @ean_lengths
     end)
   end
 
