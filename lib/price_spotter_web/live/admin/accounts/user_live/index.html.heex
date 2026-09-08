@@ -37,34 +37,43 @@
             variant={if user.role == :admin, do: :info, else: :neutral}
           />
         </:meta>
+        <:actions>
+          <.button
+            id={"users-delete-#{user.id}"}
+            type="button"
+            phx-click="prompt_delete"
+            phx-value-id={user.id}
+            class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
+          >
+            <.icon name="hero-trash-solid" class="h-4 w-4" />
+            <span class="sr-only"><%= gettext("Delete") %></span>
+          </.button>
+        </:actions>
         <:content>
-          <div class="flex items-center justify-end gap-2">
-            <.link
-              navigate={~p"/admin/accounts/users/#{user}"}
-              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          <div class="space-y-6">
+            <.live_component
+              module={PriceSpotterWeb.Admin.Accounts.UserLive.FormComponent}
+              id={"user-edit-#{user.id}"}
+              title={gettext("Edit User")}
+              action={:edit}
+              user={user}
+              patch={~p"/admin/accounts/users"}
+              form_id={"user-form-#{user.id}"}
+            />
+
+            <div
+              :if={@current_user.role == :admin}
+              class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700"
             >
-              <%= gettext("Show") %>
-            </.link>
-            <.link
-              id={"users-edit-#{user.id}"}
-              patch={~p"/admin/accounts/users/#{user}/edit"}
-              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-            >
-              <%= gettext("Edit") %>
-            </.link>
-            <.button
-              id={"users-delete-#{user.id}"}
-              phx-click={
-                JS.push("delete", value: %{id: user.id})
-                |> hide("#users-#{user.id}")
-              }
-              data-confirm={
-                gettext("Delete user \"%{name}\"?", name: user.email)
-              }
-              class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
-            >
-              <%= gettext("Delete") %>
-            </.button>
+              <.live_component
+                module={
+                  PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent
+                }
+                id={"customer-access-#{user.id}"}
+                user={user}
+                form_id={"customer-access-form-#{user.id}"}
+              />
+            </div>
           </div>
         </:content>
       </.expandable_list_row>
@@ -80,7 +89,7 @@
 <% end %>
 
 <.modal
-  :if={@live_action in [:new, :edit]}
+  :if={@live_action == :new}
   id="user-modal"
   show
   on_cancel={JS.patch(~p"/admin/accounts/users")}
@@ -93,4 +102,38 @@
     user={@user}
     patch={~p"/admin/accounts/users"}
   />
+</.modal>
+
+<.modal
+  :if={@delete_user != nil}
+  id="delete-user-modal"
+  show
+  on_cancel={JS.push("cancel_delete")}
+>
+  <div class="space-y-6">
+    <.header>
+      <%= gettext("Delete user") %>
+      <:subtitle>
+        <%= gettext("Delete user \"%{name}\"?", name: @delete_user.email) %>
+      </:subtitle>
+    </.header>
+
+    <div class="flex items-center justify-end gap-3">
+      <.button
+        type="button"
+        phx-click="cancel_delete"
+        class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+      >
+        <%= gettext("Cancel") %>
+      </.button>
+      <.button
+        type="button"
+        phx-click="delete"
+        phx-value-id={@delete_user.id}
+        class="bg-rose-600 text-zinc-100 hover:bg-rose-500"
+      >
+        <%= gettext("Delete") %>
+      </.button>
+    </div>
+  </div>
 </.modal>

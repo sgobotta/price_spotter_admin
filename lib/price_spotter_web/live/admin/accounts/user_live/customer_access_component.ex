@@ -6,6 +6,8 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
 
   @impl true
   def render(assigns) do
+    assigns = assign_new(assigns, :form_id, fn -> "customer-access-form" end)
+
     ~H"""
     <div>
       <.header>
@@ -51,49 +53,57 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
       </p>
 
       <form
-        id="customer-access-form"
+        id={@form_id}
         phx-submit="save"
         phx-target={@myself}
-        class="mt-6 space-y-2"
+        class="mt-6 space-y-3"
       >
-        <div :for={row <- @draft_rows} class="flex gap-2 items-start">
-          <.input
-            type="select"
-            name={"rows[#{row.ref}][supplier_id]"}
-            id={"row-#{row.ref}-supplier"}
-            value={row.supplier_id}
-            label={gettext("Supplier")}
-            prompt={gettext("Choose a supplier")}
-            options={@supplier_options}
-            errors={row_errors(@row_errors, row.ref)}
-          />
-          <.input
-            type="select"
-            name={"rows[#{row.ref}][role]"}
-            id={"row-#{row.ref}-role"}
-            value={row.role}
-            label={gettext("Role")}
-            prompt={gettext("Choose a role")}
-            options={Ecto.Enum.values(UserSupplier, :role)}
-          />
-          <button
-            :if={length(@draft_rows) > 1}
-            type="button"
-            phx-click="remove_row"
-            phx-value-ref={row.ref}
-            phx-target={@myself}
-            class="mt-7 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-          >
-            <.icon name="hero-x-mark" class="h-5 w-5" />
-          </button>
+        <div
+          :for={row <- @draft_rows}
+          class="rounded-lg border border-zinc-200 bg-zinc-100 p-3 dark:border-zinc-700 dark:bg-zinc-800/40"
+        >
+          <div class="flex items-start gap-2">
+            <.input
+              type="select"
+              name={"rows[#{row.ref}][supplier_id]"}
+              id={"row-#{row.ref}-supplier"}
+              value={row.supplier_id}
+              label={gettext("Supplier")}
+              prompt={gettext("Choose a supplier")}
+              options={@supplier_options}
+              errors={row_errors(@row_errors, row.ref)}
+              container_class="flex-1"
+            />
+            <.input
+              type="select"
+              name={"rows[#{row.ref}][role]"}
+              id={"row-#{row.ref}-role"}
+              value={row.role}
+              label={gettext("Role")}
+              prompt={gettext("Choose a role")}
+              options={Ecto.Enum.values(UserSupplier, :role)}
+              container_class="flex-1"
+            />
+            <button
+              :if={length(@draft_rows) > 1}
+              type="button"
+              phx-click="remove_row"
+              phx-value-ref={row.ref}
+              phx-target={@myself}
+              class="mt-7 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+            >
+              <.icon name="hero-x-mark" class="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         <button
           type="button"
           phx-click="add_row"
           phx-target={@myself}
-          class="text-sm font-semibold text-brand hover:underline"
+          class="inline-flex items-center gap-2 rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-700 hover:border-zinc-400 hover:bg-zinc-200 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
         >
+          <.icon name="hero-plus-solid" class="h-4 w-4" />
           <%= gettext("+ Add another") %>
         </button>
 
