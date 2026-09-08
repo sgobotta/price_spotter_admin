@@ -128,6 +128,7 @@ defmodule PriceSpotterWeb.UserSettingsLive do
             name="current_password"
             type="password"
             label={gettext("Current password")}
+            value=""
             errors={@password_confirmation_errors}
             required
           />
