@@ -75,14 +75,6 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
              socket
              |> update(:eans_drafts, &Map.put(&1, key, eans))
              |> update(:eans_errors, &Map.put(&1, key, details))}
-
-          {:error, _reason} ->
-            {:noreply,
-             put_flash(
-               socket,
-               :error,
-               gettext("Could not save EAN configuration")
-             )}
         end
     end
   end
