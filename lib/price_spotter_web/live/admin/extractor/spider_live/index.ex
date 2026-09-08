@@ -228,7 +228,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     assign(socket, :spiders, spiders)
   end
 
-  defp run_log_line(%{status: "finished"}), do: gettext("Finished")
+  defp run_log_line(%{status: status})
+       when status in ["finished", "stopped", "cancelled", "canceled"],
+       do: gettext("Finished")
+
   defp run_log_line(%{item: nil, stats: stats}), do: format_stats(stats)
 
   defp run_log_line(%{item: item, stats: stats}),
@@ -242,6 +245,8 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   defp run_status(status)
        when status in ["finished", "stopped", "cancelled", "canceled"],
        do: :finished
+
+  defp run_status("stopping"), do: :stopping
 
   defp run_status(_status), do: :running
 end
