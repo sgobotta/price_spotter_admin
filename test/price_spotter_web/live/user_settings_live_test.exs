@@ -13,8 +13,9 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
         |> log_in_user(admin_fixture())
         |> live(~p"/users/settings")
 
-      assert html =~ gettext("Change Email")
-      assert html =~ gettext("Change Password")
+      refute html =~ gettext("Change Email")
+      refute html =~ gettext("Change Password")
+      assert html =~ gettext("Save")
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
@@ -67,7 +68,6 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
           "user" => %{"email" => "with spaces"}
         })
 
-      assert result =~ gettext("Change Email")
       assert result =~ dgettext("errors", "must have the @ sign and no spaces")
     end
 
@@ -85,7 +85,6 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
         })
         |> render_submit()
 
-      assert result =~ gettext("Change Email")
       assert result =~ gettext("did not change")
     end
   end
@@ -108,7 +107,6 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
 
       form =
         form(lv, "#password_form", %{
-          "current_password" => password,
           "user" => %{
             "email" => user.email,
             "password" => new_password,
@@ -116,7 +114,11 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
           }
         })
 
-      render_submit(form)
+      assert render_submit(form) =~ gettext("Confirm password change")
+
+      lv
+      |> form("#password_confirmation_form", %{"current_password" => password})
+      |> render_submit()
 
       new_password_conn = follow_trigger_action(form, conn)
 
@@ -145,7 +147,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
           }
         })
 
-      assert result =~ gettext("Change Password")
+      assert result =~ gettext("Save")
 
       assert result =~
                dgettext(
@@ -165,7 +167,6 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
       result =
         lv
         |> form("#password_form", %{
-          "current_password" => "invalid",
           "user" => %{
             "password" => "too short",
             "password_confirmation" => "does not match"
@@ -174,7 +175,7 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
         |> render_submit()
 
       # assert result =~ "debe tener al menos 12 caracteres"
-      assert result =~ gettext("Change Password")
+      assert result =~ gettext("Save")
 
       assert result =~
                dgettext(
@@ -185,6 +186,34 @@ defmodule PriceSpotterWeb.UserSettingsLiveTest do
                )
 
       assert result =~ gettext("does not match password")
+    end
+
+    test "renders errors with invalid current password confirmation", %{
+      conn: conn,
+      user: user
+    } do
+      new_password = valid_user_password()
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      lv
+      |> form("#password_form", %{
+        "user" => %{
+          "email" => user.email,
+          "password" => new_password,
+          "password_confirmation" => new_password
+        }
+      })
+      |> render_submit()
+
+      result =
+        lv
+        |> form("#password_confirmation_form", %{
+          "current_password" => "invalid"
+        })
+        |> render_submit()
+
+      assert result =~ gettext("Confirm password change")
+      assert result =~ dgettext("errors", "is not valid")
     end
   end
 
