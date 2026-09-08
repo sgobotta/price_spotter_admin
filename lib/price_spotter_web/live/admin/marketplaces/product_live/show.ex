@@ -70,33 +70,27 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_info(:update_chart, socket) do
-    with %Marketplaces.Product{
-           name: product_name,
-           id: product_id
-         } <- socket.assigns.product,
-         {:ok, history} <-
-           Marketplaces.fetch_prices_history(
-             product_id,
-             socket.assigns.interval
-           ) do
-      socket = push_event(socket, "reset-dataset", %{label: product_name})
+    case socket.assigns.product do
+      %Marketplaces.Product{
+        ean: ean
+      } = product ->
+        products =
+          case ean do
+            nil -> [product]
+            _ean -> Marketplaces.list_products_by_ean(ean)
+          end
 
-      socket =
-        Enum.reduce(build_dataset(product_name, history), socket, fn data,
-                                                                     acc ->
-          push_event(acc, "new-point", data)
-        end)
+        chart_data = build_chart_data(products, socket.assigns.interval)
 
-      {:noreply, socket}
-    else
+        socket = push_event(socket, "set-chart-data", chart_data)
+
+        {:noreply, socket}
+
       _error ->
         {:noreply,
-         socket
-         |> push_event("reset-dataset", %{label: socket.assigns.product.name})
-         |> push_event("new-point", %{
-           data_label: get_datetime_label(DateTime.utc_now()),
-           label: socket.assigns.product.name,
-           value: 0
+         push_event(socket, "set-chart-data", %{
+           labels: [],
+           datasets: []
          })}
     end
   end
@@ -110,49 +104,94 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     """
   end
 
-  @spec build_dataset(String.t(), [
-          {NaiveDateTime.t(), Marketplaces.ProductPriceDocument.t()}
-        ]) :: [map()]
-  defp build_dataset(product_name, product_history) do
+  @spec build_chart_data([Marketplaces.Product.t()], Marketplaces.interval()) ::
+          map()
+  defp build_chart_data(products, interval) do
+    series =
+      Enum.map(products, fn %Marketplaces.Product{
+                              id: product_id,
+                              supplier_name: supplier_name
+                            } = product ->
+        history =
+          case Marketplaces.fetch_prices_history(product_id, interval) do
+            {:ok, fetched_history} -> fetched_history
+            :error -> []
+          end
+
+        %{
+          label: chart_series_label(product, supplier_name),
+          history: history
+        }
+      end)
+
+    labels =
+      series
+      |> Enum.flat_map(fn %{history: history} ->
+        Enum.map(history, fn {datetime, _price_doc} ->
+          get_timestamp(datetime)
+        end)
+      end)
+      |> Enum.uniq()
+      |> Enum.sort()
+
+    %{
+      labels: Enum.map(labels, &format_chart_label/1),
+      datasets: Enum.map(series, &build_dataset(&1, labels))
+    }
+  end
+
+  @spec build_dataset(map(), [integer()]) :: map()
+  defp build_dataset(%{history: history, label: label}, labels) do
+    price_by_timestamp =
+      Map.new(history, fn {datetime,
+                           %Marketplaces.ProductPriceDocument{price: price}} ->
+        {get_timestamp(datetime), price}
+      end)
+
     dataset_trend =
-      product_history
+      history
       |> Enum.map(fn {_ts, %Marketplaces.ProductPriceDocument{price: price}} ->
         price
       end)
       |> Enum.reverse()
-      |> get_dataset_trend
+      |> get_dataset_trend()
 
     {background_color, border_color} = get_chart_colors(dataset_trend)
 
-    Enum.map(product_history, fn {datetime,
-                                  %Marketplaces.ProductPriceDocument{
-                                    price: price
-                                  }} ->
-      %{
-        data_label: get_datetime_label(datetime),
-        label: product_name,
-        value: price,
-        background_color: background_color,
-        border_color: border_color
-      }
-    end)
+    %{
+      label: label,
+      data: Enum.map(labels, &Map.get(price_by_timestamp, &1)),
+      background_color: background_color,
+      border_color: border_color
+    }
   end
+
+  defp format_chart_label(timestamp),
+    do: timestamp |> DateTime.from_unix!(:millisecond) |> get_datetime_label()
 
   defp get_datetime_label(%DateTime{} = datetime),
     do: DatetimeUtils.human_readable_datetime(datetime, :shift_timezone)
 
+  defp get_timestamp(%DateTime{} = datetime),
+    do: DateTime.to_unix(datetime, :millisecond)
+
+  defp chart_series_label(%Marketplaces.Product{name: name}, supplier_name) do
+    case supplier_name do
+      nil -> name
+      _supplier_name -> "#{name} - #{supplier_name}"
+    end
+  end
+
   defp get_dataset_trend([]), do: :bullish
   defp get_dataset_trend([_price]), do: :bullish
 
-  defp get_dataset_trend([last_price, price | _rest])
-       when last_price == price do
-    :notrend
+  defp get_dataset_trend([last_price, price | _rest]) do
+    case Decimal.compare(last_price, price) do
+      :eq -> :notrend
+      :gt -> :bullish
+      :lt -> :bearish
+    end
   end
-
-  defp get_dataset_trend([last_price, price | _rest]) when last_price > price,
-    do: :bullish
-
-  defp get_dataset_trend(_price_history), do: :bearish
 
   defp get_chart_colors(:notrend),
     do: {"rgba(203, 213, 225, 1)", "rgba(100, 116, 139, 1)"}
