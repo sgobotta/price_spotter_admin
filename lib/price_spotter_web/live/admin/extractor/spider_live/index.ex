@@ -255,6 +255,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
      socket
      |> put_cron_error(key, message)}
   end
+
   defp find_spider(spiders, key), do: Enum.find(spiders, &(&1.name == key))
 
   defp eans_drafts_from_spiders(spiders) do
@@ -325,6 +326,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   defp run_log_line(%{status: status})
        when status in ["finished", "stopped", "cancelled", "canceled"],
        do: gettext("Finished")
+
   defp run_log_line(%{item: nil, stats: stats}), do: format_stats(stats)
 
   defp run_log_line(%{item: item, stats: stats}),
