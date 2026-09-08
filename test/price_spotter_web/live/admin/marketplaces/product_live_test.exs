@@ -82,11 +82,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
         role: :maintainer
       })
 
-      {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/products")
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+      row_html = index_live |> element("#products-#{product.id}") |> render()
 
-      refute html =~ gettext("Unassigned")
-      refute html =~ gettext("No price yet")
-      assert html =~ "–"
+      refute row_html =~ gettext("Unassigned")
+      refute row_html =~ gettext("No price yet")
+      assert row_html =~ "–"
     end
 
     test "saves new product", %{conn: conn} do
