@@ -105,6 +105,12 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   @impl true
   def handle_event("save_cron", %{"key" => key, "cron" => cron}, socket) do
+    # Persist the submitted value as the draft up front so the input keeps
+    # showing what the user tried even when the form is submitted without a
+    # preceding "preview_cron" change event. Otherwise an error re-render could
+    # fall back to the saved `spider.cron` while flagging the attempted value.
+    socket = update(socket, :cron_drafts, &Map.put(&1, key, cron))
+
     if String.trim(cron) == "" do
       {:noreply,
        socket
