@@ -4,7 +4,7 @@ defmodule PriceSpotter.Extractor.Exploration do
 
   Finds products with no EAN, gathers same-name reference products that *do*
   have an EAN, asks the LLM which references are the same product, and - after
-  re-enforcing the package size/unit hard constraint
+  re-checking the package size/unit hard constraint
   (`PriceSpotter.Extractor.PackageSize`) - upserts the survivors as a pending
   match-candidate set (`PriceSpotter.Extractor.upsert_candidate_set/1`) for
   admin review.
@@ -86,17 +86,28 @@ defmodule PriceSpotter.Extractor.Exploration do
   """
   @spec find_reference_products(Product.t(), run_opts()) :: [Product.t()]
   def find_reference_products(%Product{} = product, opts \\ []) do
-    threshold = opts[:similarity] || @default_similarity
+    threshold = normalize_threshold(opts[:similarity] || @default_similarity)
     limit = opts[:reference_limit] || @default_reference_limit
     name = product.name || ""
 
-    Product
-    |> where([p], p.id != ^product.id)
-    |> where([p], not is_nil(p.ean) and p.ean != "")
-    |> where([p], fragment("similarity(?, ?) > ?", p.name, ^name, ^threshold))
-    |> order_by([p], desc: fragment("similarity(?, ?)", p.name, ^name))
-    |> limit(^limit)
-    |> Repo.all()
+    # Align pg_trgm's operator threshold with ours (SET LOCAL is
+    # transaction-scoped, so it never leaks onto the pooled connection) so the
+    # `name % ^name` filter is served by the products_name_trgm GIN index
+    # instead of scanning every product.
+    {:ok, results} =
+      Repo.transaction(fn ->
+        Repo.query!("SET LOCAL pg_trgm.similarity_threshold = #{threshold}")
+
+        Product
+        |> where([p], p.id != ^product.id)
+        |> where([p], not is_nil(p.ean) and p.ean != "")
+        |> where([p], fragment("? % ?", p.name, ^name))
+        |> order_by([p], desc: fragment("similarity(?, ?)", p.name, ^name))
+        |> limit(^limit)
+        |> Repo.all()
+      end)
+
+    results
   end
 
   @doc """
@@ -361,4 +372,14 @@ defmodule PriceSpotter.Extractor.Exploration do
 
   defp maybe_limit(query, limit) when is_integer(limit),
     do: limit(query, ^limit)
+
+  # Coerce the threshold to a float clamped to [0.0, 1.0] before it is
+  # interpolated into `SET LOCAL` (which does not take bind parameters), so a
+  # bad config value can't turn into arbitrary SQL.
+  defp normalize_threshold(value) when is_number(value) do
+    value
+    |> max(0.0)
+    |> min(1.0)
+    |> :erlang.float()
+  end
 end
