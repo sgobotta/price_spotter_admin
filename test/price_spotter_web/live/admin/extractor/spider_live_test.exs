@@ -50,6 +50,34 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
     |> String.contains?("grid-rows-[1fr]")
   end
 
+  defp submit_eans(view, key, eans) do
+    view
+    |> form("#spiders-#{key}-eans-form", %{"eans" => eans})
+    |> render_change()
+
+    view
+    |> element("#spiders-#{key}-save-eans")
+    |> render_click()
+  end
+
+  defp confirm_save_eans(view) do
+    view
+    |> element("#confirm-save-eans")
+    |> render_click()
+  end
+
+  defp confirm_toggle_active(view) do
+    view
+    |> element("#confirm-toggle-active")
+    |> render_click()
+  end
+
+  defp confirm_save_cron(view) do
+    view
+    |> element("#confirm-save-cron")
+    |> render_click()
+  end
+
   describe "as an admin" do
     setup [:register_and_log_in_admin]
 
@@ -100,7 +128,31 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       assert html =~ "spiders-coto-by-ean-cron-form"
       assert html =~ "spiders-coto-by-ean-toggle"
       assert html =~ "spiders-coto-by-ean-run"
+      assert html =~ gettext("Schedule")
+      assert html =~ gettext("Cron expression")
+      assert html =~ gettext("EAN codes")
+      assert html =~ gettext("Click to deactivate")
       assert html =~ "hero-chevron-up-solid"
+    end
+
+    test "toggles the activate tooltip when the spider is inactive", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{"active" => false})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "coto-by-ean")
+
+      assert html =~ gettext("Click to activate")
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-toggle")
+        |> render_click()
+
+      assert html =~ gettext("Activate extractor")
+
+      assert html =~
+               gettext("You are about to activate %{name}.", name: "coto-by-ean")
     end
 
     test "collapses an expanded row again", %{conn: conn} do
@@ -169,7 +221,41 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> element("#spiders-coto-by-ean-toggle")
         |> render_click()
 
+      assert html =~ "toggle-active-modal"
+      assert html =~ gettext("Deactivate extractor")
+
+      assert html =~
+               gettext("You are about to deactivate %{name}.",
+                 name: "coto-by-ean"
+               )
+
+      html = confirm_toggle_active(view)
       assert html =~ gettext("Inactive")
+    end
+
+    test "does not toggle active when the confirmation modal is closed", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :patch, _url, _headers, _body ->
+        flunk("closing the toggle modal should not call the extractor API")
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-toggle")
+        |> render_click()
+
+      assert html =~ "toggle-active-modal"
+      refute html =~ gettext("Inactive")
+
+      html = render_click(view, "cancel_toggle_active")
+
+      refute html =~ "toggle-active-modal"
+      assert html =~ gettext("Active")
     end
 
     test "saves an edited cron expression", %{conn: conn} do
@@ -187,8 +273,39 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "0 * * * *"})
         |> render_submit()
 
+      assert html =~ "save-cron-modal"
+      assert html =~ "Every hour"
+      assert html =~ "Every 5 minutes"
+      refute html =~ gettext("Schedule saved successfully.")
+
+      html = confirm_save_cron(view)
       assert html =~ "Every hour"
       assert html =~ gettext("Schedule saved successfully.")
+    end
+
+    test "does not save the cron expression when the confirmation modal is closed",
+         %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :patch, _url, _headers, _body ->
+        flunk("closing the cron modal should not call the extractor API")
+      end)
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "0 * * * *"})
+        |> render_submit()
+
+      assert html =~ "save-cron-modal"
+      refute html =~ gettext("Schedule saved successfully.")
+
+      html = render_click(view, "cancel_save_cron")
+
+      refute html =~ "save-cron-modal"
+      assert html =~ "Every 5 minutes"
+      refute html =~ gettext("Schedule saved successfully.")
     end
 
     test "shows a live preview while editing the cron expression", %{conn: conn} do
@@ -202,6 +319,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> render_change()
 
       assert html =~ "At 09:00, only on Monday"
+      assert html =~ "Every 5 minutes"
     end
 
     test "gently warns when the cron preview is invalid", %{conn: conn} do
@@ -269,10 +387,11 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         {:ok, 400, %{"error" => "cron does not parse"}}
       end)
 
-      html =
-        view
-        |> element("#spiders-coto-by-ean-toggle")
-        |> render_click()
+      view
+      |> element("#spiders-coto-by-ean-toggle")
+      |> render_click()
+
+      html = confirm_toggle_active(view)
 
       assert html =~ "cron does not parse"
     end
@@ -323,12 +442,24 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       expand(view, "coto-by-ean")
 
       html =
-        view
-        |> form("#spiders-coto-by-ean-eans-form", %{
-          "eans" => "7790070418161, 7790742307279\n7790070418161"
-        })
-        |> render_submit()
+        submit_eans(
+          view,
+          "coto-by-ean",
+          "7790070418161, 7790742307279\n7790070418161"
+        )
 
+      assert html =~ "save-eans-modal"
+
+      assert html =~
+               ngettext(
+                 "EAN about to be added",
+                 "EANs about to be added",
+                 2
+               )
+
+      refute html =~ gettext("EAN configuration saved")
+
+      html = confirm_save_eans(view)
       assert html =~ gettext("EAN configuration saved")
 
       FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
@@ -355,15 +486,30 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
       expand(view, "coto-by-ean")
 
-      html =
-        view
-        |> form("#spiders-coto-by-ean-eans-form", %{
-          "eans" => "8445291121867,7891000389300"
-        })
-        |> render_submit()
+      submit_eans(view, "coto-by-ean", "8445291121867,7891000389300")
+      html = confirm_save_eans(view)
 
       assert html =~ gettext("EAN configuration saved")
       refute html =~ "Unknown EANs"
+    end
+
+    test "does not save EANs when the confirmation modal is closed", %{
+      conn: conn
+    } do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html = submit_eans(view, "coto-by-ean", "7790070418161")
+
+      assert html =~ "save-eans-modal"
+      assert html =~ gettext("EAN about to be added")
+      refute html =~ gettext("EAN configuration saved")
+
+      html = render_click(view, "cancel_save_eans")
+
+      refute html =~ "save-eans-modal"
+      refute html =~ gettext("EAN configuration saved")
     end
 
     test "triggers a plain run with no eans when the field is left blank", %{

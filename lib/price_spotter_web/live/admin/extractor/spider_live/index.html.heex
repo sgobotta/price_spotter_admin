@@ -24,7 +24,7 @@
         <.entity_avatar label={spider.name} />
       </:leading>
       <:title><%= spider.name %></:title>
-      <:subtitle><%= cron_summary(spider, @cron_previews) %></:subtitle>
+      <:subtitle><%= saved_cron_summary(spider) %></:subtitle>
       <:actions>
         <span
           id={"spiders-#{spider.name}-status-light"}
@@ -41,123 +41,198 @@
         />
       </:actions>
       <:content>
-        <div class="flex flex-wrap items-center gap-2">
-          <form
-            id={"spiders-#{spider.name}-cron-form"}
-            phx-change="preview_cron"
-            phx-submit="save_cron"
-            class="flex items-start gap-2"
-          >
-            <input type="hidden" name="key" value={spider.name} />
-            <.input
-              type="text"
-              name="cron"
-              value={Map.get(@cron_drafts, spider.name, spider.cron)}
-              errors={
-                case Map.get(@cron_errors, spider.name) do
-                  nil -> []
-                  message -> [message]
-                end
-              }
-              container_class="w-36"
-            />
-            <.button
-              type="submit"
-              class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-start">
+          <div class="min-w-0 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900">
+            <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+              <%= gettext("Schedule") %>
+            </h3>
+            <p class="mt-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+              <%= gettext("Cron expression") %>
+            </p>
+
+            <form
+              id={"spiders-#{spider.name}-cron-form"}
+              phx-change="preview_cron"
+              phx-submit="prompt_save_cron"
+              class="mt-1"
             >
-              <%= gettext("Save") %>
+              <input type="hidden" name="key" value={spider.name} />
+              <div class="flex items-start gap-2">
+                <.input
+                  type="text"
+                  name="cron"
+                  value={Map.get(@cron_drafts, spider.name, spider.cron)}
+                  errors={[]}
+                  container_class={
+                    if Map.get(@cron_errors, spider.name) do
+                      "w-36 [&_input]:border-rose-400 [&_input]:focus:border-rose-400"
+                    else
+                      "w-36"
+                    end
+                  }
+                />
+                <.button
+                  type="submit"
+                  class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                >
+                  <%= gettext("Save") %>
+                </.button>
+                <.button
+                  id={"spiders-#{spider.name}-toggle"}
+                  type="button"
+                  phx-click="prompt_toggle_active"
+                  phx-value-key={spider.name}
+                  title={toggle_tooltip(spider)}
+                  aria-label={toggle_tooltip(spider)}
+                  class={toggle_button_class(spider)}
+                >
+                  <%= if spider.active,
+                    do: gettext("Active"),
+                    else: gettext("Inactive") %>
+                </.button>
+              </div>
+            </form>
+
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              <%= cron_summary(spider, @cron_previews) %>
+            </p>
+            <p
+              :if={message = Map.get(@cron_errors, spider.name)}
+              class="mt-1 flex min-w-0 gap-2 text-sm leading-6 text-rose-600 dark:text-rose-300"
+            >
+              <.icon
+                name="hero-exclamation-circle-mini"
+                class="mt-0.5 h-5 w-5 flex-none"
+              />
+              <span class="min-w-0 flex-1 break-words"><%= message %></span>
+            </p>
+          </div>
+
+          <div
+            :if={Spider.ean_configurable?(spider)}
+            class="min-w-0 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900"
+          >
+            <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+              <%= gettext("EAN codes") %>
+            </h3>
+
+            <form
+              id={"spiders-#{spider.name}-eans-form"}
+              phx-change="update_eans"
+              phx-submit="prompt_save_eans"
+              class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start"
+            >
+              <input type="hidden" name="key" value={spider.name} />
+              <div class="w-[20ch] max-w-[16rem] shrink-0 font-mono">
+                <.input
+                  type="textarea"
+                  name="eans"
+                  value={Map.get(@eans_drafts, spider.name, "")}
+                  placeholder={gettext("One EAN per line or comma separated")}
+                  rows="8"
+                />
+                <p
+                  :for={
+                    invalid_ean <-
+                      Map.get(
+                        Map.get(@eans_errors, spider.name, %{}),
+                        :invalid_eans,
+                        []
+                      )
+                  }
+                  class="mt-1 font-sans text-sm text-rose-600 dark:text-rose-300"
+                >
+                  <%= ean_format_error_message(invalid_ean) %>
+                </p>
+              </div>
+
+              <div class="flex flex-col items-start gap-2">
+                <.button
+                  id={"spiders-#{spider.name}-save-eans"}
+                  type="button"
+                  phx-click="prompt_save_eans"
+                  phx-value-key={spider.name}
+                  class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                >
+                  <%= gettext("Save EANs") %>
+                </.button>
+                <.button
+                  id={"spiders-#{spider.name}-run"}
+                  type="button"
+                  phx-click="run"
+                  phx-value-key={spider.name}
+                  phx-value-dry_run="false"
+                  class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                >
+                  <%= gettext("Run now") %>
+                </.button>
+                <.button
+                  :if={spider.supports_dry_run}
+                  id={"spiders-#{spider.name}-dry-run"}
+                  type="button"
+                  phx-click="run"
+                  phx-value-key={spider.name}
+                  phx-value-dry_run="true"
+                  class="bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/70"
+                >
+                  <%= gettext("Dry run") %>
+                </.button>
+                <.button
+                  :if={
+                    @active_run &&
+                      @active_run.spider_key == spider.name &&
+                      @active_run.status in [:running, :stopping]
+                  }
+                  id={"spiders-#{spider.name}-stop-run"}
+                  type="button"
+                  phx-click="stop_run"
+                  class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
+                >
+                  <%= gettext("Stop run") %>
+                </.button>
+              </div>
+            </form>
+          </div>
+
+          <div
+            :if={not Spider.ean_configurable?(spider)}
+            class="flex min-w-0 items-center gap-2"
+          >
+            <.button
+              id={"spiders-#{spider.name}-run"}
+              type="button"
+              phx-click="run"
+              phx-value-key={spider.name}
+              phx-value-dry_run="false"
+              class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            >
+              <%= gettext("Run now") %>
             </.button>
-          </form>
-
-          <button
-            id={"spiders-#{spider.name}-toggle"}
-            type="button"
-            phx-click="toggle_active"
-            phx-value-key={spider.name}
-            class="!appearance-none !border-0 !bg-transparent hover:!bg-transparent focus:!bg-transparent !p-0 !shadow-none"
-          >
-            <.pill
-              variant={if spider.active, do: :success, else: :neutral}
-              text={
-                if spider.active,
-                  do: gettext("Active"),
-                  else: gettext("Inactive")
-              }
-            />
-          </button>
-        </div>
-
-        <form
-          :if={Spider.ean_configurable?(spider)}
-          id={"spiders-#{spider.name}-eans-form"}
-          phx-change="update_eans"
-          phx-submit="save_eans"
-        >
-          <input type="hidden" name="key" value={spider.name} />
-          <.input
-            type="textarea"
-            name="eans"
-            value={Map.get(@eans_drafts, spider.name, "")}
-            placeholder={gettext("One EAN per line or comma separated")}
-          />
-          <p
-            :for={
-              invalid_ean <-
-                Map.get(
-                  Map.get(@eans_errors, spider.name, %{}),
-                  :invalid_eans,
-                  []
-                )
-            }
-            class="mt-1 text-sm text-rose-600 dark:text-rose-300"
-          >
-            <%= ean_format_error_message(invalid_ean) %>
-          </p>
-          <div class="mt-2">
             <.button
-              type="submit"
-              class="bg-zinc-100 text-xs text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+              :if={spider.supports_dry_run}
+              id={"spiders-#{spider.name}-dry-run"}
+              type="button"
+              phx-click="run"
+              phx-value-key={spider.name}
+              phx-value-dry_run="true"
+              class="bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/70"
             >
-              <%= gettext("Save EANs") %>
+              <%= gettext("Dry run") %>
+            </.button>
+            <.button
+              :if={
+                @active_run &&
+                  @active_run.spider_key == spider.name &&
+                  @active_run.status in [:running, :stopping]
+              }
+              id={"spiders-#{spider.name}-stop-run"}
+              type="button"
+              phx-click="stop_run"
+              class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
+            >
+              <%= gettext("Stop run") %>
             </.button>
           </div>
-        </form>
-
-        <div class="flex items-center gap-2">
-          <.button
-            id={"spiders-#{spider.name}-run"}
-            type="button"
-            phx-click="run"
-            phx-value-key={spider.name}
-            phx-value-dry_run="false"
-            class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-          >
-            <%= gettext("Run now") %>
-          </.button>
-          <.button
-            :if={spider.supports_dry_run}
-            id={"spiders-#{spider.name}-dry-run"}
-            type="button"
-            phx-click="run"
-            phx-value-key={spider.name}
-            phx-value-dry_run="true"
-            class="bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/70"
-          >
-            <%= gettext("Dry run") %>
-          </.button>
-          <.button
-            :if={
-              @active_run &&
-                @active_run.spider_key == spider.name &&
-                @active_run.status in [:running, :stopping]
-            }
-            id={"spiders-#{spider.name}-stop-run"}
-            type="button"
-            phx-click="stop_run"
-            class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
-          >
-            <%= gettext("Stop run") %>
-          </.button>
         </div>
 
         <div
@@ -211,3 +286,112 @@
     </.expandable_list_row>
   </:row>
 </.list_group>
+
+<.modal
+  :if={@ean_save_confirm}
+  id="save-eans-modal"
+  show
+  on_cancel={JS.push("cancel_save_eans")}
+>
+  <div class="space-y-6">
+    <.header>
+      <%= gettext("Save EAN codes") %>
+    </.header>
+
+    <div class="text-center">
+      <p class="text-4xl font-semibold tabular-nums text-zinc-800 dark:text-zinc-100">
+        <%= @ean_save_confirm.count %>
+      </p>
+      <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <%= ngettext(
+          "EAN about to be added",
+          "EANs about to be added",
+          @ean_save_confirm.count
+        ) %>
+      </p>
+    </div>
+
+    <div class="flex items-center justify-end">
+      <.button
+        id="confirm-save-eans"
+        type="button"
+        phx-click="confirm_save_eans"
+        class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+      >
+        <%= gettext("Confirm") %>
+      </.button>
+    </div>
+  </div>
+</.modal>
+
+<.modal
+  :if={@cron_save_confirm}
+  id="save-cron-modal"
+  show
+  on_cancel={JS.push("cancel_save_cron")}
+>
+  <div class="space-y-6">
+    <.header>
+      <%= gettext("Save schedule") %>
+    </.header>
+
+    <div class="text-center">
+      <p class="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
+        <%= @cron_save_confirm.summary %>
+      </p>
+      <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <%= gettext("This extractor will run") %>
+      </p>
+    </div>
+
+    <div class="flex items-center justify-end">
+      <.button
+        id="confirm-save-cron"
+        type="button"
+        phx-click="confirm_save_cron"
+        class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+      >
+        <%= gettext("Confirm") %>
+      </.button>
+    </div>
+  </div>
+</.modal>
+
+<.modal
+  :if={@toggle_confirm}
+  id="toggle-active-modal"
+  show
+  on_cancel={JS.push("cancel_toggle_active")}
+>
+  <div class="space-y-6">
+    <.header>
+      <%= if @toggle_confirm.activate? do %>
+        <%= gettext("Activate extractor") %>
+      <% else %>
+        <%= gettext("Deactivate extractor") %>
+      <% end %>
+      <:subtitle>
+        <%= if @toggle_confirm.activate? do %>
+          <%= gettext("You are about to activate %{name}.",
+            name: @toggle_confirm.name
+          ) %>
+        <% else %>
+          <%= gettext("You are about to deactivate %{name}.",
+            name: @toggle_confirm.name
+          ) %>
+        <% end %>
+      </:subtitle>
+    </.header>
+
+    <div class="flex items-center justify-end">
+      <.button
+        id="confirm-toggle-active"
+        type="button"
+        phx-click="confirm_toggle_active"
+        class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+      >
+        <%= gettext("Confirm") %>
+      </.button>
+    </div>
+  </div>
+</.modal>
