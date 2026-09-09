@@ -124,6 +124,9 @@ defmodule PriceSpotterWeb.PageHTML do
   defp mover_delta_sign(:up), do: "+"
   defp mover_delta_sign(:down), do: "-"
 
+  # Movement deltas always arrive as Decimals from the metrics query; normalize
+  # to a Decimal magnitude (the direction drives the sign) or nil so that any
+  # unexpected shape renders as "-" via format_money/1 rather than crashing.
   defp mover_absolute_delta(%{absolute_delta: %D{} = delta}), do: D.abs(delta)
-  defp mover_absolute_delta(%{absolute_delta: delta}), do: delta
+  defp mover_absolute_delta(_mover), do: nil
 end
