@@ -5,12 +5,21 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
 
   alias PriceSpotter.Extractor
   alias PriceSpotter.Extractor.Exploration
+  alias PriceSpotter.Extractor.FakeHttpAdapter
   alias PriceSpotter.Extractor.FakeLlmClient
   alias PriceSpotter.Marketplaces.SuppliersFixtures
 
   # 13-digit EANs (numeric) so Product's changeset keeps them.
   @ean_match "7790000000017"
   @ean_mismatch "7790000000024"
+  @ean_other "7790000000031"
+
+  # supplier_name values as emitted by the extractor spiders; these are the
+  # keys of the :ean_override_spider_by_supplier config map (config/config.exs)
+  # and are not always identical to the spider key ("maxiconsumo" spider is
+  # "maxiconsumo-by-ean-v2").
+  @coto_supplier "coto-by-ean"
+  @maxi_supplier "maxiconsumo"
 
   # The fake LLM stub lives in Application env, which persists across tests;
   # clear it around each test so ordering can't leak a stub between them.
@@ -47,6 +56,43 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
       supplier_id: unique_supplier_id(),
       internal_id: "int-#{System.unique_integer([:positive])}"
     })
+  end
+
+  defp spider_json(name, override?) do
+    %{
+      "id" => name,
+      "name" => name,
+      "cron" => "0 0 * * *",
+      "active" => true,
+      "next_run_time" => nil,
+      "supports_dry_run" => override?,
+      "supports_ean_override" => override?
+    }
+  end
+
+  # Stubs GET /admin/spiders with `spiders` and forwards every POST .../run to
+  # the test process as {:run, spider_key, eans} so routing can be asserted.
+  defp stub_spiders_and_capture_runs(spiders) do
+    test_pid = self()
+
+    FakeHttpAdapter.stub(fn
+      :get, url, _headers, nil ->
+        assert String.ends_with?(url, "/admin/spiders")
+        {:ok, 200, spiders}
+
+      :post, url, _headers, body ->
+        key =
+          url
+          |> String.split("/admin/spiders/")
+          |> List.last()
+          |> String.trim_trailing("/run")
+
+        %{"eans" => eans} = Jason.decode!(body)
+        send(test_pid, {:run, key, eans})
+
+        {:ok, 200,
+         %{"run_id" => "r", "stream_token" => "t", "stream_url" => "u"}}
+    end)
   end
 
   describe "explore_product/2 weight/unit safeguard" do
@@ -94,6 +140,119 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
 
       assert {:error, :llm_unreachable} = Exploration.explore_product(target)
       assert Extractor.list_pending_candidate_sets() == []
+    end
+  end
+
+  describe "explore_product/2 fetch_prices supplier routing" do
+    setup do
+      on_exit(fn ->
+        Application.delete_env(:price_spotter, :extractor_test_stub)
+      end)
+
+      :ok
+    end
+
+    test "routes each supplier's EANs to its own by-ean spider" do
+      target = no_ean_product("Fideos Tirabuzon Marca X 200g")
+
+      product_with_ean(
+        "Fideos Tirabuzon Marca X 200g",
+        @ean_match,
+        @coto_supplier
+      )
+
+      product_with_ean(
+        "Fideos Tirabuzon Marca X 200g",
+        @ean_other,
+        @maxi_supplier
+      )
+
+      FakeLlmClient.stub(:endorse_all)
+
+      stub_spiders_and_capture_runs([
+        spider_json("coto-by-ean", true),
+        spider_json("maxiconsumo-by-ean-v2", true)
+      ])
+
+      assert {:ok, result} =
+               Exploration.explore_product(target, fetch_prices: true)
+
+      assert result.candidate_count == 2
+
+      # Each supplier's EAN goes to the spider that matches that supplier -
+      # never a single hardcoded spider for all of them.
+      assert_receive {:run, "coto-by-ean", [@ean_match]}
+      assert_receive {:run, "maxiconsumo-by-ean-v2", [@ean_other]}
+    end
+
+    test "skips a supplier that has no EAN-override spider" do
+      target = no_ean_product("Arroz Largo Fino Marca Y 1kg")
+
+      product_with_ean(
+        "Arroz Largo Fino Marca Y 1kg",
+        @ean_match,
+        @coto_supplier
+      )
+
+      # "yaguar" is not in the config map, so it must not be fetched.
+      product_with_ean("Arroz Largo Fino Marca Y 1kg", @ean_other, "yaguar")
+
+      FakeLlmClient.stub(:endorse_all)
+
+      stub_spiders_and_capture_runs([
+        spider_json("coto-by-ean", true),
+        spider_json("maxiconsumo-by-ean-v2", true)
+      ])
+
+      assert {:ok, result} =
+               Exploration.explore_product(target, fetch_prices: true)
+
+      assert result.candidate_count == 2
+      assert_receive {:run, "coto-by-ean", [@ean_match]}
+      refute_receive {:run, _key, [@ean_other]}
+    end
+
+    test "skips fetches when the extractor spider list is unavailable" do
+      target = no_ean_product("Leche Entera Marca Z 1L")
+      product_with_ean("Leche Entera Marca Z 1L", @ean_match, @coto_supplier)
+
+      FakeLlmClient.stub(:endorse_all)
+
+      test_pid = self()
+
+      FakeHttpAdapter.stub(fn
+        :get, _url, _headers, nil ->
+          {:error, :timeout}
+
+        :post, _url, _headers, _body ->
+          send(test_pid, :unexpected_run)
+          {:ok, 200, %{}}
+      end)
+
+      assert {:ok, result} =
+               Exploration.explore_product(target, fetch_prices: true)
+
+      assert result.candidate_count == 1
+      refute_receive :unexpected_run
+    end
+
+    test "does not fetch prices when fetch_prices is not requested" do
+      target = no_ean_product("Yerba Mate Marca Q 1kg")
+      product_with_ean("Yerba Mate Marca Q 1kg", @ean_match, @coto_supplier)
+
+      FakeLlmClient.stub(:endorse_all)
+
+      test_pid = self()
+
+      FakeHttpAdapter.stub(fn _method, _url, _headers, _body ->
+        send(test_pid, :unexpected_call)
+        {:ok, 200, %{}}
+      end)
+
+      assert {:ok, result} = Exploration.explore_product(target)
+
+      assert result.candidate_count == 1
+      refute_receive :unexpected_call
     end
   end
 

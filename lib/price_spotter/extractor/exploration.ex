@@ -37,7 +37,10 @@ defmodule PriceSpotter.Extractor.Exploration do
     * `:similarity` - trigram similarity threshold, 0.0-1.0 (default 0.3).
     * `:fetch_prices` - when `true`, request a fresh extractor price fetch
       for the endorsed EANs (best-effort; results flow back through the
-      normal ingestion path, not this run).
+      normal ingestion path, not this run). Each candidate is routed to the
+      by-ean spider that matches its own supplier (see
+      `:ean_override_spider_by_supplier` config); suppliers without an
+      EAN-override spider are skipped rather than fetched from the wrong one.
   """
   @type run_opts :: keyword()
 
@@ -229,21 +232,91 @@ defmodule PriceSpotter.Extractor.Exploration do
   # Best-effort extractor price refresh. Never blocks or fails the run: the
   # extractor persists fresh prices through the usual ingestion path, so this
   # only kicks off the fetch and logs the outcome.
+  #
+  # Endorsed EANs can originate from any supplier's reference product, so each
+  # candidate is routed to the by-ean spider that matches its own supplier
+  # (one run per spider). A supplier with no EAN-override spider is skipped -
+  # never fetched from an unrelated supplier's spider.
   defp maybe_fetch_prices(candidates, opts) do
     if opts[:fetch_prices] do
-      eans = Enum.map(candidates, & &1.ean)
+      candidates
+      |> group_eans_by_spider()
+      |> Enum.each(fn {spider_key, eans} ->
+        case Client.trigger_run(spider_key, eans: eans) do
+          {:ok, _run} ->
+            :ok
 
-      case Client.trigger_run("coto-by-ean", eans: eans) do
-        {:ok, _run} ->
-          :ok
-
-        {:error, reason} ->
-          Logger.warning("Exploration price fetch failed: #{inspect(reason)}")
-          :ok
-      end
-    else
-      :ok
+          {:error, reason} ->
+            Logger.warning(
+              "Exploration price fetch failed for #{spider_key}: " <>
+                inspect(reason)
+            )
+        end
+      end)
     end
+
+    :ok
+  end
+
+  # Groups candidate EANs by the extractor spider that should fetch them,
+  # keyed by supplier. Only suppliers that map to a spider the extractor
+  # currently reports as EAN-override-capable are included; the rest are
+  # logged and dropped.
+  defp group_eans_by_spider(candidates) do
+    overridable = overridable_spider_keys()
+
+    candidates
+    |> Enum.group_by(& &1.supplier_name)
+    |> Enum.reduce(%{}, fn {supplier, refs}, acc ->
+      case resolve_spider_key(supplier, overridable) do
+        {:ok, key} ->
+          eans = refs |> Enum.map(& &1.ean) |> Enum.uniq()
+          Map.update(acc, key, eans, &Enum.uniq(&1 ++ eans))
+
+        :skip ->
+          Logger.warning(
+            "Exploration price fetch: no EAN-override spider for supplier " <>
+              "#{inspect(supplier)}; skipping #{length(refs)} candidate(s)"
+          )
+
+          acc
+      end
+    end)
+  end
+
+  # The extractor is the source of truth for which spiders accept an EAN
+  # override; fall back to skipping everything if it can't be reached.
+  defp overridable_spider_keys do
+    case Client.list_spiders() do
+      {:ok, spiders} ->
+        for spider <- spiders,
+            spider.supports_ean_override,
+            into: MapSet.new(),
+            do: spider.name
+
+      {:error, reason} ->
+        Logger.warning(
+          "Exploration price fetch: could not list spiders: #{inspect(reason)}"
+        )
+
+        MapSet.new()
+    end
+  end
+
+  defp resolve_spider_key(supplier, overridable) do
+    with key when is_binary(key) <- spider_key_for_supplier(supplier),
+         true <- MapSet.member?(overridable, key) do
+      {:ok, key}
+    else
+      _no_match -> :skip
+    end
+  end
+
+  defp spider_key_for_supplier(supplier) do
+    :price_spotter
+    |> Application.get_env(:extractor, [])
+    |> Keyword.get(:ean_override_spider_by_supplier, %{})
+    |> Map.get(supplier)
   end
 
   defp do_run(trigger, product, products, opts) do
