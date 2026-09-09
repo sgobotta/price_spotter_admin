@@ -71,6 +71,28 @@ defmodule PriceSpotter.ExtractorTest do
     end
   end
 
+  describe "validate_eans/1" do
+    test "returns parsed codes when every EAN is well formed" do
+      assert {:ok, ["7790070418161", "7790742307279"]} =
+               Extractor.validate_eans(
+                 "7790070418161, 7790742307279\n7790070418161"
+               )
+    end
+
+    test "returns structured invalid format errors without persisting" do
+      assert {:error,
+              %{
+                reason: :invalid_format,
+                details: %{invalid_eans: invalid_eans}
+              }} = Extractor.validate_eans("ABC,1234")
+
+      assert invalid_eans == [
+               %{ean: "ABC", reason: :non_numeric},
+               %{ean: "1234", reason: :invalid_length}
+             ]
+    end
+  end
+
   describe "parse_eans/1" do
     test "supports comma and newline separators" do
       assert Extractor.parse_eans("7790070418161,7790742307279\n7790070418161") ==

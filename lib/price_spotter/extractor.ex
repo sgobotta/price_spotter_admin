@@ -50,7 +50,7 @@ defmodule PriceSpotter.Extractor do
           {:ok, %{eans: [String.t()]}} | {:error, eans_config_error()}
   def save_input_config(%Spider{} = spider, raw_eans) do
     if Spider.ean_configurable?(spider) do
-      with {:ok, eans} <- normalize_and_validate_eans(raw_eans),
+      with {:ok, eans} <- validate_eans(raw_eans),
            {:ok, _config} <-
              upsert_spider_config(spider.name, %{"eans" => eans}) do
         {:ok, %{eans: eans}}
@@ -74,6 +74,28 @@ defmodule PriceSpotter.Extractor do
     |> Enum.map(&String.trim/1)
     |> Enum.reject(&(&1 == ""))
     |> dedupe_preserving_order()
+  end
+
+  @doc """
+  Parses and validates EAN format without persisting.
+  """
+  @spec validate_eans(String.t() | nil) ::
+          {:ok, [String.t()]} | {:error, eans_config_error()}
+  def validate_eans(raw_eans) do
+    eans = parse_eans(raw_eans)
+
+    case validate_ean_formats(eans) do
+      [] ->
+        {:ok, eans}
+
+      invalid_eans ->
+        {:error,
+         %{
+           reason: :invalid_format,
+           message: "Some EAN values have an invalid format",
+           details: %{invalid_eans: invalid_eans}
+         }}
+    end
   end
 
   @doc """
@@ -333,23 +355,6 @@ defmodule PriceSpotter.Extractor do
       ],
       conflict_target: :spider_name
     )
-  end
-
-  defp normalize_and_validate_eans(raw_eans) do
-    eans = parse_eans(raw_eans)
-
-    case validate_ean_formats(eans) do
-      [] ->
-        {:ok, eans}
-
-      invalid_eans ->
-        {:error,
-         %{
-           reason: :invalid_format,
-           message: "Some EAN values have an invalid format",
-           details: %{invalid_eans: invalid_eans}
-         }}
-    end
   end
 
   @spec validate_ean_formats([String.t()]) :: [ean_format_error()]

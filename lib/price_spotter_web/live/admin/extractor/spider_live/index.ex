@@ -60,17 +60,25 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
     eans =
       Map.get(params, "eans") || Map.get(socket.assigns.eans_drafts, key, "")
 
-    parsed = Extractor.parse_eans(eans)
+    socket = update(socket, :eans_drafts, &Map.put(&1, key, eans))
 
-    {:noreply,
-     socket
-     |> update(:eans_drafts, &Map.put(&1, key, eans))
-     |> update(:eans_errors, &Map.delete(&1, key))
-     |> assign(:ean_save_confirm, %{
-       key: key,
-       eans: eans,
-       count: length(parsed)
-     })}
+    case Extractor.validate_eans(eans) do
+      {:ok, parsed} ->
+        {:noreply,
+         socket
+         |> update(:eans_errors, &Map.delete(&1, key))
+         |> assign(:ean_save_confirm, %{
+           key: key,
+           eans: eans,
+           count: length(parsed)
+         })}
+
+      {:error, %{details: details}} ->
+        {:noreply,
+         socket
+         |> update(:eans_errors, &Map.put(&1, key, details))
+         |> assign(:ean_save_confirm, nil)}
+    end
   end
 
   @impl true
@@ -170,7 +178,16 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
   @impl true
   def handle_event("cancel_save_cron", _params, socket) do
-    {:noreply, assign(socket, :cron_save_confirm, nil)}
+    case socket.assigns.cron_save_confirm do
+      nil ->
+        {:noreply, socket}
+
+      %{key: key} ->
+        {:noreply,
+         socket
+         |> assign(:cron_save_confirm, nil)
+         |> clear_cron_feedback(key)}
+    end
   end
 
   @impl true

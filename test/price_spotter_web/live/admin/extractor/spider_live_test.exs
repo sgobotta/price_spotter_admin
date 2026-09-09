@@ -304,7 +304,9 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
       html = render_click(view, "cancel_save_cron")
 
       refute html =~ "save-cron-modal"
+      refute html =~ "Every hour"
       assert html =~ "Every 5 minutes"
+      assert html =~ ~s(value="*/5 * * * *")
       refute html =~ gettext("Schedule saved successfully.")
     end
 
@@ -510,6 +512,29 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       refute html =~ "save-eans-modal"
       refute html =~ gettext("EAN configuration saved")
+    end
+
+    test "shows inline errors instead of the confirmation modal for invalid EANs",
+         %{conn: conn} do
+      stub_list([spider_json(%{})])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html = submit_eans(view, "coto-by-ean", "ABC,1234")
+
+      refute html =~ "save-eans-modal"
+
+      refute html =~
+               ngettext(
+                 "EAN about to be added",
+                 "EANs about to be added",
+                 2
+               )
+
+      assert html =~ gettext("%{ean} — must contain only digits", ean: "ABC")
+
+      assert html =~
+               gettext("%{ean} — must be 8, 13, or 14 digits long", ean: "1234")
     end
 
     test "triggers a plain run with no eans when the field is left blank", %{
