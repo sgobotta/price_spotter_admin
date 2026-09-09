@@ -1320,8 +1320,8 @@ msgstr[1] "%{count} proveedores más venden este producto"
 #, elixir-autogen, elixir-format
 msgid "%{count} other supplier sells this product"
 msgid_plural "%{count} other suppliers sell this product"
-msgstr[0] "%{count} proveedor vende este producto"
-msgstr[1] "%{count} proveedores venden este producto"
+msgstr[0] "%{count} otro proveedor vende este producto"
+msgstr[1] "%{count} otros proveedores venden este producto"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:272
 #, elixir-autogen, elixir-format
