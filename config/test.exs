@@ -52,3 +52,7 @@ config :mix_test_watch, clear: true
 config :price_spotter, :extractor,
   adapter: PriceSpotter.Extractor.FakeHttpAdapter,
   watcher: PriceSpotter.Extractor.FakeRunWatcher
+
+# The EAN exploration flow calls an LLM; tests inject a fake client whose
+# response is set per-test via PriceSpotter.Extractor.FakeLlmClient.stub/1.
+config :price_spotter, :llm, client: PriceSpotter.Extractor.FakeLlmClient

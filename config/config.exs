@@ -11,6 +11,12 @@ config :price_spotter,
   ecto_repos: [PriceSpotter.Repo],
   generators: [binary_id: true]
 
+# LLM used by the EAN match-candidate exploration flow. The API key is
+# supplied at runtime (see config/runtime.exs); tests swap the client.
+config :price_spotter, :llm,
+  client: PriceSpotter.Extractor.LlmClient.Anthropic,
+  model: "claude-opus-5"
+
 config :flop, repo: PriceSpotter.Repo
 
 config :flop_phoenix,
