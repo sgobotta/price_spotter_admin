@@ -17,6 +17,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     {:ok,
      socket
      |> assign(:copy_clicked, false)
+     |> assign(:ean_listings, empty_ean_listings())
      |> assign_interval()}
   end
 
@@ -56,7 +57,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
        :section_title,
        page_title(socket.assigns.live_action)
      )
-     |> assign(:product, product)}
+     |> assign(:product, product)
+     |> assign_ean_listings(product)}
   end
 
   @impl true
@@ -70,21 +72,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_info(:update_chart, socket) do
-    case socket.assigns.product do
-      %Marketplaces.Product{
-        ean: ean
-      } = product ->
-        products =
-          case ean do
-            nil -> [product]
-            _ean -> Marketplaces.list_products_by_ean(ean)
-          end
+    case socket.assigns do
+      %{
+        product: %Marketplaces.Product{} = product,
+        ean_listings: %{visible: visible}
+      } ->
+        chart_data =
+          build_chart_data([product | visible], socket.assigns.interval)
 
-        chart_data = build_chart_data(products, socket.assigns.interval)
-
-        socket = push_event(socket, "set-chart-data", chart_data)
-
-        {:noreply, socket}
+        {:noreply, push_event(socket, "set-chart-data", chart_data)}
 
       _error ->
         {:noreply,
@@ -266,4 +262,24 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
           Phoenix.LiveView.Socket.t()
   defp assign_interval(socket, interval \\ :daily),
     do: assign(socket, :interval, interval)
+
+  @spec assign_ean_listings(
+          Phoenix.LiveView.Socket.t(),
+          Marketplaces.Product.t()
+        ) :: Phoenix.LiveView.Socket.t()
+  defp assign_ean_listings(socket, product) do
+    assign(
+      socket,
+      :ean_listings,
+      Marketplaces.list_other_ean_listings(
+        product,
+        socket.assigns.current_user
+      )
+    )
+  end
+
+  defp empty_ean_listings, do: %{visible: [], hidden_supplier_count: 0}
+
+  defp has_ean_listings?(%{visible: [], hidden_supplier_count: 0}), do: false
+  defp has_ean_listings?(_ean_listings), do: true
 end

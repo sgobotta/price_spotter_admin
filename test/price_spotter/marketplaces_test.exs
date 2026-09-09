@@ -298,6 +298,111 @@ defmodule PriceSpotter.MarketplacesTest do
     end
   end
 
+  describe "other ean listings" do
+    import PriceSpotter.MarketplacesFixtures
+
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+    alias PriceSpotter.Marketplaces.SuppliersFixtures
+
+    @ean "7790070418161"
+
+    defp listing_product(attrs) do
+      unique = System.unique_integer([:positive])
+
+      product_fixture(
+        Map.merge(
+          %{
+            ean: @ean,
+            internal_id: "ean-#{unique}",
+            name: "Product #{unique}",
+            supplier_name: "supplier-#{unique}"
+          },
+          attrs
+        )
+      )
+    end
+
+    test "returns empty listings when the product has no EAN" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      product = product_fixture()
+
+      assert Marketplaces.list_other_ean_listings(product, user) == %{
+               visible: [],
+               hidden_supplier_count: 0
+             }
+    end
+
+    test "admins see every other-supplier listing and no hidden count" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      current = listing_product(%{})
+
+      visible =
+        listing_product(%{
+          name: "Visible listing",
+          price: "88.5"
+        })
+
+      _same_supplier =
+        listing_product(%{
+          supplier_id: current.supplier_id,
+          supplier_name: current.supplier_name,
+          name: "Same supplier listing"
+        })
+
+      assert %{visible: [result], hidden_supplier_count: 0} =
+               Marketplaces.list_other_ean_listings(current, admin)
+
+      assert result.id == visible.id
+    end
+
+    test "non-admins see granted listings and a distinct hidden supplier count" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      hidden_supplier_a = SuppliersFixtures.create()
+      hidden_supplier_b = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      current = listing_product(%{})
+
+      visible =
+        listing_product(%{
+          name: "Granted listing",
+          supplier_id: granted_supplier.id,
+          supplier_name: granted_supplier.name
+        })
+
+      _hidden_a =
+        listing_product(%{
+          name: "Hidden listing A",
+          supplier_id: hidden_supplier_a.id,
+          supplier_name: hidden_supplier_a.name
+        })
+
+      _hidden_b1 =
+        listing_product(%{
+          name: "Hidden listing B1",
+          supplier_id: hidden_supplier_b.id,
+          supplier_name: hidden_supplier_b.name
+        })
+
+      _hidden_b2 =
+        listing_product(%{
+          name: "Hidden listing B2",
+          supplier_id: hidden_supplier_b.id,
+          supplier_name: hidden_supplier_b.name
+        })
+
+      assert %{visible: [result], hidden_supplier_count: 2} =
+               Marketplaces.list_other_ean_listings(current, user)
+
+      assert result.id == visible.id
+    end
+  end
+
   describe "homepage metrics" do
     import PriceSpotter.MarketplacesFixtures
 
