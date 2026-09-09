@@ -21,6 +21,11 @@ defmodule PriceSpotter.Extractor do
 
   @ean_lengths [8, 13, 14]
 
+  @type ean_format_error :: %{
+          ean: String.t(),
+          reason: :non_numeric | :invalid_length
+        }
+
   @type eans_config_error :: %{
           reason: :invalid_format | :not_supported,
           message: String.t(),
@@ -347,11 +352,24 @@ defmodule PriceSpotter.Extractor do
     end
   end
 
+  @spec validate_ean_formats([String.t()]) :: [ean_format_error()]
   defp validate_ean_formats(eans) do
-    Enum.filter(eans, fn ean ->
-      not String.match?(ean, ~r/^\d+$/) or
-        String.length(ean) not in @ean_lengths
-    end)
+    eans
+    |> Enum.map(&classify_ean_format/1)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp classify_ean_format(ean) do
+    cond do
+      not String.match?(ean, ~r/^\d+$/) ->
+        %{ean: ean, reason: :non_numeric}
+
+      String.length(ean) not in @ean_lengths ->
+        %{ean: ean, reason: :invalid_length}
+
+      true ->
+        nil
+    end
   end
 
   defp dedupe_preserving_order(values) do

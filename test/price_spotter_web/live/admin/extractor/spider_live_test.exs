@@ -188,7 +188,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> render_submit()
 
       assert html =~ "Every hour"
-      assert html =~ "Schedule saved successfully."
+      assert html =~ gettext("Schedule saved successfully.")
     end
 
     test "shows a live preview while editing the cron expression", %{conn: conn} do
@@ -214,7 +214,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "not a cron"})
         |> render_change()
 
-      assert html =~ "Please check the cron format."
+      assert html =~
+               gettext(
+                 "We couldn't read that schedule yet. Please check the cron format."
+               )
     end
 
     test "does not attempt to save an invalid cron expression", %{conn: conn} do
@@ -231,7 +234,10 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
         |> form("#spiders-coto-by-ean-cron-form", %{"cron" => "not a cron"})
         |> render_submit()
 
-      assert html =~ "Please check the cron format."
+      assert html =~
+               gettext(
+                 "We couldn't read that schedule yet. Please check the cron format."
+               )
     end
 
     test "keeps the attempted cron value in the input after an invalid submit",
