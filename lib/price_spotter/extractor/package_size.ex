@@ -13,8 +13,10 @@ defmodule PriceSpotter.Extractor.PackageSize do
 
   Names are Argentine Spanish (es_AR), so units cover both English and
   Spanish spellings (g/gr/gramos, kg/kilo(s), l/lt/litro(s), ml/cc, ...).
-  Decimal commas ("1,5 l") and simple multipacks ("6x500ml", "3 u x 1 l")
-  are supported.
+  Decimal commas ("1,5 l") are supported, as is the adjacent multipack form
+  where the count directly precedes the size ("6x500ml" -> 3000 ml). Spaced
+  forms such as "3 u x 1 l" are not treated as a multiplier - the trailing
+  size token wins ("1 l").
   """
 
   @typedoc """

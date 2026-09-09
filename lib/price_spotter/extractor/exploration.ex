@@ -274,7 +274,9 @@ defmodule PriceSpotter.Extractor.Exploration do
          %{scanned: 1, sets: 0, candidates: 0}}
 
       {:ok, :no_candidates} ->
-        {log(product, "No size-compatible candidates", :info),
+        # Covers both "the model endorsed nothing" and "every endorsed
+        # reference was dropped by the size/unit safeguard".
+        {log(product, "No match candidates produced", :info),
          %{scanned: 1, sets: 0, candidates: 0}}
 
       {:ok, result} ->
