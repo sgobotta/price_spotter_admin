@@ -136,7 +136,11 @@ defmodule PriceSpotter.Extractor.Exploration do
   end
 
   defp finalize_candidates(product, references, proposals, opts) do
-    endorsed = MapSet.new(proposals, & &1.ean_candidate)
+    endorsed =
+      proposals
+      |> Enum.map(& &1.ean_candidate)
+      |> MapSet.new()
+
     proposed_count = MapSet.size(endorsed)
 
     # Hard weight/unit safeguard: keep only endorsed references whose package
@@ -220,18 +224,25 @@ defmodule PriceSpotter.Extractor.Exploration do
   end
 
   defp do_run(trigger, product, products, opts) do
-    {:ok, run} = start_run(trigger, product)
+    case start_run(trigger, product) do
+      {:ok, run} ->
+        run_and_record(run, products, opts)
 
-    try do
-      {logs, stats} = explore_all(products, opts)
-      complete_run(run, logs, stats)
-    rescue
-      error ->
-        message = Exception.message(error)
-        Logger.error("Exploration run crashed: #{message}")
-        fail_run(run, message)
-        {:error, error}
+      {:error, changeset} ->
+        Logger.error("Could not start exploration run: #{inspect(changeset)}")
+        {:error, changeset}
     end
+  end
+
+  defp run_and_record(run, products, opts) do
+    {logs, stats} = explore_all(products, opts)
+    complete_run(run, logs, stats)
+  rescue
+    error ->
+      message = Exception.message(error)
+      Logger.error("Exploration run crashed: #{message}")
+      fail_run(run, message)
+      {:error, error}
   end
 
   defp explore_all(products, opts) do

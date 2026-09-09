@@ -103,7 +103,7 @@ defmodule PriceSpotter.Extractor.LlmClient.Anthropic do
   end
 
   defp decode_embedded_array(text) do
-    case Regex.run(~r/\[.*\]/s, text) do
+    case Regex.run(~r/\[.*?\]/s, text) do
       [json] ->
         case Jason.decode(json) do
           {:ok, list} when is_list(list) -> {:ok, list}
@@ -116,7 +116,10 @@ defmodule PriceSpotter.Extractor.LlmClient.Anthropic do
   end
 
   defp normalize_entries(entries, references) do
-    valid_eans = MapSet.new(references, & &1.ean)
+    valid_eans =
+      references
+      |> Enum.map(& &1.ean)
+      |> MapSet.new()
 
     entries
     |> Enum.map(&normalize_entry/1)

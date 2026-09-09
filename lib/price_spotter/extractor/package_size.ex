@@ -123,7 +123,10 @@ defmodule PriceSpotter.Extractor.PackageSize do
     end
   end
 
-  defp multiplier(""), do: 1.0
+  # An absent multiplier capture group comes back as "" from Regex.scan/2;
+  # guard nil too so a single-size name can never reach to_number/1 with a
+  # non-binary.
+  defp multiplier(count) when count in [nil, ""], do: 1.0
   defp multiplier(count), do: to_number(count)
 
   defp to_number(value) do
