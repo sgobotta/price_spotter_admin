@@ -18,4 +18,22 @@ defmodule PriceSpotterWeb.PageControllerTest do
 
     assert response =~ gettext("Products")
   end
+
+  test "GET / renders the access-scoped 24h summary metric cards", %{conn: conn} do
+    conn = get(conn, ~p"/")
+    response = html_response(conn, 200)
+
+    assert response =~ gettext("24h summary scoped by your customer access")
+    assert response =~ gettext("Total products")
+    assert response =~ gettext("Scraped in 24h")
+    assert response =~ gettext("Price increases")
+    assert response =~ gettext("Price decreases")
+    assert response =~ gettext("Top increase product")
+    assert response =~ gettext("Top decrease product")
+
+    # A freshly registered user has no snapshots in scope, so movement cards
+    # fall back to their explicit empty states.
+    assert response =~ gettext("No price increases in the last 24h.")
+    assert response =~ gettext("No price decreases in the last 24h.")
+  end
 end

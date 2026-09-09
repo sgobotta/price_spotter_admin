@@ -949,8 +949,7 @@ msgstr ""
 msgid "Could not connect to the run stream: %{reason}"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:133
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:174
+#: lib/price_spotter_web/controllers/page_html.ex:71
 #, elixir-autogen, elixir-format
 msgid "Current price"
 msgstr ""
@@ -1045,12 +1044,12 @@ msgstr ""
 msgid "Inactive"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:187
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:106
 #, elixir-autogen, elixir-format
 msgid "No price decreases in the last 24h."
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:146
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:100
 #, elixir-autogen, elixir-format
 msgid "No price increases in the last 24h."
 msgstr ""
@@ -1075,7 +1074,7 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:101
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:89
 #, elixir-autogen, elixir-format
 msgid "Price decreases"
 msgstr ""
@@ -1085,7 +1084,7 @@ msgstr ""
 msgid "Price history"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:93
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:84
 #, elixir-autogen, elixir-format
 msgid "Price increases"
 msgstr ""
@@ -1137,7 +1136,7 @@ msgstr ""
 msgid "Save access"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:85
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:80
 #, elixir-autogen, elixir-format
 msgid "Scraped in 24h"
 msgstr ""
@@ -1147,17 +1146,17 @@ msgstr ""
 msgid "Supplier page"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:153
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:103
 #, elixir-autogen, elixir-format
 msgid "Top decrease product"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:112
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:97
 #, elixir-autogen, elixir-format
 msgid "Top increase product"
 msgstr ""
 
-#: lib/price_spotter_web/controllers/page_html/home.html.heex:77
+#: lib/price_spotter_web/controllers/page_html/home.html.heex:76
 #, elixir-autogen, elixir-format
 msgid "Total products"
 msgstr ""
