@@ -40,7 +40,10 @@ defmodule PriceSpotter.ExtractorTest do
                 details: %{invalid_eans: invalid_eans}
               }} = Extractor.save_input_config(spider, "ABC,1234")
 
-      assert invalid_eans == ["ABC", "1234"]
+      assert invalid_eans == [
+               %{ean: "ABC", reason: :non_numeric},
+               %{ean: "1234", reason: :invalid_length}
+             ]
     end
 
     test "saves EANs that are not yet in the product catalog" do

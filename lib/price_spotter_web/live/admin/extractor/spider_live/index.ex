@@ -262,6 +262,14 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
      |> put_cron_error(key, message)}
   end
 
+  defp ean_format_error_message(%{ean: ean, reason: :non_numeric}) do
+    gettext("%{ean} — must contain only digits", ean: ean)
+  end
+
+  defp ean_format_error_message(%{ean: ean, reason: :invalid_length}) do
+    gettext("%{ean} — must be 8, 13, or 14 digits long", ean: ean)
+  end
+
   defp find_spider(spiders, key), do: Enum.find(spiders, &(&1.name == key))
 
   defp eans_drafts_from_spiders(spiders) do
