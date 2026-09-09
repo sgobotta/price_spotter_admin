@@ -487,11 +487,12 @@ defmodule PriceSpotterWeb.CoreComponents do
   def header(assigns) do
     ~H"""
     <header class={[
+      "min-w-0",
       @actions != [] && "flex items-center justify-between gap-6",
       @class
     ]}>
-      <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-200">
+      <div class="min-w-0 flex-1">
+        <h1 class="truncate text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-200">
           <%= render_slot(@inner_block) %>
         </h1>
         <p
@@ -501,7 +502,9 @@ defmodule PriceSpotterWeb.CoreComponents do
           <%= render_slot(@subtitle) %>
         </p>
       </div>
-      <div class="flex flex-row gap-x-2"><%= render_slot(@actions) %></div>
+      <div class="flex shrink-0 flex-row gap-x-2">
+        <%= render_slot(@actions) %>
+      </div>
     </header>
     """
   end

@@ -10,6 +10,9 @@ export default class {
       type: 'line',
       data: {datasets: [], labels: []},
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        resizeDelay: 0,
         spanGaps: false,
         scales: {
           x: {},
@@ -45,6 +48,7 @@ export default class {
     }
 
     this.chart.update()
+    this.chart.resize()
   }
 
   destroy() {

@@ -78,7 +78,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
         ean_listings: %{visible: visible}
       } ->
         chart_data =
-          build_chart_data([product | visible], socket.assigns.interval)
+          build_chart_data(
+            [product | visible],
+            socket.assigns.interval,
+            product.id
+          )
 
         {:noreply, push_event(socket, "set-chart-data", chart_data)}
 
@@ -96,13 +100,21 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp render_chart(assigns) do
     ~H"""
-    <canvas id="chart-canvas" phx-update="ignore" phx-hook="LineChart" />
+    <canvas
+      id="chart-canvas"
+      class="block h-full w-full max-w-full"
+      phx-update="ignore"
+      phx-hook="LineChart"
+    />
     """
   end
 
-  @spec build_chart_data([Marketplaces.Product.t()], Marketplaces.interval()) ::
-          map()
-  defp build_chart_data(products, interval) do
+  @spec build_chart_data(
+          [Marketplaces.Product.t()],
+          Marketplaces.interval(),
+          String.t()
+        ) :: map()
+  defp build_chart_data(products, interval, current_product_id) do
     series =
       Enum.map(products, fn %Marketplaces.Product{
                               id: product_id,
@@ -116,7 +128,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
         %{
           label: chart_series_label(product, supplier_name),
-          history: history
+          history: history,
+          current?: product_id == current_product_id
         }
       end)
 
@@ -137,7 +150,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   end
 
   @spec build_dataset(map(), [integer()]) :: map()
-  defp build_dataset(%{history: history, label: label}, labels) do
+  defp build_dataset(
+         %{history: history, label: label, current?: current?},
+         labels
+       ) do
     price_by_timestamp =
       Map.new(history, fn {datetime,
                            %Marketplaces.ProductPriceDocument{price: price}} ->
@@ -152,7 +168,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
       |> Enum.reverse()
       |> get_dataset_trend()
 
-    {background_color, border_color} = get_chart_colors(dataset_trend)
+    {background_color, border_color} =
+      chart_series_colors(current?, dataset_trend)
 
     %{
       label: label,
@@ -197,6 +214,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp get_chart_colors(:bearish),
     do: {"rgba(253, 164, 175, 1)", "rgba(244, 63, 94, 1)"}
+
+  defp chart_series_colors(false, _trend),
+    do: {"rgba(203, 213, 225, 1)", "rgba(148, 163, 184, 1)"}
+
+  defp chart_series_colors(true, trend), do: get_chart_colors(trend)
 
   # ----------------------------------------------------------------------------
   # Render functions
