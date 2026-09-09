@@ -893,7 +893,7 @@ msgstr "No se encontraron usuarios."
 msgid "Show"
 msgstr "Mostrar"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:170
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:249
 #, elixir-autogen, elixir-format
 msgid "%{count} EAN"
 msgid_plural "%{count} EANs"
@@ -916,7 +916,7 @@ msgid "24h summary scoped by your customer access"
 msgstr "Resumen de 24h según tu acceso de cliente"
 
 #: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:39
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:83
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:90
 #, elixir-autogen, elixir-format
 msgid "Active"
 msgstr "Activo"
@@ -947,7 +947,7 @@ msgstr "Elegí un proveedor"
 msgid "Collapse"
 msgstr "Contraer"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:174
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:225
 #, elixir-autogen, elixir-format
 msgid "Could not connect to the run stream: %{reason}"
 msgstr "No se pudo conectar al flujo de ejecución: %{reason}"
@@ -992,13 +992,14 @@ msgstr "Vista detallada con los metadatos actuales del producto y la tendencia d
 msgid "Details"
 msgstr "Detalles"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:142
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:167
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:178
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:220
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:246
 #, elixir-autogen, elixir-format
 msgid "Dry run"
 msgstr "Simulación"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:71
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:309
 #, elixir-autogen, elixir-format
 msgid "EAN configuration saved"
 msgstr "Configuración de EAN guardada"
@@ -1025,8 +1026,8 @@ msgstr "Expandir"
 msgid "Extractors"
 msgstr "Extractores"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:342
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:188
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:442
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:267
 #, elixir-autogen, elixir-format
 msgid "Finished"
 msgstr "Finalizado"
@@ -1042,7 +1043,7 @@ msgid "Home"
 msgstr "Inicio"
 
 #: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:39
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:84
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:91
 #, elixir-autogen, elixir-format
 msgid "Inactive"
 msgstr "Inactivo"
@@ -1067,7 +1068,7 @@ msgstr "No se encontraron spiders."
 msgid "No supplier access granted yet."
 msgstr "Todavía no se otorgó acceso a proveedores."
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:101
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:131
 #, elixir-autogen, elixir-format
 msgid "One EAN per line or comma separated"
 msgstr "Un EAN por línea o separados por comas"
@@ -1107,28 +1108,29 @@ msgstr "Quitar"
 msgid "Remove this access?"
 msgstr "¿Quitar este acceso?"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:168
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:247
 #, elixir-autogen, elixir-format
 msgid "Run"
 msgstr "Ejecutar"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:131
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:167
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:209
 #, elixir-autogen, elixir-format
 msgid "Run now"
 msgstr "Ejecutar ahora"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:190
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:269
 #, elixir-autogen, elixir-format
 msgid "Running"
 msgstr "En ejecución"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:68
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:78
 #: lib/price_spotter_web/live/user_settings_live.ex:99
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Guardar"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:117
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:157
 #, elixir-autogen, elixir-format
 msgid "Save EANs"
 msgstr "Guardar EANs"
@@ -1178,16 +1180,19 @@ msgstr "Actualizá dónde enviaremos las notificaciones de la cuenta."
 msgid "Use a strong password you don't use elsewhere."
 msgstr "Usá una contraseña segura que no uses en otro lado."
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:270
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:368
 #, elixir-autogen, elixir-format
 msgid "%{ean} — must be 8, 13, or 14 digits long"
 msgstr "%{ean} — debe tener 8, 13 o 14 dígitos"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:266
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:364
 #, elixir-autogen, elixir-format
 msgid "%{ean} — must contain only digits"
 msgstr "%{ean} — debe contener solo dígitos"
 
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:321
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:354
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:393
 #: lib/price_spotter_web/live/user_settings_live.ex:138
 #, elixir-autogen, elixir-format
 msgid "Confirm"
@@ -1203,7 +1208,7 @@ msgstr "Confirmar cambio de contraseña"
 msgid "Enter your current password to apply this change."
 msgstr "Ingresá tu contraseña actual para aplicar este cambio."
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:119
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:143
 #, elixir-autogen, elixir-format
 msgid "Please enter a cron expression so we can save the schedule."
 msgstr "Ingresá una expresión cron para poder guardar la programación."
@@ -1213,28 +1218,96 @@ msgstr "Ingresá una expresión cron para poder guardar la programación."
 msgid "Save email"
 msgstr "Guardar email"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:256
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:354
 #, elixir-autogen, elixir-format
 msgid "Schedule saved successfully."
 msgstr "Programación guardada con éxito."
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:204
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:255
 #, elixir-autogen, elixir-format
 msgid "Stop requested. Waiting for the extractor to finish the run."
 msgstr "Se solicitó detener la ejecución. Esperando a que el extractor finalice."
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:155
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:191
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:233
 #, elixir-autogen, elixir-format
 msgid "Stop run"
 msgstr "Detener ejecución"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:189
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:268
 #, elixir-autogen, elixir-format
 msgid "Stopping"
 msgstr "Deteniendo"
 
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:133
-#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:306
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:163
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:404
 #, elixir-autogen, elixir-format
 msgid "We couldn't read that schedule yet. Please check the cron format."
 msgstr "Todavía no pudimos interpretar esa programación. Revisá el formato cron."
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:325
+#, elixir-autogen, elixir-format
+msgid "Click to activate"
+msgstr "Hacé clic para activar"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.ex:323
+#, elixir-autogen, elixir-format
+msgid "Click to deactivate"
+msgstr "Hacé clic para desactivar"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:50
+#, elixir-autogen, elixir-format
+msgid "Cron expression"
+msgstr "Expresión cron"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:116
+#, elixir-autogen, elixir-format
+msgid "EAN codes"
+msgstr "Códigos EAN"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:298
+#, elixir-autogen, elixir-format
+msgid "Save EAN codes"
+msgstr "Guardar códigos EAN"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:47
+#, elixir-autogen, elixir-format
+msgid "Schedule"
+msgstr "Programación"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:369
+#, elixir-autogen, elixir-format
+msgid "Activate extractor"
+msgstr "Activar extractor"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:371
+#, elixir-autogen, elixir-format
+msgid "Deactivate extractor"
+msgstr "Desactivar extractor"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:375
+#, elixir-autogen, elixir-format
+msgid "You are about to activate %{name}."
+msgstr "Estás por activar %{name}."
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:379
+#, elixir-autogen, elixir-format
+msgid "You are about to deactivate %{name}."
+msgstr "Estás por desactivar %{name}."
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:306
+#, elixir-autogen, elixir-format
+msgid "EAN about to be added"
+msgid_plural "EANs about to be added"
+msgstr[0] "EAN por agregar"
+msgstr[1] "EANs por agregar"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:335
+#, elixir-autogen, elixir-format
+msgid "Save schedule"
+msgstr "Guardar programación"
+
+#: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:343
+#, elixir-autogen, elixir-format
+msgid "This extractor will run"
+msgstr "Este extractor se ejecutará"
