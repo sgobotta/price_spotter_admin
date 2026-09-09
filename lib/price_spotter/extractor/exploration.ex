@@ -154,11 +154,14 @@ defmodule PriceSpotter.Extractor.Exploration do
 
     # Hard weight/unit safeguard: keep only eligible references whose package
     # size is compatible with the target, regardless of what the LLM said.
+    # Parse the target size once rather than per reference.
+    target_size = PackageSize.parse(product.name)
+
     kept =
       references
       |> Enum.filter(fn ref ->
         MapSet.member?(eligible, ref.ean) and
-          PackageSize.compatible?(product.name, ref.name)
+          PackageSize.equal?(target_size, PackageSize.parse(ref.name))
       end)
       |> Enum.uniq_by(& &1.ean)
 

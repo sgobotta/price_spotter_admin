@@ -102,8 +102,17 @@ defmodule PriceSpotter.Extractor.LlmClient.Anthropic do
     end
   end
 
+  # Try a greedy match first (first `[` to last `]`, so a `]` inside a string
+  # value doesn't cut the array short); fall back to non-greedy so a trailing
+  # bracketed aside after the array can't defeat extraction either.
   defp decode_embedded_array(text) do
-    case Regex.run(~r/\[.*?\]/s, text) do
+    with :error <- try_array(~r/\[.*\]/s, text) do
+      try_array(~r/\[.*?\]/s, text)
+    end
+  end
+
+  defp try_array(regex, text) do
+    case Regex.run(regex, text) do
       [json] ->
         case Jason.decode(json) do
           {:ok, list} when is_list(list) -> {:ok, list}

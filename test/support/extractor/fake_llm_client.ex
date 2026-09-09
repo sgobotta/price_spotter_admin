@@ -28,6 +28,15 @@ defmodule PriceSpotter.Extractor.FakeLlmClient do
     Application.put_env(:price_spotter, @key, fun_or_mode)
   end
 
+  @doc """
+  Clears any registered stub. Call from `setup`/`on_exit` so a test that
+  forgets to stub raises instead of inheriting a previous test's stub.
+  """
+  @spec clear() :: :ok
+  def clear do
+    Application.delete_env(:price_spotter, @key)
+  end
+
   @impl true
   def propose_matches(target, references, opts) do
     case Application.get_env(:price_spotter, @key) do

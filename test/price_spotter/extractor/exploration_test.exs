@@ -12,6 +12,14 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
   @ean_match "7790000000017"
   @ean_mismatch "7790000000024"
 
+  # The fake LLM stub lives in Application env, which persists across tests;
+  # clear it around each test so ordering can't leak a stub between them.
+  setup do
+    FakeLlmClient.clear()
+    on_exit(&FakeLlmClient.clear/0)
+    :ok
+  end
+
   # A product's fixture derives its supplier from the product name, so each
   # product needs a uniquely-named supplier to avoid the supplier unique index.
   defp unique_supplier_id do
