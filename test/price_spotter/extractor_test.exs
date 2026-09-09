@@ -1,8 +1,13 @@
 defmodule PriceSpotter.ExtractorTest do
   use PriceSpotter.DataCase, async: false
 
+  import PriceSpotter.MarketplacesFixtures
+
   alias PriceSpotter.Extractor
+  alias PriceSpotter.Extractor.EanMatchDecision
   alias PriceSpotter.Extractor.Spider
+  alias PriceSpotter.Marketplaces
+  alias PriceSpotter.Repo
 
   describe "save_input_config/2" do
     test "accepts spiders that only advertise supports_ean_override" do
@@ -71,5 +76,162 @@ defmodule PriceSpotter.ExtractorTest do
                  "7790742307279"
                ]
     end
+  end
+
+  describe "candidate set lifecycle" do
+    test "upsert stores a pending set grouped by product with candidates" do
+      product = product_fixture(%{name: "Yerba Mate 1kg", category: "yerbas"})
+
+      assert {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert set.product_id == product.id
+      assert set.status == "pending"
+      assert [candidate] = set.candidates
+      assert candidate.ean_candidate == "7790070418161"
+      assert candidate.supplier == "coto"
+    end
+
+    test "re-upsert replaces the pending set's candidates" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, _set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      replacement =
+        set_attrs(product, [
+          %{
+            "ean_candidate" => "7790742307279",
+            "name" => "Yerba Mate 500g",
+            "supplier" => "carrefour"
+          }
+        ])
+
+      assert {:ok, set} = Extractor.upsert_candidate_set(replacement)
+      assert [candidate] = set.candidates
+      assert candidate.ean_candidate == "7790742307279"
+
+      assert [only_set] = Extractor.list_pending_candidate_sets()
+      assert only_set.id == set.id
+    end
+
+    test "list supports filtering by name, ean candidate, supplier, category" do
+      coto =
+        product_fixture(%{
+          name: "Yerba Mate 1kg",
+          category: "yerbas",
+          internal_id: "coto-yerba-1"
+        })
+
+      other =
+        product_fixture(%{
+          name: "Cafe Molido",
+          category: "cafes",
+          internal_id: "carrefour-cafe-1"
+        })
+
+      {:ok, _} = Extractor.upsert_candidate_set(set_attrs(coto))
+
+      {:ok, _} =
+        Extractor.upsert_candidate_set(
+          set_attrs(other, [
+            %{
+              "ean_candidate" => "7891000389300",
+              "name" => "Cafe Molido 250g",
+              "supplier" => "carrefour"
+            }
+          ])
+        )
+
+      assert [%{product_id: id}] =
+               Extractor.list_pending_candidate_sets(%{name: "yerba"})
+
+      assert id == coto.id
+
+      assert [%{product_id: ^id}] =
+               Extractor.list_pending_candidate_sets(%{
+                 ean_candidate: "7790070418161"
+               })
+
+      assert [%{product_id: ^id}] =
+               Extractor.list_pending_candidate_sets(%{supplier: "coto"})
+
+      assert [%{product_id: other_id}] =
+               Extractor.list_pending_candidate_sets(%{category: "cafes"})
+
+      assert other_id == other.id
+    end
+
+    test "approval persists a decision, applies the EAN, removes the set" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert {:ok, %{decision: decision, product: updated}} =
+               Extractor.approve_candidate(set, "7790070418161")
+
+      assert decision.decision == "approved"
+      assert decision.ean_candidate == "7790070418161"
+      assert updated.ean == "7790070418161"
+
+      assert Marketplaces.get_product!(product.id).ean == "7790070418161"
+      assert Extractor.list_pending_candidate_sets() == []
+      assert Repo.aggregate(EanMatchDecision, :count) == 1
+    end
+
+    test "disapproval persists a decision and removes the set without touching the product" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert {:ok, %{decision: decision}} =
+               Extractor.disapprove_candidate(set, "7790070418161")
+
+      assert decision.decision == "disapproved"
+      assert Marketplaces.get_product!(product.id).ean == nil
+      assert Extractor.list_pending_candidate_sets() == []
+      assert Repo.aggregate(EanMatchDecision, :count) == 1
+    end
+
+    test "approval of an EAN not in the set is rejected without side effects" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert {:error, :candidate_not_found} =
+               Extractor.approve_candidate(set, "0000000000000")
+
+      assert Marketplaces.get_product!(product.id).ean == nil
+      assert [only_set] = Extractor.list_pending_candidate_sets()
+      assert only_set.id == set.id
+      assert Repo.aggregate(EanMatchDecision, :count) == 0
+    end
+
+    test "disapproval of an EAN not in the set is rejected without side effects" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert {:error, :candidate_not_found} =
+               Extractor.disapprove_candidate(set, "0000000000000")
+
+      assert [only_set] = Extractor.list_pending_candidate_sets()
+      assert only_set.id == set.id
+      assert Repo.aggregate(EanMatchDecision, :count) == 0
+    end
+  end
+
+  defp set_attrs(product, candidates \\ nil) do
+    %{
+      "product_id" => product.id,
+      "product_name" => product.name,
+      "category" => product.category,
+      "candidates" =>
+        candidates ||
+          [
+            %{
+              "ean_candidate" => "7790070418161",
+              "name" => "Yerba Mate 1kg Coto",
+              "supplier" => "coto",
+              "url" => "https://coto.example/p/1",
+              "image_url" => "https://coto.example/img/1.png",
+              "price" => "1200.50",
+              "last_fetched_at" => "2026-09-08T05:00:00Z"
+            }
+          ]
+    }
   end
 end

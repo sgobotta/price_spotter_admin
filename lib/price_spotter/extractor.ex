@@ -7,11 +7,16 @@ defmodule PriceSpotter.Extractor do
 
   import Ecto.Query, warn: false
 
+  alias Ecto.Multi
   alias PriceSpotter.Extractor.Client
   alias PriceSpotter.Extractor.CronHumanizer
+  alias PriceSpotter.Extractor.EanMatchCandidate
+  alias PriceSpotter.Extractor.EanMatchCandidateSet
+  alias PriceSpotter.Extractor.EanMatchDecision
   alias PriceSpotter.Extractor.RunWatcher
   alias PriceSpotter.Extractor.Spider
   alias PriceSpotter.Extractor.SpiderConfig
+  alias PriceSpotter.Marketplaces.Product
   alias PriceSpotter.Repo
 
   @ean_lengths [8, 13, 14]
@@ -88,6 +93,206 @@ defmodule PriceSpotter.Extractor do
           {:ok, pid()} | {:error, term()}
   def watch_run(run_id, stream_url, stream_token, parent_pid \\ self()) do
     watcher().start_link(run_id, stream_url, stream_token, parent_pid)
+  end
+
+  ## EAN match candidates — pending/submitted lifecycle
+
+  @typedoc """
+  Filters for pending candidate retrieval. Any subset may be supplied.
+  """
+  @type candidate_filters :: %{
+          optional(:name) => String.t(),
+          optional(:ean_candidate) => String.t(),
+          optional(:supplier) => String.t(),
+          optional(:category) => String.t()
+        }
+
+  @doc """
+  Inserts or replaces the pending candidate set for a product.
+
+  Candidates are grouped by product: there is at most one pending set per
+  `product_id`, and re-upserting replaces that set's candidates wholesale.
+  """
+  @spec upsert_candidate_set(map()) ::
+          {:ok, EanMatchCandidateSet.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_candidate_set(attrs) do
+    attrs = normalize_keys(attrs)
+
+    case get_candidate_set_by_product(attrs["product_id"]) do
+      nil -> %EanMatchCandidateSet{}
+      %EanMatchCandidateSet{} = set -> Repo.preload(set, :candidates)
+    end
+    |> EanMatchCandidateSet.changeset(attrs)
+    |> Repo.insert_or_update()
+    |> case do
+      {:ok, set} -> {:ok, Repo.preload(set, :candidates, force: true)}
+      error -> error
+    end
+  end
+
+  @doc """
+  Lists pending candidate sets with their candidates preloaded.
+
+  Supported filters: `:name` and `:category` match the set's product;
+  `:ean_candidate` and `:supplier` keep sets that own at least one matching
+  candidate. All string filters are case-insensitive substring matches.
+  """
+  @spec list_pending_candidate_sets(candidate_filters()) :: [
+          EanMatchCandidateSet.t()
+        ]
+  def list_pending_candidate_sets(filters \\ %{}) do
+    filters = normalize_keys(filters)
+
+    EanMatchCandidateSet
+    |> where([s], s.status == "pending")
+    |> filter_by_name(filters["name"])
+    |> filter_by_category(filters["category"])
+    |> filter_by_candidate(:ean_candidate, filters["ean_candidate"])
+    |> filter_by_candidate(:supplier, filters["supplier"])
+    |> order_by([s], desc: s.inserted_at)
+    |> Repo.all()
+    |> Repo.preload(:candidates)
+  end
+
+  @doc """
+  Fetches a pending candidate set by id with candidates preloaded.
+  """
+  @spec get_candidate_set!(Ecto.UUID.t()) :: EanMatchCandidateSet.t()
+  def get_candidate_set!(id) do
+    EanMatchCandidateSet
+    |> Repo.get!(id)
+    |> Repo.preload(:candidates)
+  end
+
+  @doc """
+  Approves an EAN candidate for a set's product.
+
+  In a single transaction this records an `approved` decision, applies the
+  approved EAN to the related product, and removes the pending set.
+  """
+  @spec approve_candidate(EanMatchCandidateSet.t(), String.t()) ::
+          {:ok, %{decision: EanMatchDecision.t(), product: Product.t()}}
+          | {:error, :candidate_not_found | term()}
+  def approve_candidate(%EanMatchCandidateSet{} = set, ean_candidate) do
+    with %EanMatchCandidate{} = candidate <-
+           find_candidate(set, ean_candidate) ||
+             {:error, :candidate_not_found} do
+      Multi.new()
+      |> Multi.insert(
+        :decision,
+        decision_changeset(set, candidate, "approved")
+      )
+      |> Multi.run(:product, fn _repo, _changes ->
+        apply_ean_to_product(set.product_id, candidate.ean_candidate)
+      end)
+      |> Multi.delete(:pending, set)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{decision: decision, product: product}} ->
+          {:ok, %{decision: decision, product: product}}
+
+        {:error, _step, reason, _changes} ->
+          {:error, reason}
+      end
+    end
+  end
+
+  @doc """
+  Disapproves an EAN candidate for a set's product.
+
+  Records a `disapproved` decision and removes the pending set. The product
+  is left untouched.
+  """
+  @spec disapprove_candidate(EanMatchCandidateSet.t(), String.t()) ::
+          {:ok, %{decision: EanMatchDecision.t()}}
+          | {:error, :candidate_not_found | term()}
+  def disapprove_candidate(%EanMatchCandidateSet{} = set, ean_candidate) do
+    with %EanMatchCandidate{} = candidate <-
+           find_candidate(set, ean_candidate) ||
+             {:error, :candidate_not_found} do
+      Multi.new()
+      |> Multi.insert(
+        :decision,
+        decision_changeset(set, candidate, "disapproved")
+      )
+      |> Multi.delete(:pending, set)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{decision: decision}} -> {:ok, %{decision: decision}}
+        {:error, _step, reason, _changes} -> {:error, reason}
+      end
+    end
+  end
+
+  defp get_candidate_set_by_product(nil), do: nil
+
+  defp get_candidate_set_by_product(product_id),
+    do: Repo.get_by(EanMatchCandidateSet, product_id: product_id)
+
+  defp filter_by_name(query, nil), do: query
+
+  defp filter_by_name(query, name),
+    do: where(query, [s], ilike(s.product_name, ^"%#{name}%"))
+
+  defp filter_by_category(query, nil), do: query
+
+  defp filter_by_category(query, category),
+    do: where(query, [s], ilike(s.category, ^"%#{category}%"))
+
+  defp filter_by_candidate(query, _field, nil), do: query
+
+  defp filter_by_candidate(query, field, value) do
+    where(
+      query,
+      [s],
+      s.id in subquery(
+        from(c in EanMatchCandidate,
+          where: ilike(field(c, ^field), ^"%#{value}%"),
+          select: c.candidate_set_id
+        )
+      )
+    )
+  end
+
+  defp find_candidate(%EanMatchCandidateSet{} = set, ean_candidate) do
+    set
+    |> ensure_candidates_loaded()
+    |> Map.get(:candidates, [])
+    |> Enum.find(&(&1.ean_candidate == ean_candidate))
+  end
+
+  defp ensure_candidates_loaded(%EanMatchCandidateSet{} = set),
+    do: Repo.preload(set, :candidates)
+
+  defp decision_changeset(set, %EanMatchCandidate{} = candidate, decision) do
+    EanMatchDecision.changeset(%EanMatchDecision{}, %{
+      product_id: set.product_id,
+      ean_candidate: candidate.ean_candidate,
+      decision: decision,
+      product_name: set.product_name,
+      supplier: candidate.supplier
+    })
+  end
+
+  defp apply_ean_to_product(product_id, ean_candidate) do
+    Product
+    |> Repo.get(product_id)
+    |> case do
+      nil ->
+        {:error, :product_not_found}
+
+      %Product{} = product ->
+        product
+        |> Product.changeset(%{ean: ean_candidate})
+        |> Repo.update()
+    end
+  end
+
+  defp normalize_keys(map) do
+    Map.new(map, fn
+      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
+      {k, v} -> {k, v}
+    end)
   end
 
   defp watcher,
