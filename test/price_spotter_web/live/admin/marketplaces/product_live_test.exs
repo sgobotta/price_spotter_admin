@@ -209,7 +209,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ product.category
     end
 
-    test "fills the selected price-history interval tab", %{
+    test "fills the selected price-history interval button", %{
       conn: conn,
       product: product
     } do
@@ -220,7 +220,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert has_element?(
                show_live,
-               "button[phx-value-interval=daily].is-selected"
+               ~s(button[phx-value-interval=daily][aria-pressed="true"])
              )
 
       show_live
@@ -229,12 +229,12 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert has_element?(
                show_live,
-               "button[phx-value-interval=weekly].is-selected"
+               ~s(button[phx-value-interval=weekly][aria-pressed="true"])
              )
 
       refute has_element?(
                show_live,
-               "button[phx-value-interval=daily].is-selected"
+               ~s(button[phx-value-interval=daily][aria-pressed="true"])
              )
     end
 

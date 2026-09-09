@@ -159,11 +159,14 @@
       </div>
 
       <div class="mb-4 rounded-lg border border-zinc-200 p-1 dark:border-zinc-700">
-        <div class="grid grid-cols-3 gap-1" role="tablist">
+        <div
+          class="grid grid-cols-3 gap-1"
+          role="group"
+          aria-label={gettext("Price history")}
+        >
           <button
             type="button"
-            role="tab"
-            aria-selected={@interval == :daily}
+            aria-pressed={to_string(@interval == :daily)}
             class={[
               "segmented-control-tab rounded-md px-2 py-1 text-sm",
               @interval == :daily && "is-selected"
@@ -175,8 +178,7 @@
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={@interval == :weekly}
+            aria-pressed={to_string(@interval == :weekly)}
             class={[
               "segmented-control-tab rounded-md px-2 py-1 text-sm",
               @interval == :weekly && "is-selected"
@@ -188,8 +190,7 @@
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={@interval == :monthly}
+            aria-pressed={to_string(@interval == :monthly)}
             class={[
               "segmented-control-tab rounded-md px-2 py-1 text-sm",
               @interval == :monthly && "is-selected"
