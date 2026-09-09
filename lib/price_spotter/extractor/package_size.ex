@@ -58,11 +58,13 @@ defmodule PriceSpotter.Extractor.PackageSize do
 
   # A size token: an optional "N x" multiplier, a decimal magnitude, and a
   # unit. `\b`-free on the unit side so "500g" (no space) matches too.
-  @size_regex ~r/(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*([a-zA-Zµ]+)\.?/u
+  @size_regex ~r/(?:(\d+)\s*[xX×]\s*)?(\d+(?:[.,]\d+)?)\s*([a-zA-Zµ]+)\.?/u
 
-  # Floating-point comparison tolerance (0.1% of the larger magnitude) so
-  # "1kg" and "1000g" compare equal despite representation.
-  @rel_tolerance 0.001
+  # Relative tolerance for the equality check. This is a HARD constraint, so
+  # the tolerance only absorbs floating-point roundoff (~1e-12 here) - it must
+  # not treat genuinely different sizes as equal (e.g. 999 g vs 1 kg). "1kg"
+  # and "1000g" still compare equal because both normalize to 1000.0 exactly.
+  @rel_tolerance 1.0e-9
 
   @doc """
   Extracts the package size from a product name, or `nil` when none is found.

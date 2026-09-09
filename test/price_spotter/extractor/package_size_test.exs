@@ -28,6 +28,11 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
                PackageSize.parse("Agua Mineral 6x500ml")
     end
 
+    test "parses a multipack with an uppercase X" do
+      assert %{dimension: :volume, base: 3000.0} =
+               PackageSize.parse("Agua Mineral 6X500ml")
+    end
+
     test "uses the last size token when several are present" do
       assert %{dimension: :mass, base: 500.0} =
                PackageSize.parse("Fideos 4 quesos x 500 g")
@@ -49,6 +54,10 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
 
     test "different weights are NOT compatible" do
       refute PackageSize.compatible?("Fideos 200g", "Fideos 400g")
+    end
+
+    test "close-but-different weights are NOT compatible (hard constraint)" do
+      refute PackageSize.compatible?("Harina 999g", "Harina 1kg")
     end
 
     test "different dimensions are NOT compatible" do
