@@ -136,24 +136,33 @@ defmodule PriceSpotter.Extractor.Exploration do
   end
 
   defp finalize_candidates(product, references, proposals, opts) do
+    reference_eans =
+      references
+      |> Enum.map(& &1.ean)
+      |> MapSet.new()
+
     endorsed =
       proposals
       |> Enum.map(& &1.ean_candidate)
       |> MapSet.new()
 
-    proposed_count = MapSet.size(endorsed)
+    # Only endorsements that actually name a reference product are eligible;
+    # an EAN the model invented is not a size rejection, it was never a
+    # candidate, so exclude it from the stats.
+    eligible = MapSet.intersection(endorsed, reference_eans)
+    eligible_count = MapSet.size(eligible)
 
-    # Hard weight/unit safeguard: keep only endorsed references whose package
+    # Hard weight/unit safeguard: keep only eligible references whose package
     # size is compatible with the target, regardless of what the LLM said.
     kept =
       references
       |> Enum.filter(fn ref ->
-        MapSet.member?(endorsed, ref.ean) and
+        MapSet.member?(eligible, ref.ean) and
           PackageSize.compatible?(product.name, ref.name)
       end)
       |> Enum.uniq_by(& &1.ean)
 
-    size_rejections = max(proposed_count - length(kept), 0)
+    size_rejections = max(eligible_count - length(kept), 0)
 
     case kept do
       [] ->
@@ -167,7 +176,7 @@ defmodule PriceSpotter.Extractor.Exploration do
            %{
              set: set,
              candidate_count: length(candidates),
-             proposed_count: proposed_count,
+             proposed_count: eligible_count,
              size_rejections: size_rejections
            }}
         end
