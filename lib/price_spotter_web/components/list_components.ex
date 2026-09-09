@@ -35,7 +35,7 @@ defmodule PriceSpotterWeb.ListComponents do
     <div
       id={@id}
       class={[
-        "divide-y divide-zinc-200 dark:divide-zinc-700",
+        "divide-y divide-zinc-200 overflow-x-hidden dark:divide-zinc-700",
         "rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900",
         @class
       ]}
@@ -137,27 +137,27 @@ defmodule PriceSpotterWeb.ListComponents do
 
   def expandable_list_row(assigns) do
     ~H"""
-    <div id={@id} class="flex flex-col px-4 py-3">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div class="flex items-center gap-3">
+    <div id={@id} class="flex min-w-0 flex-col px-4 py-3">
+      <div class="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
           <div :if={@leading != []} class="shrink-0">
             <%= render_slot(@leading) %>
           </div>
 
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1 overflow-hidden">
             <div class="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
               <%= render_slot(@title) %>
             </div>
             <div
               :if={@subtitle != []}
-              class="truncate text-xs text-zinc-500 dark:text-zinc-400"
+              class="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
             >
               <%= render_slot(@subtitle) %>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex shrink-0 items-center gap-3 self-end sm:self-auto">
           <div
             :if={@meta != []}
             class="hidden shrink-0 flex-wrap items-center justify-end gap-1 sm:flex"

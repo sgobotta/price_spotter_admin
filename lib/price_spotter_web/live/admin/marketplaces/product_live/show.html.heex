@@ -159,16 +159,14 @@
       </div>
 
       <div class="mb-4 rounded-lg border border-zinc-200 p-1 dark:border-zinc-700">
-        <div class="grid grid-cols-3 gap-1">
+        <div class="grid grid-cols-3 gap-1" role="tablist">
           <button
+            type="button"
+            role="tab"
+            aria-selected={@interval == :daily}
             class={[
-              "rounded-md px-2 py-1 text-sm transition-colors",
-              if(@interval == :daily,
-                do:
-                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
-                else:
-                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              )
+              "segmented-control-tab rounded-md px-2 py-1 text-sm",
+              @interval == :daily && "is-selected"
             ]}
             phx-click="interval_change"
             phx-value-interval={:daily}
@@ -176,14 +174,12 @@
             <%= gettext("Daily") %>
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={@interval == :weekly}
             class={[
-              "rounded-md px-2 py-1 text-sm transition-colors",
-              if(@interval == :weekly,
-                do:
-                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
-                else:
-                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              )
+              "segmented-control-tab rounded-md px-2 py-1 text-sm",
+              @interval == :weekly && "is-selected"
             ]}
             phx-click="interval_change"
             phx-value-interval={:weekly}
@@ -191,14 +187,12 @@
             <%= gettext("Weekly") %>
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={@interval == :monthly}
             class={[
-              "rounded-md px-2 py-1 text-sm transition-colors",
-              if(@interval == :monthly,
-                do:
-                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
-                else:
-                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              )
+              "segmented-control-tab rounded-md px-2 py-1 text-sm",
+              @interval == :monthly && "is-selected"
             ]}
             phx-click="interval_change"
             phx-value-interval={:monthly}

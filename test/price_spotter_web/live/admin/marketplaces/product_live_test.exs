@@ -92,6 +92,39 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert row_html =~ "–"
     end
 
+    test "keeps price and details in place when the product name is long", %{
+      conn: conn,
+      user: user
+    } do
+      long_name =
+        String.duplicate("Very long product name ", 8)
+        |> String.trim()
+
+      product =
+        product_fixture(%{
+          name: long_name,
+          internal_id: "long-#{System.unique_integer([:positive])}"
+        })
+
+      Marketplaces.create_user_supplier(%{
+        user_id: user.id,
+        supplier_id: product.supplier_id,
+        role: :maintainer
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+      row_html = index_live |> element("#products-#{product.id}") |> render()
+
+      assert row_html =~ long_name
+      assert row_html =~ "$#{product.price}"
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-toggle-expand",
+               gettext("Details")
+             )
+    end
+
     test "saves new product", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
@@ -174,6 +207,35 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert html =~ gettext("Show Product")
       assert html =~ product.category
+    end
+
+    test "fills the selected price-history interval tab", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}")
+
+      assert html =~ gettext("Daily")
+
+      assert has_element?(
+               show_live,
+               "button[phx-value-interval=daily].is-selected"
+             )
+
+      show_live
+      |> element("button[phx-value-interval=weekly]")
+      |> render_click()
+
+      assert has_element?(
+               show_live,
+               "button[phx-value-interval=weekly].is-selected"
+             )
+
+      refute has_element?(
+               show_live,
+               "button[phx-value-interval=daily].is-selected"
+             )
     end
 
     test "updates product within modal", %{conn: conn, product: product} do
