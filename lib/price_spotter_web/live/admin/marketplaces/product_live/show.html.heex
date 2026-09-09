@@ -236,7 +236,7 @@
       <li
         :for={listing <- @ean_listings.visible}
         id={"ean-listing-#{listing.id}"}
-        class="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4"
+        class="grid grid-cols-2 items-center gap-3 p-3 sm:p-4"
       >
         <div class="min-w-0 space-y-2">
           <.pill
@@ -247,26 +247,27 @@
             href={~p"/admin/marketplaces/products/#{listing}"}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex max-w-full items-center gap-1 text-sm font-medium text-zinc-800 hover:text-sky-600 dark:text-zinc-100 dark:hover:text-sky-300"
+            title={listing.name}
+            class="flex min-w-0 max-w-full items-center gap-1 text-sm font-medium text-zinc-800 hover:text-sky-600 dark:text-zinc-100 dark:hover:text-sky-300"
           >
-            <span class="truncate"><%= listing.name %></span>
+            <span class="min-w-0 truncate"><%= listing.name %></span>
             <.icon name="hero-link-solid" class="h-4 w-4 shrink-0" />
           </a>
         </div>
 
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          <span class="font-semibold text-zinc-500 dark:text-zinc-400">
+        <div class="min-w-0 text-sm">
+          <div class="font-semibold text-zinc-500 dark:text-zinc-400">
             <%= if listing.price == nil do %>
               <%= gettext("No price yet") %>
             <% else %>
               <%= render_price(listing.price) %>
             <% end %>
-          </span>
-          <span class="text-zinc-500 dark:text-zinc-400">
+          </div>
+          <div class="text-zinc-500 dark:text-zinc-400">
             <%= gettext("Last price update") %>: <%= TimeAgo.time_ago(
               listing.price_updated_at
             ) %>
-          </span>
+          </div>
         </div>
       </li>
     </ul>
