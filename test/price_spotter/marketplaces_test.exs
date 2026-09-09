@@ -401,6 +401,62 @@ defmodule PriceSpotter.MarketplacesTest do
 
       assert result.id == visible.id
     end
+
+    test "treats unassigned listings as other suppliers by name" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+
+      current =
+        listing_product(%{
+          supplier_id: nil,
+          supplier_name: "unassigned-shop"
+        })
+
+      assigned =
+        listing_product(%{
+          name: "Assigned listing"
+        })
+
+      other_unassigned =
+        listing_product(%{
+          name: "Other unassigned listing",
+          supplier_id: nil,
+          supplier_name: "another-unassigned-shop"
+        })
+
+      _same_unassigned_supplier =
+        listing_product(%{
+          name: "Same unassigned supplier",
+          supplier_id: nil,
+          supplier_name: "unassigned-shop"
+        })
+
+      assert %{visible: results, hidden_supplier_count: 0} =
+               Marketplaces.list_other_ean_listings(current, admin)
+
+      result_ids = MapSet.new(results, & &1.id)
+
+      assert MapSet.member?(result_ids, assigned.id)
+      assert MapSet.member?(result_ids, other_unassigned.id)
+      refute MapSet.member?(result_ids, current.id)
+      refute Enum.any?(results, &(&1.supplier_name == current.supplier_name))
+    end
+
+    test "includes unassigned listings for a product with a supplier" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      current = listing_product(%{})
+
+      unassigned =
+        listing_product(%{
+          name: "Unassigned listing",
+          supplier_id: nil,
+          supplier_name: "unassigned-shop"
+        })
+
+      assert %{visible: [result], hidden_supplier_count: 0} =
+               Marketplaces.list_other_ean_listings(current, admin)
+
+      assert result.id == unassigned.id
+    end
   end
 
   describe "homepage metrics" do

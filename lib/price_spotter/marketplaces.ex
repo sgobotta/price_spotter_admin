@@ -324,7 +324,8 @@ defmodule PriceSpotter.Marketplaces do
   defp other_ean_products(%Product{
          id: product_id,
          ean: ean,
-         supplier_id: supplier_id
+         supplier_id: supplier_id,
+         supplier_name: supplier_name
        }) do
     query =
       from(p in Product,
@@ -335,7 +336,10 @@ defmodule PriceSpotter.Marketplaces do
     query =
       case supplier_id do
         nil ->
-          query
+          from(p in query,
+            where:
+              not is_nil(p.supplier_id) or p.supplier_name != ^supplier_name
+          )
 
         id ->
           from(p in query,
