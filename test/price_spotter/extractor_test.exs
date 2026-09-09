@@ -187,6 +187,31 @@ defmodule PriceSpotter.ExtractorTest do
       assert Extractor.list_pending_candidate_sets() == []
       assert Repo.aggregate(EanMatchDecision, :count) == 1
     end
+
+    test "approval of an EAN not in the set is rejected without side effects" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert {:error, :candidate_not_found} =
+               Extractor.approve_candidate(set, "0000000000000")
+
+      assert Marketplaces.get_product!(product.id).ean == nil
+      assert [only_set] = Extractor.list_pending_candidate_sets()
+      assert only_set.id == set.id
+      assert Repo.aggregate(EanMatchDecision, :count) == 0
+    end
+
+    test "disapproval of an EAN not in the set is rejected without side effects" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      assert {:error, :candidate_not_found} =
+               Extractor.disapprove_candidate(set, "0000000000000")
+
+      assert [only_set] = Extractor.list_pending_candidate_sets()
+      assert only_set.id == set.id
+      assert Repo.aggregate(EanMatchDecision, :count) == 0
+    end
   end
 
   defp set_attrs(product, candidates \\ nil) do

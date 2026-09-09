@@ -172,26 +172,28 @@ defmodule PriceSpotter.Extractor do
   """
   @spec approve_candidate(EanMatchCandidateSet.t(), String.t()) ::
           {:ok, %{decision: EanMatchDecision.t(), product: Product.t()}}
-          | {:error, term()}
+          | {:error, :candidate_not_found | term()}
   def approve_candidate(%EanMatchCandidateSet{} = set, ean_candidate) do
-    candidate = find_candidate(set, ean_candidate)
+    with %EanMatchCandidate{} = candidate <-
+           find_candidate(set, ean_candidate) ||
+             {:error, :candidate_not_found} do
+      Multi.new()
+      |> Multi.insert(
+        :decision,
+        decision_changeset(set, candidate, "approved")
+      )
+      |> Multi.run(:product, fn _repo, _changes ->
+        apply_ean_to_product(set.product_id, candidate.ean_candidate)
+      end)
+      |> Multi.delete(:pending, set)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{decision: decision, product: product}} ->
+          {:ok, %{decision: decision, product: product}}
 
-    Multi.new()
-    |> Multi.insert(
-      :decision,
-      decision_changeset(set, candidate, ean_candidate, "approved")
-    )
-    |> Multi.run(:product, fn _repo, _changes ->
-      apply_ean_to_product(set.product_id, ean_candidate)
-    end)
-    |> Multi.delete(:pending, set)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{decision: decision, product: product}} ->
-        {:ok, %{decision: decision, product: product}}
-
-      {:error, _step, reason, _changes} ->
-        {:error, reason}
+        {:error, _step, reason, _changes} ->
+          {:error, reason}
+      end
     end
   end
 
@@ -202,20 +204,23 @@ defmodule PriceSpotter.Extractor do
   is left untouched.
   """
   @spec disapprove_candidate(EanMatchCandidateSet.t(), String.t()) ::
-          {:ok, %{decision: EanMatchDecision.t()}} | {:error, term()}
+          {:ok, %{decision: EanMatchDecision.t()}}
+          | {:error, :candidate_not_found | term()}
   def disapprove_candidate(%EanMatchCandidateSet{} = set, ean_candidate) do
-    candidate = find_candidate(set, ean_candidate)
-
-    Multi.new()
-    |> Multi.insert(
-      :decision,
-      decision_changeset(set, candidate, ean_candidate, "disapproved")
-    )
-    |> Multi.delete(:pending, set)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{decision: decision}} -> {:ok, %{decision: decision}}
-      {:error, _step, reason, _changes} -> {:error, reason}
+    with %EanMatchCandidate{} = candidate <-
+           find_candidate(set, ean_candidate) ||
+             {:error, :candidate_not_found} do
+      Multi.new()
+      |> Multi.insert(
+        :decision,
+        decision_changeset(set, candidate, "disapproved")
+      )
+      |> Multi.delete(:pending, set)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{decision: decision}} -> {:ok, %{decision: decision}}
+        {:error, _step, reason, _changes} -> {:error, reason}
+      end
     end
   end
 
@@ -259,13 +264,13 @@ defmodule PriceSpotter.Extractor do
   defp ensure_candidates_loaded(%EanMatchCandidateSet{} = set),
     do: Repo.preload(set, :candidates)
 
-  defp decision_changeset(set, candidate, ean_candidate, decision) do
+  defp decision_changeset(set, %EanMatchCandidate{} = candidate, decision) do
     EanMatchDecision.changeset(%EanMatchDecision{}, %{
       product_id: set.product_id,
-      ean_candidate: ean_candidate,
+      ean_candidate: candidate.ean_candidate,
       decision: decision,
       product_name: set.product_name,
-      supplier: candidate && candidate.supplier
+      supplier: candidate.supplier
     })
   end
 

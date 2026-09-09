@@ -34,8 +34,11 @@ defmodule PriceSpotter.Extractor.EanMatchCandidateSet do
 
   @doc false
   def changeset(candidate_set, attrs) do
+    # `:status` is intentionally not castable: this is a pending-only store,
+    # so the status stays at its `"pending"` default and callers cannot write
+    # a value that would hide the set from `list_pending_candidate_sets/1`.
     candidate_set
-    |> cast(attrs, [:product_id, :product_name, :category, :status])
+    |> cast(attrs, [:product_id, :product_name, :category])
     |> validate_required([:product_id, :product_name])
     |> cast_assoc(:candidates)
     |> unique_constraint(:product_id)
