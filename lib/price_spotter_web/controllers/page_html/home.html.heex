@@ -72,122 +72,39 @@
       </p>
 
       <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900/30">
-          <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            <%= gettext("Total products") %>
-          </p>
-          <p class="mt-1 text-2xl font-semibold text-zinc-800 dark:text-zinc-200">
-            <%= @metrics.total_products %>
-          </p>
-        </div>
-        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900/30">
-          <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            <%= gettext("Scraped in 24h") %>
-          </p>
-          <p class="mt-1 text-2xl font-semibold text-zinc-800 dark:text-zinc-200">
-            <%= @metrics.products_scraped_last_24h %>
-          </p>
-        </div>
-        <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-900/20">
-          <p class="text-xs uppercase tracking-wide text-green-700 dark:text-green-300">
-            <%= gettext("Price increases") %>
-          </p>
-          <p class="mt-1 text-2xl font-semibold text-green-800 dark:text-green-300">
-            <%= @metrics.products_price_increase_last_24h %>
-          </p>
-        </div>
-        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-900/20">
-          <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300">
-            <%= gettext("Price decreases") %>
-          </p>
-          <p class="mt-1 text-2xl font-semibold text-red-800 dark:text-red-300">
-            <%= @metrics.products_price_decrease_last_24h %>
-          </p>
-        </div>
+        <.metric_card
+          label={gettext("Total products")}
+          value={@metrics.total_products}
+        />
+        <.metric_card
+          label={gettext("Scraped in 24h")}
+          value={@metrics.products_scraped_last_24h}
+        />
+        <.metric_card
+          label={gettext("Price increases")}
+          value={@metrics.products_price_increase_last_24h}
+          tone={:up}
+        />
+        <.metric_card
+          label={gettext("Price decreases")}
+          value={@metrics.products_price_decrease_last_24h}
+          tone={:down}
+        />
       </div>
 
       <div class="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-4 dark:border-zinc-700 dark:bg-zinc-900/30">
-          <h2 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-            <%= gettext("Top increase product") %>
-          </h2>
-          <%= if @metrics.top_price_increase do %>
-            <% mover = @metrics.top_price_increase %>
-            <div class="mt-3 flex items-start gap-3">
-              <img
-                src={mover.product_image}
-                alt={mover.product_name}
-                class="h-16 w-16 rounded-md border border-zinc-200 object-cover dark:border-zinc-700"
-              />
-              <div class="flex-1">
-                <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                  <%= mover.product_name %>
-                </p>
-                <div class="mt-1 flex flex-wrap gap-2">
-                  <.pill text={mover.supplier_name} variant={:info} />
-                  <%= if mover.category_name do %>
-                    <.pill text={mover.category_name} variant={:neutral} />
-                  <% end %>
-                </div>
-                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                  <%= gettext("Current price") %>: <%= format_money(
-                    mover.current_price
-                  ) %>
-                </p>
-                <p class="text-sm font-semibold text-green-700 dark:text-green-300">
-                  +<%= format_money(mover.absolute_delta) %> (<%= format_percentage(
-                    mover.percentage_delta
-                  ) %>)
-                </p>
-              </div>
-            </div>
-          <% else %>
-            <p class="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-              <%= gettext("No price increases in the last 24h.") %>
-            </p>
-          <% end %>
-        </div>
-
-        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-4 dark:border-zinc-700 dark:bg-zinc-900/30">
-          <h2 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-            <%= gettext("Top decrease product") %>
-          </h2>
-          <%= if @metrics.top_price_decrease do %>
-            <% mover = @metrics.top_price_decrease %>
-            <div class="mt-3 flex items-start gap-3">
-              <img
-                src={mover.product_image}
-                alt={mover.product_name}
-                class="h-16 w-16 rounded-md border border-zinc-200 object-cover dark:border-zinc-700"
-              />
-              <div class="flex-1">
-                <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                  <%= mover.product_name %>
-                </p>
-                <div class="mt-1 flex flex-wrap gap-2">
-                  <.pill text={mover.supplier_name} variant={:info} />
-                  <%= if mover.category_name do %>
-                    <.pill text={mover.category_name} variant={:neutral} />
-                  <% end %>
-                </div>
-                <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                  <%= gettext("Current price") %>: <%= format_money(
-                    mover.current_price
-                  ) %>
-                </p>
-                <p class="text-sm font-semibold text-red-700 dark:text-red-300">
-                  -<%= format_money(mover.absolute_delta |> Decimal.abs()) %> (<%= format_percentage(
-                    mover.percentage_delta
-                  ) %>)
-                </p>
-              </div>
-            </div>
-          <% else %>
-            <p class="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-              <%= gettext("No price decreases in the last 24h.") %>
-            </p>
-          <% end %>
-        </div>
+        <.top_mover_card
+          title={gettext("Top increase product")}
+          mover={@metrics.top_price_increase}
+          direction={:up}
+          empty_text={gettext("No price increases in the last 24h.")}
+        />
+        <.top_mover_card
+          title={gettext("Top decrease product")}
+          mover={@metrics.top_price_decrease}
+          direction={:down}
+          empty_text={gettext("No price decreases in the last 24h.")}
+        />
       </div>
     <% end %>
   </div>
