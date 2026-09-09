@@ -9,9 +9,10 @@ export default {
 
     this.handleEvent('set-chart-data', ({
       labels,
-      datasets
+      datasets,
+      timezone
     }) => {
-      this.chart.setData(labels, datasets)
+      this.chart.setData(labels, datasets, timezone)
     })
   }
 }
