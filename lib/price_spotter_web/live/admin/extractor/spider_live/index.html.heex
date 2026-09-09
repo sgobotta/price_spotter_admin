@@ -103,7 +103,11 @@
           <p
             :for={
               invalid_ean <-
-                Map.get(Map.get(@eans_errors, spider.name, %{}), :invalid_eans, [])
+                Map.get(
+                  Map.get(@eans_errors, spider.name, %{}),
+                  :invalid_eans,
+                  []
+                )
             }
             class="mt-1 text-sm text-rose-600 dark:text-rose-300"
           >
