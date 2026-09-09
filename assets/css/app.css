@@ -121,6 +121,29 @@ button {
   @apply text-zinc-700 dark:text-zinc-200 hover:text-zinc-700 hover:dark:text-zinc-200 !important;
 }
 
+button.segmented-control-tab {
+  @apply border-transparent bg-transparent font-normal shadow-none transition-colors duration-200 !important;
+}
+
+button.segmented-control-tab:hover {
+  @apply bg-zinc-100 shadow-none dark:bg-zinc-800 !important;
+}
+
+button.segmented-control-tab:focus {
+  @apply bg-transparent shadow-none !important;
+}
+
+button.segmented-control-tab:active {
+  @apply scale-[0.98] bg-zinc-100 shadow-none dark:bg-zinc-800 !important;
+}
+
+button.segmented-control-tab.is-selected,
+button.segmented-control-tab.is-selected:hover,
+button.segmented-control-tab.is-selected:focus,
+button.segmented-control-tab.is-selected:active {
+  @apply bg-zinc-200 font-semibold text-zinc-800 shadow-none dark:bg-zinc-700 dark:text-zinc-100 !important;
+}
+
 select {
   @apply mt-0 !important;
 }

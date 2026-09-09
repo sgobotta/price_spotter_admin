@@ -3,7 +3,7 @@
     current_user={assigns[:current_user]}
     current_path={assigns[:current_path]}
   />
-  <div class="flex-1 min-w-0">
+  <div class="flex-1 min-w-0 overflow-x-hidden">
     <header class="sticky top-0 header-bg z-50">
       <div>
         <div class="
@@ -34,8 +34,8 @@
         </div>
       </div>
     </header>
-    <main class="px-4 py-2 sm:px-6 lg:px-8">
-      <div class="">
+    <main class="min-w-0 px-4 py-2 sm:px-6 lg:px-8">
+      <div class="min-w-0 max-w-full">
         <.flash_group flash={@flash} />
         <%= @inner_content %>
       </div>

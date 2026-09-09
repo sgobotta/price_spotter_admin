@@ -92,6 +92,39 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert row_html =~ "–"
     end
 
+    test "keeps price and details in place when the product name is long", %{
+      conn: conn,
+      user: user
+    } do
+      long_name =
+        String.duplicate("Very long product name ", 8)
+        |> String.trim()
+
+      product =
+        product_fixture(%{
+          name: long_name,
+          internal_id: "long-#{System.unique_integer([:positive])}"
+        })
+
+      Marketplaces.create_user_supplier(%{
+        user_id: user.id,
+        supplier_id: product.supplier_id,
+        role: :maintainer
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+      row_html = index_live |> element("#products-#{product.id}") |> render()
+
+      assert row_html =~ long_name
+      assert row_html =~ "$#{product.price}"
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-toggle-expand",
+               gettext("Details")
+             )
+    end
+
     test "saves new product", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
@@ -176,6 +209,35 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ product.category
     end
 
+    test "fills the selected price-history interval button", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}")
+
+      assert html =~ gettext("Daily")
+
+      assert has_element?(
+               show_live,
+               ~s(button[phx-value-interval=daily][aria-pressed="true"])
+             )
+
+      show_live
+      |> element("button[phx-value-interval=weekly]")
+      |> render_click()
+
+      assert has_element?(
+               show_live,
+               ~s(button[phx-value-interval=weekly][aria-pressed="true"])
+             )
+
+      refute has_element?(
+               show_live,
+               ~s(button[phx-value-interval=daily][aria-pressed="true"])
+             )
+    end
+
     test "updates product within modal", %{conn: conn, product: product} do
       {:ok, show_live, _html} =
         live(conn, ~p"/admin/marketplaces/products/#{product}")
@@ -202,6 +264,146 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       html = render(show_live)
       assert html =~ gettext("Product updated successfully")
       assert html =~ "some updated category"
+    end
+
+    test "keeps supplier, category, and price in pills only", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}")
+
+      assert html =~ product.supplier_name
+      assert html =~ product.category
+      assert html =~ "$#{product.price}"
+
+      details =
+        show_live
+        |> element("#product-details-list")
+        |> render()
+
+      refute details =~ gettext("Supplier")
+      refute details =~ gettext("Category")
+      refute details =~ gettext("Price")
+      assert details =~ gettext("EAN")
+      assert details =~ gettext("External link")
+    end
+
+    test "does not render the EAN listings banner without other suppliers", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}")
+
+      refute has_element?(show_live, "#ean-listings")
+    end
+
+    test "lists other-supplier EAN matches for an admin", %{
+      conn: conn,
+      product: product
+    } do
+      ean = "7790070418161"
+
+      {:ok, current} = Marketplaces.update_product(product, %{ean: ean})
+
+      other =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "other-#{System.unique_integer([:positive])}",
+          name: "Other supplier listing",
+          supplier_name: "other-supplier",
+          price: "88.5"
+        })
+
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{current}")
+
+      assert has_element?(show_live, "#ean-listings")
+      assert html =~ gettext("Same product at other suppliers")
+      assert html =~ other.name
+      assert html =~ "$#{other.price}"
+      assert html =~ gettext("Last price update")
+      refute has_element?(show_live, "#ean-listings-hidden-count")
+
+      assert has_element?(
+               show_live,
+               "#ean-listing-#{other.id} a[target=_blank]"
+             )
+
+      assert html =~ ~p"/admin/marketplaces/products/#{other}"
+    end
+  end
+
+  describe "Show EAN listings for a customer" do
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+    alias PriceSpotter.Marketplaces.SuppliersFixtures
+
+    setup [:register_and_log_in_user]
+
+    test "shows granted listings and a count of hidden suppliers", %{
+      conn: conn,
+      user: user
+    } do
+      ean = "7790070418161"
+      granted_supplier = SuppliersFixtures.create()
+      hidden_supplier = SuppliersFixtures.create()
+      current_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: current_supplier.id
+      })
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      current =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "current-#{System.unique_integer([:positive])}",
+          name: "Current listing",
+          supplier_id: current_supplier.id,
+          supplier_name: current_supplier.name
+        })
+
+      visible =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "visible-#{System.unique_integer([:positive])}",
+          name: "Visible other listing",
+          price: "77.1",
+          supplier_id: granted_supplier.id,
+          supplier_name: granted_supplier.name
+        })
+
+      hidden =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "hidden-#{System.unique_integer([:positive])}",
+          name: "Hidden other listing",
+          supplier_id: hidden_supplier.id,
+          supplier_name: hidden_supplier.name
+        })
+
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{current}")
+
+      assert html =~ visible.name
+      assert html =~ "$#{visible.price}"
+      refute html =~ hidden.name
+
+      assert has_element?(show_live, "#ean-listings-hidden-count")
+
+      assert html =~
+               ngettext(
+                 "%{count} more supplier sells this product",
+                 "%{count} more suppliers sell this product",
+                 1,
+                 count: 1
+               )
     end
   end
 end

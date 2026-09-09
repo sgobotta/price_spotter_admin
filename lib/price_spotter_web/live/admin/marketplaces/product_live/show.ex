@@ -17,6 +17,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     {:ok,
      socket
      |> assign(:copy_clicked, false)
+     |> assign(:ean_listings, empty_ean_listings())
      |> assign_interval()}
   end
 
@@ -56,7 +57,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
        :section_title,
        page_title(socket.assigns.live_action)
      )
-     |> assign(:product, product)}
+     |> assign(:product, product)
+     |> assign_ean_listings(product)}
   end
 
   @impl true
@@ -70,27 +72,26 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_info(:update_chart, socket) do
-    case socket.assigns.product do
-      %Marketplaces.Product{
-        ean: ean
-      } = product ->
-        products =
-          case ean do
-            nil -> [product]
-            _ean -> Marketplaces.list_products_by_ean(ean)
-          end
+    case socket.assigns do
+      %{
+        product: %Marketplaces.Product{} = product,
+        ean_listings: %{visible: visible}
+      } ->
+        chart_data =
+          build_chart_data(
+            [product | visible],
+            socket.assigns.interval,
+            product.id
+          )
 
-        chart_data = build_chart_data(products, socket.assigns.interval)
-
-        socket = push_event(socket, "set-chart-data", chart_data)
-
-        {:noreply, socket}
+        {:noreply, push_event(socket, "set-chart-data", chart_data)}
 
       _error ->
         {:noreply,
          push_event(socket, "set-chart-data", %{
            labels: [],
-           datasets: []
+           datasets: [],
+           timezone: DatetimeUtils.timezone()
          })}
     end
   end
@@ -100,13 +101,21 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp render_chart(assigns) do
     ~H"""
-    <canvas id="chart-canvas" phx-update="ignore" phx-hook="LineChart" />
+    <canvas
+      id="chart-canvas"
+      class="block h-full w-full max-w-full"
+      phx-update="ignore"
+      phx-hook="LineChart"
+    />
     """
   end
 
-  @spec build_chart_data([Marketplaces.Product.t()], Marketplaces.interval()) ::
-          map()
-  defp build_chart_data(products, interval) do
+  @spec build_chart_data(
+          [Marketplaces.Product.t()],
+          Marketplaces.interval(),
+          String.t()
+        ) :: map()
+  defp build_chart_data(products, interval, current_product_id) do
     series =
       Enum.map(products, fn %Marketplaces.Product{
                               id: product_id,
@@ -120,34 +129,26 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
         %{
           label: chart_series_label(product, supplier_name),
-          history: history
+          history: history,
+          current?: product_id == current_product_id
         }
       end)
 
-    labels =
-      series
-      |> Enum.flat_map(fn %{history: history} ->
-        Enum.map(history, fn {datetime, _price_doc} ->
-          get_timestamp(datetime)
-        end)
-      end)
-      |> Enum.uniq()
-      |> Enum.sort()
-
     %{
-      labels: Enum.map(labels, &format_chart_label/1),
-      datasets: Enum.map(series, &build_dataset(&1, labels))
+      labels: [],
+      timezone: DatetimeUtils.timezone(),
+      datasets:
+        series
+        |> Enum.with_index()
+        |> Enum.map(fn {item, index} -> build_dataset(item, index) end)
     }
   end
 
-  @spec build_dataset(map(), [integer()]) :: map()
-  defp build_dataset(%{history: history, label: label}, labels) do
-    price_by_timestamp =
-      Map.new(history, fn {datetime,
-                           %Marketplaces.ProductPriceDocument{price: price}} ->
-        {get_timestamp(datetime), price}
-      end)
-
+  @spec build_dataset(map(), integer()) :: map()
+  defp build_dataset(
+         %{history: history, label: label, current?: current?},
+         index
+       ) do
     dataset_trend =
       history
       |> Enum.map(fn {_ts, %Marketplaces.ProductPriceDocument{price: price}} ->
@@ -156,14 +157,39 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
       |> Enum.reverse()
       |> get_dataset_trend()
 
-    {background_color, border_color} = get_chart_colors(dataset_trend)
+    {background_color, border_color} =
+      chart_series_colors(current?, index, dataset_trend)
 
     %{
       label: label,
-      data: Enum.map(labels, &Map.get(price_by_timestamp, &1)),
+      data:
+        history
+        |> Enum.map(&chart_point/1)
+        |> Enum.reject(fn point -> point.y == nil end),
       background_color: background_color,
       border_color: border_color
     }
+  end
+
+  defp chart_point({datetime, %Marketplaces.ProductPriceDocument{price: price}}) do
+    timestamp = get_timestamp(datetime)
+
+    %{
+      x: timestamp,
+      y: to_chart_price(price),
+      formatted_x: format_chart_label(timestamp)
+    }
+  end
+
+  defp to_chart_price(%Decimal{} = price), do: Decimal.to_float(price)
+
+  defp to_chart_price(price) when is_number(price), do: price / 1
+
+  defp to_chart_price(price) when is_binary(price) do
+    case Float.parse(price) do
+      {number, _rest} -> number
+      :error -> nil
+    end
   end
 
   defp format_chart_label(timestamp),
@@ -201,6 +227,23 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   defp get_chart_colors(:bearish),
     do: {"rgba(253, 164, 175, 1)", "rgba(244, 63, 94, 1)"}
+
+  @comparison_palette [
+    {"rgba(186, 230, 253, 1)", "rgba(14, 165, 233, 1)"},
+    {"rgba(253, 230, 138, 1)", "rgba(202, 138, 4, 1)"},
+    {"rgba(221, 214, 254, 1)", "rgba(124, 58, 237, 1)"},
+    {"rgba(254, 215, 170, 1)", "rgba(234, 88, 12, 1)"},
+    {"rgba(165, 180, 252, 1)", "rgba(79, 70, 229, 1)"}
+  ]
+
+  defp chart_series_colors(true, _index, trend), do: get_chart_colors(trend)
+
+  defp chart_series_colors(false, index, _trend) do
+    Enum.at(
+      @comparison_palette,
+      rem(index, length(@comparison_palette))
+    )
+  end
 
   # ----------------------------------------------------------------------------
   # Render functions
@@ -266,4 +309,24 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
           Phoenix.LiveView.Socket.t()
   defp assign_interval(socket, interval \\ :daily),
     do: assign(socket, :interval, interval)
+
+  @spec assign_ean_listings(
+          Phoenix.LiveView.Socket.t(),
+          Marketplaces.Product.t()
+        ) :: Phoenix.LiveView.Socket.t()
+  defp assign_ean_listings(socket, product) do
+    assign(
+      socket,
+      :ean_listings,
+      Marketplaces.list_other_ean_listings(
+        product,
+        socket.assigns.current_user
+      )
+    )
+  end
+
+  defp empty_ean_listings, do: %{visible: [], hidden_supplier_count: 0}
+
+  defp has_ean_listings?(%{visible: [], hidden_supplier_count: 0}), do: false
+  defp has_ean_listings?(_ean_listings), do: true
 end

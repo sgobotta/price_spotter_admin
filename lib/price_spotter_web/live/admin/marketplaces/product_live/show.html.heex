@@ -1,7 +1,7 @@
-<div class="xl:mx-32">
-  <div class="my-4">
-    <.header>
-      <%= @product.name %>
+<div class="min-w-0 max-w-full">
+  <div class="my-4 min-w-0">
+    <.header class="min-w-0">
+      <span class="block truncate"><%= @product.name %></span>
       <:subtitle>
         <%= gettext(
           "Detailed view with current product metadata and price trend."
@@ -41,8 +41,8 @@
     </.header>
   </div>
 
-  <div id={@product.id} class="my-8 grid gap-6 lg:grid-cols-3">
-    <section class="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 lg:col-span-2">
+  <div id={@product.id} class="my-8 grid min-w-0 gap-6">
+    <section class="min-w-0 max-w-full overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
       <div class="flex flex-col gap-3 border-b border-zinc-200 p-4 dark:border-zinc-700 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div class="text-sm text-zinc-500 dark:text-zinc-400">
           <%= gettext("Product information") %>
@@ -67,50 +67,22 @@
         </div>
       </div>
 
-      <div class="grid gap-6 p-4 sm:p-6 md:grid-cols-2">
-        <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
-          <div class="aspect-square w-full overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
+      <div class="grid min-w-0 gap-6 p-4 sm:p-6 md:grid-cols-2">
+        <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+          <div class="aspect-square w-full max-w-full overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
             <img
               :if={@product.img_url != nil}
               src={@product.img_url}
               alt={gettext("%{name} image", name: @product.name)}
-              class="h-full w-full object-cover"
+              class="h-full w-full max-w-full object-cover"
             />
           </div>
         </div>
 
-        <dl class="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
-          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
-            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              <%= gettext("Supplier") %>
-            </dt>
-            <dd class="text-sm text-zinc-700 dark:text-zinc-200">
-              <%= String.replace(@product.supplier_name, "-", " ") %>
-            </dd>
-          </div>
-
-          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
-            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              <%= gettext("Category") %>
-            </dt>
-            <dd class="text-sm text-zinc-700 dark:text-zinc-200">
-              <%= maybe_render_category(@product.category) %>
-            </dd>
-          </div>
-
-          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
-            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              <%= gettext("Price") %>
-            </dt>
-            <dd class="text-sm text-zinc-700 dark:text-zinc-200">
-              <%= if @product.price == nil do %>
-                <%= gettext("No price yet") %>
-              <% else %>
-                <%= render_price(@product.price) %>
-              <% end %>
-            </dd>
-          </div>
-
+        <dl
+          id="product-details-list"
+          class="min-w-0 divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700"
+        >
           <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
             <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
               <%= gettext("EAN") %>
@@ -174,7 +146,7 @@
       </div>
     </section>
 
-    <section class="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+    <section class="min-w-0 max-w-full overflow-hidden rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
       <div class="mb-3 flex items-center justify-between">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
           <%= gettext("Price history") %>
@@ -187,16 +159,17 @@
       </div>
 
       <div class="mb-4 rounded-lg border border-zinc-200 p-1 dark:border-zinc-700">
-        <div class="grid grid-cols-3 gap-1">
+        <div
+          class="grid grid-cols-3 gap-1"
+          role="group"
+          aria-label={gettext("Price history")}
+        >
           <button
+            type="button"
+            aria-pressed={to_string(@interval == :daily)}
             class={[
-              "rounded-md px-2 py-1 text-sm transition-colors",
-              if(@interval == :daily,
-                do:
-                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
-                else:
-                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              )
+              "segmented-control-tab rounded-md px-2 py-1 text-sm",
+              @interval == :daily && "is-selected"
             ]}
             phx-click="interval_change"
             phx-value-interval={:daily}
@@ -204,14 +177,11 @@
             <%= gettext("Daily") %>
           </button>
           <button
+            type="button"
+            aria-pressed={to_string(@interval == :weekly)}
             class={[
-              "rounded-md px-2 py-1 text-sm transition-colors",
-              if(@interval == :weekly,
-                do:
-                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
-                else:
-                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              )
+              "segmented-control-tab rounded-md px-2 py-1 text-sm",
+              @interval == :weekly && "is-selected"
             ]}
             phx-click="interval_change"
             phx-value-interval={:weekly}
@@ -219,14 +189,11 @@
             <%= gettext("Weekly") %>
           </button>
           <button
+            type="button"
+            aria-pressed={to_string(@interval == :monthly)}
             class={[
-              "rounded-md px-2 py-1 text-sm transition-colors",
-              if(@interval == :monthly,
-                do:
-                  "bg-zinc-200 font-semibold text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100",
-                else:
-                  "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              )
+              "segmented-control-tab rounded-md px-2 py-1 text-sm",
+              @interval == :monthly && "is-selected"
             ]}
             phx-click="interval_change"
             phx-value-interval={:monthly}
@@ -236,11 +203,98 @@
         </div>
       </div>
 
-      <div class="h-64 w-full">
+      <div class="relative h-96 w-full min-w-0 max-w-full overflow-hidden">
         <%= render_chart(@socket) %>
       </div>
     </section>
   </div>
+
+  <section
+    :if={has_ean_listings?(@ean_listings)}
+    id="ean-listings"
+    class="mb-8 min-w-0 max-w-full overflow-hidden rounded-lg border border-sky-200 bg-sky-50 p-4 dark:border-sky-900 dark:bg-sky-950/40 sm:p-6"
+  >
+    <div class="mb-4 flex items-start gap-3">
+      <.icon
+        name="hero-building-storefront"
+        class="mt-0.5 h-5 w-5 shrink-0 text-sky-600 dark:text-sky-300"
+      />
+      <div>
+        <h2 class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+          <%= gettext("Same product at other suppliers") %>
+        </h2>
+        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <%= gettext("This EAN is also listed by other suppliers.") %>
+        </p>
+      </div>
+    </div>
+
+    <ul
+      :if={@ean_listings.visible != []}
+      id="ean-listings-visible"
+      class="divide-y divide-sky-200 rounded-lg border border-sky-200 bg-white dark:divide-sky-900 dark:border-sky-900 dark:bg-zinc-900"
+    >
+      <li
+        :for={listing <- @ean_listings.visible}
+        id={"ean-listing-#{listing.id}"}
+        class="grid grid-cols-2 items-center gap-3 p-3 sm:p-4"
+      >
+        <div class="min-w-0 space-y-2">
+          <.pill
+            text={String.replace(listing.supplier_name, "-", " ")}
+            variant={:danger}
+          />
+          <a
+            href={~p"/admin/marketplaces/products/#{listing}"}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={listing.name}
+            class="flex min-w-0 max-w-full items-center gap-1 text-sm font-medium text-zinc-800 hover:text-sky-600 dark:text-zinc-100 dark:hover:text-sky-300"
+          >
+            <span class="min-w-0 truncate"><%= listing.name %></span>
+            <.icon name="hero-link-solid" class="h-4 w-4 shrink-0" />
+          </a>
+        </div>
+
+        <div class="min-w-0 text-sm">
+          <div class="font-semibold text-zinc-500 dark:text-zinc-400">
+            <%= if listing.price == nil do %>
+              <%= gettext("No price yet") %>
+            <% else %>
+              <%= render_price(listing.price) %>
+            <% end %>
+          </div>
+          <div class="text-zinc-500 dark:text-zinc-400">
+            <%= gettext("Last price update") %>: <%= TimeAgo.time_ago(
+              listing.price_updated_at
+            ) %>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <p
+      :if={@ean_listings.hidden_supplier_count > 0}
+      id="ean-listings-hidden-count"
+      class="mt-3 text-sm text-zinc-600 dark:text-zinc-400"
+    >
+      <%= if @ean_listings.visible != [] do %>
+        <%= ngettext(
+          "%{count} more supplier sells this product",
+          "%{count} more suppliers sell this product",
+          @ean_listings.hidden_supplier_count,
+          count: @ean_listings.hidden_supplier_count
+        ) %>
+      <% else %>
+        <%= ngettext(
+          "%{count} other supplier sells this product",
+          "%{count} other suppliers sell this product",
+          @ean_listings.hidden_supplier_count,
+          count: @ean_listings.hidden_supplier_count
+        ) %>
+      <% end %>
+    </p>
+  </section>
 
   <.back navigate={~p"/admin/marketplaces/products"}>
     <%= gettext("Back to products") %>

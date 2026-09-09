@@ -293,6 +293,96 @@ defmodule PriceSpotter.Marketplaces do
 
   def list_products_by_ean(_ean), do: []
 
+  @type ean_listings :: %{
+          visible: [Product.t()],
+          hidden_supplier_count: non_neg_integer()
+        }
+
+  @doc """
+  Returns other-supplier listings that share `product`'s EAN, split by
+  whether the user can access those suppliers.
+
+  Hidden matches are counted by distinct supplier, not product row.
+  """
+  @spec list_other_ean_listings(Product.t(), User.t()) :: ean_listings()
+  def list_other_ean_listings(%Product{ean: ean} = product, %User{} = user)
+      when is_binary(ean) do
+    {visible, hidden} =
+      product
+      |> other_ean_products()
+      |> partition_ean_listings(user)
+
+    %{
+      visible: visible,
+      hidden_supplier_count: count_distinct_suppliers(hidden)
+    }
+  end
+
+  def list_other_ean_listings(_product, _user),
+    do: %{visible: [], hidden_supplier_count: 0}
+
+  defp other_ean_products(%Product{
+         id: product_id,
+         ean: ean,
+         supplier_id: supplier_id,
+         supplier_name: supplier_name
+       }) do
+    query =
+      from(p in Product,
+        where: p.ean == ^ean and p.id != ^product_id,
+        order_by: [asc: p.supplier_name, asc: p.name]
+      )
+
+    query =
+      case supplier_id do
+        nil ->
+          from(p in query,
+            where:
+              not is_nil(p.supplier_id) or p.supplier_name != ^supplier_name
+          )
+
+        id ->
+          from(p in query,
+            where: p.supplier_id != ^id or is_nil(p.supplier_id)
+          )
+      end
+
+    Repo.all(query)
+  end
+
+  defp partition_ean_listings(products, %User{role: :admin}),
+    do: {products, []}
+
+  defp partition_ean_listings(products, %User{id: user_id}) do
+    accessible_ids = user_accessible_supplier_ids(user_id)
+
+    Enum.split_with(products, fn product ->
+      MapSet.member?(accessible_ids, product.supplier_id)
+    end)
+  end
+
+  defp user_accessible_supplier_ids(user_id) do
+    from(us in Relations.UserSupplier,
+      where: us.user_id == ^user_id,
+      select: us.supplier_id
+    )
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
+  defp count_distinct_suppliers(products) do
+    products
+    |> Enum.map(&ean_listing_supplier_key/1)
+    |> Enum.uniq()
+    |> length()
+  end
+
+  defp ean_listing_supplier_key(%Product{supplier_id: nil, supplier_name: name}),
+    do: {:name, name}
+
+  defp ean_listing_supplier_key(%Product{supplier_id: supplier_id}),
+    do: {:id, supplier_id}
+
   @doc """
   Given an internal id returns a product if exists.
 
