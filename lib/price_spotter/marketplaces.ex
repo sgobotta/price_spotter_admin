@@ -634,23 +634,24 @@ defmodule PriceSpotter.Marketplaces do
       _repo, %{supplier: %Supplier{} = s} ->
         {:ok, {:noop, s}}
     end)
-    # Relate supplier to a product
+    # Relate supplier to a product. Return the assigned product so callers
+    # (price snapshots) see supplier_id — the create/update struct is stale.
     |> Ecto.Multi.run(:assoc_supplier, fn _repo,
                                           %{
                                             maybe_create_product:
-                                              {_product_op, %Product{} = p},
+                                              {product_op, %Product{} = p},
                                             maybe_create_supplier:
                                               {_supplier_op,
                                                %Supplier{id: supplier_id}}
                                           } ->
-      {:ok, %Product{}} = assign_supplier(p, supplier_id)
-      {:ok, {:ok, :noop}}
+      {:ok, %Product{} = product} = assign_supplier(p, supplier_id)
+      {:ok, {product_op, product}}
     end)
     # Submit transaction
     |> Repo.transaction()
     |> case do
       {:ok, result} ->
-        {:ok, result.maybe_create_product}
+        {:ok, result.assoc_supplier}
 
       error ->
         Logger.error(
@@ -953,10 +954,22 @@ defmodule PriceSpotter.Marketplaces do
 
   """
   @spec record_product_price(Product.t(), non_neg_integer()) ::
-          {:ok, ProductPriceDocument.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, ProductPriceDocument.t()}
+          | {:ok, :skipped}
+          | {:error, Ecto.Changeset.t()}
+  def record_product_price(product, timestamp \\ :os.system_time(:millisecond))
+
+  def record_product_price(%Product{id: product_id, price: nil}, _timestamp) do
+    Logger.debug(
+      "Skipping product price record for product with id=#{product_id} because price is missing"
+    )
+
+    {:ok, :skipped}
+  end
+
   def record_product_price(
         %Product{id: product_id, price: price, supplier_id: supplier_id},
-        timestamp \\ :os.system_time(:millisecond)
+        timestamp
       ) do
     scraped_at =
       DateTime.from_unix!(timestamp, :millisecond)
