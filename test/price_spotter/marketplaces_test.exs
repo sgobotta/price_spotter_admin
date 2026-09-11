@@ -131,6 +131,45 @@ defmodule PriceSpotter.MarketplacesTest do
       assert product.supplier_url == update_attrs.supplier_url
     end
 
+    test "from_entry!/1 treats unpriced as a valid missing price" do
+      entry = %Redis.Stream.Entry{
+        id: "1-0",
+        datetime: DateTime.utc_now(),
+        values: %{
+          "ean_code" => "7790070418161",
+          "category" => "almacen",
+          "img_url" => "https://example.com/img.png",
+          "internal_id" => "carrefour-unpriced-1",
+          "meta" => "{}",
+          "name" => "Some product",
+          "price" => "unpriced",
+          "supplier" => "carrefour",
+          "supplier_url" => "https://www.carrefour.com.ar/p/1"
+        }
+      }
+
+      changeset = Product.from_entry!(entry)
+
+      assert changeset.valid?
+      assert Ecto.Changeset.get_field(changeset, :price) == nil
+    end
+
+    test "record_product_price/2 skips history writes when the product has no price" do
+      product =
+        product_fixture(%{
+          internal_id: "unpriced-#{System.unique_integer()}",
+          price: nil
+        })
+
+      assert {:ok, :skipped} = Marketplaces.record_product_price(product)
+
+      refute Repo.exists?(
+               from(s in Marketplaces.ProductPriceSnapshot,
+                 where: s.product_id == ^product.id
+               )
+             )
+    end
+
     test "upsert_product/1 creates a product when the product does not exist" do
       # Setup
       valid_attrs = valid_attrs()
@@ -149,6 +188,13 @@ defmodule PriceSpotter.MarketplacesTest do
       assert product.price == Decimal.new(valid_attrs.price)
       assert product.supplier_name == valid_attrs.supplier_name
       assert product.supplier_url == valid_attrs.supplier_url
+
+      assert %Supplier{id: supplier_id} =
+               PriceSpotter.Repo.get_by(Supplier,
+                 name: valid_attrs.supplier_name
+               )
+
+      assert product.supplier_id == supplier_id
     end
 
     test "upsert_supplier/1 creates a supplier when the supplier does not exist" do
@@ -160,10 +206,13 @@ defmodule PriceSpotter.MarketplacesTest do
       result = Marketplaces.upsert_product(cs)
 
       # Verify
-      assert {:ok, {:created, %Product{id: product_id}}} = result
+      assert {:ok,
+              {:created, %Product{id: product_id, supplier_id: supplier_id}}} =
+               result
+
       %{supplier_name: supplier_name} = valid_attrs
 
-      assert %Supplier{id: supplier_id, name: ^supplier_name} =
+      assert %Supplier{id: ^supplier_id, name: ^supplier_name} =
                PriceSpotter.Repo.get_by(Supplier, name: supplier_name)
 
       assert %Product{supplier_id: ^supplier_id} =
@@ -185,9 +234,11 @@ defmodule PriceSpotter.MarketplacesTest do
       result = Marketplaces.upsert_product(cs)
 
       # Verify
-      assert {:ok, {:created, %Product{id: product_id}}} = result
+      assert {:ok,
+              {:created, %Product{id: product_id, supplier_id: supplier_id}}} =
+               result
 
-      assert %Supplier{id: supplier_id, name: ^supplier_name} =
+      assert %Supplier{id: ^supplier_id, name: ^supplier_name} =
                PriceSpotter.Repo.get_by(Supplier, name: supplier_name)
 
       assert %Product{supplier_id: ^supplier_id} =

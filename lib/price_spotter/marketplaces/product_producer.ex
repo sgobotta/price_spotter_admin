@@ -91,6 +91,11 @@ defmodule PriceSpotter.Marketplaces.ProductProducer do
        %PriceSpotter.Marketplaces.ProductPriceDocument{id: product_price_id}} ->
         Logger.debug("Recorded product price with id=#{product_price_id}")
 
+      {:ok, :skipped} ->
+        Logger.debug(
+          "Skipped product price record for product with id=#{product.id}"
+        )
+
       {:error, %Ecto.Changeset{errors: errors}} ->
         Logger.error(
           "There was an error while recording product price for product with id=#{product.id} errors=#{inspect(errors)}"
