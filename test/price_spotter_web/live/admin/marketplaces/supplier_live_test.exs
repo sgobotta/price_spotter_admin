@@ -31,6 +31,11 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
     } do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
+      assert has_element?(
+               index_live,
+               "button#suppliers-#{supplier.id}-header"
+             )
+
       html =
         index_live
         |> element("#suppliers-#{supplier.id}-header")

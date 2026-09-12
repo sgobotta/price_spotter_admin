@@ -142,13 +142,14 @@ defmodule PriceSpotterWeb.ListComponents do
     ~H"""
     <div id={@id} class="flex min-w-0 flex-col px-4 py-3">
       <div class="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div
+        <button
           id={"#{@id}-header"}
+          type="button"
           phx-click={@header_click}
           phx-value-key={if @toggle_patch, do: nil, else: @toggle_key}
           aria-expanded={@expanded}
           aria-controls={"#{@id}-expand"}
-          class="flex min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden"
+          class="flex min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden border-0 bg-transparent p-0 text-left appearance-none"
         >
           <div :if={@leading != []} class="shrink-0">
             <%= render_slot(@leading) %>
@@ -196,7 +197,7 @@ defmodule PriceSpotterWeb.ListComponents do
           <span class="sr-only">
             <%= if @expanded, do: gettext("Collapse"), else: gettext("Expand") %>
           </span>
-        </div>
+        </button>
 
         <div
           :if={@actions != []}
