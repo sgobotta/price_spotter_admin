@@ -168,18 +168,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     test "updates product in listing", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
-      html =
-        index_live
-        |> element("#products-#{product.id}-header")
-        |> render_click()
+      index_live
+      |> element("#products-#{product.id}-header")
+      |> render_click()
 
       assert_patch_path(
         index_live,
         ~p"/admin/marketplaces/products/#{product}/edit"
       )
 
-      assert html =~ gettext("Show Product")
       assert has_element?(index_live, "#products-#{product.id}-preview")
+      assert has_element?(index_live, "#products-analytics-#{product.id}")
       assert has_element?(index_live, "#products-edit-form-#{product.id}")
       assert has_element?(index_live, "#product-form-#{product.id}")
 
