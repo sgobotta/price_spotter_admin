@@ -78,6 +78,36 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
     |> render_click()
   end
 
+  defp runtime_params_json(overrides \\ %{}) do
+    Map.merge(
+      %{
+        "match_timeout_ms" => %{
+          "type" => "int",
+          "default" => 2000,
+          "value" => 2000,
+          "description" => "Wait for a product tile."
+        },
+        "debounce_ms" => %{
+          "type" => "int",
+          "default" => 1000,
+          "value" => 1000,
+          "description" => "Sleep after fill()."
+        }
+      },
+      overrides
+    )
+  end
+
+  defp spider_with_params(attrs \\ %{}) do
+    spider_json(Map.merge(%{"runtime_params" => runtime_params_json()}, attrs))
+  end
+
+  defp confirm_reset_params(view) do
+    view
+    |> element("#confirm-reset-params")
+    |> render_click()
+  end
+
   describe "as an admin" do
     setup [:register_and_log_in_admin]
 
@@ -689,6 +719,209 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
       assert html =~ "run is not stoppable"
       assert html =~ gettext("Running")
+    end
+
+    test "hides runtime params when the extractor advertises none", %{
+      conn: conn
+    } do
+      stub_list([
+        spider_json(%{
+          "name" => "yaguar",
+          "supports_dry_run" => false,
+          "supports_ean_override" => false,
+          "runtime_params" => %{}
+        })
+      ])
+
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "yaguar")
+
+      refute html =~ "spiders-yaguar-params-form"
+      refute html =~ gettext("Runtime params")
+    end
+
+    test "saves edited runtime params via the extractor API", %{conn: conn} do
+      stub_list([spider_with_params()])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      html = expand(view, "coto-by-ean")
+
+      assert html =~ "spiders-coto-by-ean-params-form"
+      assert html =~ gettext("Match timeout (ms)")
+      assert html =~ gettext("Default: %{value}", value: 2000)
+
+      FakeHttpAdapter.stub(fn :patch, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/coto-by-ean/params")
+
+        assert Jason.decode!(body) == %{
+                 "params" => %{
+                   "match_timeout_ms" => 12_000,
+                   "debounce_ms" => 1000
+                 }
+               }
+
+        {:ok, 200,
+         spider_with_params(%{
+           "runtime_params" =>
+             runtime_params_json(%{
+               "match_timeout_ms" => %{
+                 "type" => "int",
+                 "default" => 2000,
+                 "value" => 12_000,
+                 "description" => "Wait for a product tile."
+               }
+             })
+         })}
+      end)
+
+      html =
+        view
+        |> form("#spiders-coto-by-ean-params-form", %{
+          "params" => %{
+            "match_timeout_ms" => "12000",
+            "debounce_ms" => "1000"
+          }
+        })
+        |> render_submit()
+
+      assert html =~ gettext("Runtime params saved")
+      assert html =~ ~s(value="12000")
+    end
+
+    test "resets runtime params after confirmation", %{conn: conn} do
+      stub_list([
+        spider_with_params(%{
+          "runtime_params" =>
+            runtime_params_json(%{
+              "match_timeout_ms" => %{
+                "type" => "int",
+                "default" => 2000,
+                "value" => 12_000,
+                "description" => "Wait for a product tile."
+              }
+            })
+        })
+      ])
+
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-reset-params")
+        |> render_click()
+
+      assert html =~ "reset-params-modal"
+      assert html =~ gettext("Reset runtime params")
+
+      assert html =~
+               gettext(
+                 "You are about to reset %{name} wait knobs to class defaults.",
+                 name: "coto-by-ean"
+               )
+
+      FakeHttpAdapter.stub(fn :patch, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/coto-by-ean/params")
+        assert Jason.decode!(body) == %{"params" => nil}
+
+        {:ok, 200, spider_with_params()}
+      end)
+
+      html = confirm_reset_params(view)
+      assert html =~ gettext("Runtime params reset to defaults")
+      assert html =~ ~s(value="2000")
+    end
+
+    test "does not reset runtime params when the confirmation is closed", %{
+      conn: conn
+    } do
+      stub_list([spider_with_params()])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      FakeHttpAdapter.stub(fn :patch, _url, _headers, _body ->
+        flunk("closing the reset modal should not call the extractor API")
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-reset-params")
+        |> render_click()
+
+      assert html =~ "reset-params-modal"
+
+      html = render_click(view, "cancel_reset_params")
+      refute html =~ "reset-params-modal"
+    end
+
+    test "sends dirty runtime param diffs with a dry run", %{conn: conn} do
+      stub_list([spider_with_params()])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      view
+      |> form("#spiders-coto-by-ean-params-form", %{
+        "params" => %{
+          "match_timeout_ms" => "12000",
+          "debounce_ms" => "1000"
+        }
+      })
+      |> render_change()
+
+      FakeHttpAdapter.stub(fn :post, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/coto-by-ean/run")
+
+        assert Jason.decode!(body) == %{
+                 "dry_run" => true,
+                 "params" => %{"match_timeout_ms" => 12_000}
+               }
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-dry-run")
+        |> render_click()
+
+      assert html =~ gettext("Dry run")
+    end
+
+    test "does not start a run when a runtime param is invalid", %{
+      conn: conn
+    } do
+      stub_list([spider_with_params()])
+      {:ok, view, _html} = live(conn, ~p"/admin/extractor/spiders")
+      expand(view, "coto-by-ean")
+
+      view
+      |> form("#spiders-coto-by-ean-params-form", %{
+        "params" => %{
+          "match_timeout_ms" => "abc",
+          "debounce_ms" => "1000"
+        }
+      })
+      |> render_change()
+
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        flunk("invalid runtime params should not trigger a run")
+      end)
+
+      html =
+        view
+        |> element("#spiders-coto-by-ean-dry-run")
+        |> render_click()
+
+      assert html =~
+               gettext("%{name} must be an integer",
+                 name: gettext("Match timeout (ms)")
+               )
+
+      refute html =~ ~s(id="spiders-coto-by-ean-active-run")
     end
   end
 
