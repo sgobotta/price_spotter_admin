@@ -1290,6 +1290,21 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @doc """
+  Creates a supplier if the user is allowed to.
+
+  Returns `{:error, :unauthorized}` when the user cannot create suppliers.
+  """
+  @spec create_supplier_for_user(map(), User.t()) ::
+          {:ok, Supplier.t()} | {:error, :unauthorized | Ecto.Changeset.t()}
+  def create_supplier_for_user(attrs, %User{} = user) do
+    if PriceSpotter.Accounts.can_create_suppliers?(user) do
+      create_supplier(attrs)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  @doc """
   Updates a supplier.
 
   ## Examples
@@ -1305,6 +1320,21 @@ defmodule PriceSpotter.Marketplaces do
     supplier
     |> Supplier.changeset(attrs)
     |> Repo.update()
+  end
+
+  @doc """
+  Updates a supplier if the user is allowed to.
+
+  Returns `{:error, :unauthorized}` when the user cannot edit suppliers.
+  """
+  @spec update_supplier_for_user(Supplier.t(), map(), User.t()) ::
+          {:ok, Supplier.t()} | {:error, :unauthorized | Ecto.Changeset.t()}
+  def update_supplier_for_user(%Supplier{} = supplier, attrs, %User{} = user) do
+    if PriceSpotter.Accounts.can_edit_suppliers?(user) do
+      update_supplier(supplier, attrs)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   @doc """

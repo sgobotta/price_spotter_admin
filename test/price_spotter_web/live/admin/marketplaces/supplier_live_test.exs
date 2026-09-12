@@ -220,6 +220,41 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
       assert {:error, {:redirect, %{to: "/"}}} =
                live(conn, ~p"/admin/marketplaces/suppliers/new")
     end
+
+    test "does not open the new supplier form from a live patch", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      render_patch(index_live, ~p"/admin/marketplaces/suppliers/new")
+
+      assert_patch(index_live, ~p"/admin/marketplaces/suppliers")
+      html = render(index_live)
+      assert html =~ gettext("You are not allowed to create suppliers")
+      refute has_element?(index_live, "#supplier-form")
+    end
+
+    test "does not open the edit supplier form from a live patch", %{
+      conn: conn,
+      user: user
+    } do
+      granted = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted.id
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      render_patch(
+        index_live,
+        ~p"/admin/marketplaces/suppliers/#{granted}/edit"
+      )
+
+      assert_patch(index_live, ~p"/admin/marketplaces/suppliers")
+      html = render(index_live)
+      assert html =~ gettext("You are not allowed to edit suppliers")
+      refute has_element?(index_live, "#supplier-form")
+    end
   end
 
   describe "Show as customer" do
@@ -258,6 +293,31 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
       assert html =~ gettext("Subscribed")
       assert html =~ "hero-x-circle-solid"
       refute html =~ gettext("Edit supplier")
+    end
+
+    test "does not open the edit form from a live patch", %{
+      conn: conn,
+      user: user
+    } do
+      granted = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted.id
+      })
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/suppliers/#{granted}")
+
+      render_patch(
+        show_live,
+        ~p"/admin/marketplaces/suppliers/#{granted}/show/edit"
+      )
+
+      assert_patch(show_live, ~p"/admin/marketplaces/suppliers/#{granted}")
+      html = render(show_live)
+      assert html =~ gettext("You are not allowed to edit suppliers")
+      refute has_element?(show_live, "#supplier-form")
     end
   end
 end

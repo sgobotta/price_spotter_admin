@@ -963,6 +963,49 @@ defmodule PriceSpotter.MarketplacesTest do
       assert Marketplaces.get_supplier!(supplier.id).id == supplier.id
     end
 
+    test "create_supplier_for_user/2 creates when the user is an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+
+      assert {:ok, %Supplier{name: "some name"}} =
+               Marketplaces.create_supplier_for_user(
+                 %{name: "some name"},
+                 admin
+               )
+    end
+
+    test "create_supplier_for_user/2 rejects a customer" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+
+      assert {:error, :unauthorized} =
+               Marketplaces.create_supplier_for_user(%{name: "some name"}, user)
+    end
+
+    test "update_supplier_for_user/3 updates when the user is an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert {:ok, %Supplier{name: "some updated name"}} =
+               Marketplaces.update_supplier_for_user(
+                 supplier,
+                 %{name: "some updated name"},
+                 admin
+               )
+    end
+
+    test "update_supplier_for_user/3 rejects a customer" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert {:error, :unauthorized} =
+               Marketplaces.update_supplier_for_user(
+                 supplier,
+                 %{name: "some updated name"},
+                 user
+               )
+
+      assert Marketplaces.get_supplier!(supplier.id).name == supplier.name
+    end
+
     test "change_supplier/1 returns a supplier changeset" do
       supplier = SuppliersFixtures.create()
       assert %Ecto.Changeset{} = Marketplaces.change_supplier(supplier)

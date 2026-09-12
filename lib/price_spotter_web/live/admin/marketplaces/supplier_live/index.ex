@@ -91,18 +91,31 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, gettext("Edit Supplier"))
-    |> assign(
-      :supplier,
-      Marketplaces.get_supplier_for_user!(id, socket.assigns.current_user)
-    )
+    user = socket.assigns.current_user
+
+    if Accounts.can_edit_suppliers?(user) do
+      socket
+      |> assign(:page_title, gettext("Edit Supplier"))
+      |> assign(:supplier, Marketplaces.get_supplier_for_user!(id, user))
+    else
+      deny_supplier_mutation(
+        socket,
+        gettext("You are not allowed to edit suppliers")
+      )
+    end
   end
 
   defp apply_action(socket, :new, _params) do
-    socket
-    |> assign(:page_title, gettext("New Supplier"))
-    |> assign(:supplier, %Supplier{})
+    if Accounts.can_create_suppliers?(socket.assigns.current_user) do
+      socket
+      |> assign(:page_title, gettext("New Supplier"))
+      |> assign(:supplier, %Supplier{})
+    else
+      deny_supplier_mutation(
+        socket,
+        gettext("You are not allowed to create suppliers")
+      )
+    end
   end
 
   defp apply_action(socket, :index, _params) do
@@ -126,6 +139,14 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
       :error,
       gettext("You are not allowed to delete suppliers")
     )
+  end
+
+  defp deny_supplier_mutation(socket, message) do
+    socket
+    |> assign(:live_action, :index)
+    |> put_flash(:error, message)
+    |> push_patch(to: ~p"/admin/marketplaces/suppliers")
+    |> apply_action(:index, %{})
   end
 
   defp empty_suppliers_label(true), do: gettext("No suppliers found.")
