@@ -118,9 +118,23 @@
   <div class="my-8">
     <%= if @products && @meta do %>
       <.list_header meta={@meta} path={~p"/admin/marketplaces/products"}>
-        <:col field={:name} label={gettext("Product")} class="flex-1" />
-        <:col field={:price} label={gettext("Last Price")} />
-        <:col field={:supplier_name} label={gettext("Supplier")} />
+        <:col field={:name} label={gettext("Product")} class="shrink-0" />
+        <:col
+          field={:supplier_name}
+          label={gettext("Supplier")}
+          class="shrink-0"
+        />
+        <:col
+          field={:price_updated_at}
+          label={gettext("Last updated")}
+          class="ml-auto w-52 shrink-0 whitespace-nowrap"
+        />
+        <:col
+          field={:price}
+          label={gettext("Last Price")}
+          class="w-36 shrink-0 whitespace-nowrap"
+        />
+        <:col class="w-4 shrink-0"></:col>
       </.list_header>
 
       <.list_group id="products" items={@products}>
@@ -130,10 +144,15 @@
         <:row :let={product}>
           <.expandable_list_row
             id={"products-#{product.id}"}
-            expanded={expanded_product?(@expanded_product_id, product.id)}
+            expanded={expanded_product?(@expanded, product.id)}
             toggle_key={product.id}
             toggle_patch={
-              toggle_expand_path(product.id, @expanded_product_id, @meta)
+              toggle_expand_path(
+                product,
+                @current_user,
+                @expanded,
+                @meta
+              )
             }
             content_class="flex flex-col gap-3"
           >
@@ -141,84 +160,97 @@
               <.entity_avatar label={product.name} />
             </:leading>
             <:title>
-              <span class="block truncate"><%= product.name %></span>
+              <span class="block min-w-0 truncate"><%= product.name %></span>
             </:title>
             <:subtitle>
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="text-xs text-zinc-500 dark:text-zinc-400">
-                  <%= TimeAgo.time_ago(product.price_updated_at) %>
-                </span>
-                <div class="flex flex-wrap items-center gap-1">
-                  <.pill
-                    text={String.replace(product.supplier_name, "-", " ")}
-                    variant={:danger}
-                  />
-                  <.pill
-                    :if={product.category != nil}
-                    text={maybe_render_category(product.category)}
-                    variant={:info}
-                  />
-                </div>
+              <div class="flex min-w-0 flex-wrap items-center gap-1">
+                <.pill
+                  text={String.replace(product.supplier_name, "-", " ")}
+                  variant={:danger}
+                />
+                <.pill
+                  :if={product.category != nil}
+                  text={maybe_render_category(product.category)}
+                  variant={:info}
+                />
               </div>
             </:subtitle>
-            <:meta>
-              <.pill
-                text={
-                  if product.price == nil,
-                    do: "–",
-                    else: "$#{product.price}"
-                }
-                variant={if product.price == nil, do: :neutral, else: :success}
-              />
+            <:meta :if={!expanded_product?(@expanded, product.id)}>
+              <span class="flex w-52 shrink-0 items-center whitespace-nowrap text-xs text-zinc-500 dark:text-zinc-400">
+                <%= TimeAgo.time_ago(product.price_updated_at) %>
+              </span>
+              <span class="flex w-36 shrink-0 items-center">
+                <.pill
+                  text={product_price(product.price)}
+                  variant={
+                    if product.price == nil, do: :neutral, else: :success
+                  }
+                />
+              </span>
             </:meta>
             <:content>
-              <div class="flex flex-col gap-4">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="flex flex-wrap items-center gap-2 sm:hidden">
-                    <.pill
-                      text={
-                        if product.price == nil,
-                          do: "–",
-                          else: "$#{product.price}"
-                      }
-                      variant={
-                        if product.price == nil, do: :neutral, else: :success
-                      }
-                    />
-                    <.pill
-                      text={String.replace(product.supplier_name, "-", " ")}
-                      variant={:danger}
-                    />
-                    <.pill
-                      :if={product.category != nil}
-                      text={maybe_render_category(product.category)}
-                      variant={:info}
-                    />
-                    <.pill
-                      text={TimeAgo.time_ago(product.price_updated_at)}
-                      variant={:neutral}
+              <div
+                id={"products-#{product.id}-preview"}
+                class="flex flex-col gap-4"
+              >
+                <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
+                  <div class="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
+                    <img
+                      :if={product.img_url != nil}
+                      src={product.img_url}
+                      alt={gettext("%{name} image", name: product.name)}
+                      class="h-full w-full object-cover"
                     />
                   </div>
 
-                  <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      <%= gettext("Last Price") %>
+                    </p>
+                    <p class="mt-1 text-2xl font-semibold text-zinc-800 dark:text-zinc-100">
+                      <%= product_price(product.price) %>
+                    </p>
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      <%= gettext("Last updated") %> · <%= TimeAgo.time_ago(
+                        product.price_updated_at
+                      ) %>
+                    </p>
+
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                      <.render_ean
+                        ean={product.ean || gettext("Unassigned")}
+                        has_code={product.ean != nil}
+                      />
+                      <a
+                        :if={product.supplier_url != nil}
+                        href={product.supplier_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-sky-500 dark:text-zinc-300"
+                      >
+                        <.icon name="hero-link-solid" class="h-4 w-4" />
+                        <%= gettext("Open") %>
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="flex shrink-0 flex-row items-center gap-2">
                     <.link
-                      navigate={~p"/admin/marketplaces/products/#{product}"}
-                      class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                      id={"products-analytics-#{product.id}"}
+                      navigate={
+                        ~p"/admin/marketplaces/products/#{product}/show"
+                      }
+                      class="inline-flex items-center justify-center rounded-lg py-2 px-3 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
                     >
-                      <%= gettext("Show Product") %>
+                      <.icon name="hero-chart-bar-solid" class="h-4 w-4" />
+                      <span class="sr-only">
+                        <%= gettext("Analytics") %>
+                      </span>
                     </.link>
-                    <a
-                      :if={product.supplier_url != nil}
-                      href={product.supplier_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-                    >
-                      <%= gettext("Supplier page") %>
-                    </a>
                     <.button
                       :if={can_delete_products?(@current_user)}
                       id={"products-delete-#{product.id}"}
+                      type="button"
                       phx-click={
                         JS.push("delete", value: %{id: product.id})
                         |> hide("#products-#{product.id}")
@@ -230,18 +262,14 @@
                       }
                       class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
                     >
-                      <%= gettext("Delete") %>
+                      <.icon name="hero-trash-solid" class="h-4 w-4" />
+                      <span class="sr-only"><%= gettext("Delete") %></span>
                     </.button>
                   </div>
                 </div>
 
                 <div
-                  :if={
-                    @live_action == :edit &&
-                      @product != nil &&
-                      @product.id == product.id &&
-                      can_edit_products?(@current_user)
-                  }
+                  :if={can_edit_products?(@current_user)}
                   id={"products-edit-form-#{product.id}"}
                 >
                   <.live_component
@@ -249,10 +277,11 @@
                       PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent
                     }
                     id={"product-inline-edit-#{product.id}"}
-                    title={@page_title}
+                    title={gettext("Edit Product")}
                     action={:edit}
                     variant={:inline}
-                    product={@product}
+                    product={product}
+                    form_id={"product-form-#{product.id}"}
                     patch={products_index_path(@meta)}
                   />
                 </div>
@@ -266,10 +295,6 @@
         <Flop.Phoenix.cursor_pagination
           meta={@meta}
           path={~p"/admin/marketplaces/products"}
-          opts={[
-            next_link_content: render_next_icon(@socket),
-            previous_link_content: render_previous_icon(@socket)
-          ]}
         />
       </div>
     <% end %>

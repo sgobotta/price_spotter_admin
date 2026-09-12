@@ -11,7 +11,7 @@ defmodule PriceSpotterWeb.SidebarComponent do
       :if={@current_user}
       class="
         hidden sm:flex sm:flex-col
-        w-56 shrink-0 h-screen sticky top-0
+        w-56 shrink-0 self-stretch
         border-r border-dotted border-zinc-300 dark:border-zinc-700
         bg-zinc-50 dark:bg-zinc-900
         py-4 px-2 gap-1

@@ -5,30 +5,39 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
   alias PriceSpotter.Marketplaces.Product
+  alias PriceSpotterWeb.Admin.ExpandableList
 
   @impl true
   def mount(_params, session, socket) do
     socket = assign_defaults(session, socket)
 
-    {:ok, assign(socket, %{products: nil, meta: nil})}
+    {:ok,
+     assign(socket, %{
+       products: nil,
+       meta: nil,
+       expanded: ExpandableList.new()
+     })}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
+    list_params = Map.drop(params, ["id"])
+
     case Marketplaces.list_products_by_user(
-           params,
+           list_params,
            socket.assigns.current_user
          ) do
       {:ok, {products, meta}} ->
         {:noreply,
          socket
-         |> assign(%{products: products, meta: meta})
+         |> assign(%{products: products, meta: meta, list_params: list_params})
          |> assign_selection_options()
          |> assign_filter_fields()
          |> assign(filter_fields_form: to_form(meta))
          |> assign_header_action()
          |> assign(:section_title, gettext("Products"))
-         |> apply_action(socket.assigns.live_action, params)}
+         |> apply_action(socket.assigns.live_action, params)
+         |> maybe_include_selected_product()}
 
       _error ->
         {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
@@ -67,62 +76,134 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    product = Marketplaces.get_product!(id)
-    {:ok, _} = Marketplaces.delete_product(product)
+    user = socket.assigns.current_user
 
-    {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
+    case Marketplaces.get_product_for_user(id, user) do
+      nil ->
+        {:noreply, unauthorized_delete(socket)}
+
+      product ->
+        case Marketplaces.delete_product_for_user(product, user) do
+          {:ok, _} ->
+            {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
+
+          {:error, :unauthorized} ->
+            {:noreply, unauthorized_delete(socket)}
+        end
+    end
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    product = Marketplaces.get_product!(id)
+    product =
+      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
 
     socket
     |> assign(:page_title, gettext("Edit Product"))
-    |> assign(:expanded_product_id, product.id)
+    |> assign(:expanded, MapSet.new([product.id]))
+    |> assign(:product, product)
+  end
+
+  defp apply_action(socket, :show, %{"id" => id}) do
+    product =
+      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
+
+    socket
+    |> assign(:page_title, gettext("Listing Products"))
+    |> assign(:expanded, MapSet.new([product.id]))
     |> assign(:product, product)
   end
 
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, gettext("New Product"))
-    |> assign(:expanded_product_id, nil)
+    |> assign(:expanded, ExpandableList.new())
     |> assign(:product, %Product{})
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, gettext("Listing Products"))
-    |> assign(:expanded_product_id, nil)
+    |> assign(:expanded, ExpandableList.new())
     |> assign(:product, nil)
+  end
+
+  defp maybe_include_selected_product(
+         %{
+           assigns: %{
+             live_action: action,
+             product: %Product{id: id} = product,
+             products: products
+           }
+         } = socket
+       )
+       when action in [:show, :edit] and is_binary(id) do
+    if Enum.any?(products, &(&1.id == id)) do
+      socket
+    else
+      assign(socket, :products, [product | products])
+    end
+  end
+
+  defp maybe_include_selected_product(socket), do: socket
+
+  defp assign_saved_product(
+         %{assigns: %{product: %Product{id: id}}} = socket,
+         product
+       )
+       when id == product.id do
+    assign(socket, :product, product)
+  end
+
+  defp assign_saved_product(socket, _product), do: socket
+
+  defp unauthorized_delete(socket) do
+    put_flash(
+      socket,
+      :error,
+      gettext("You are not allowed to delete products")
+    )
   end
 
   @impl true
   def handle_info(
         {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent,
-         {:saved, _product}},
+         {:saved, product}},
         socket
       ) do
-    {:noreply, socket}
+    {:noreply, refresh_products(socket, product)}
   end
 
-  def render_next_icon(assigns) do
-    ~H"""
-    <div class="navigation-btn-container pressable">
-      <div class="navigation-btn">
-        <.icon name="hero-arrow-right-solid" class="h-6 w-6" />
-      </div>
-    </div>
-    """
+  @impl true
+  def handle_info({:product_inline_saved, _product}, socket) do
+    {:noreply,
+     put_flash(socket, :info, gettext("Product updated successfully"))}
   end
 
-  def render_previous_icon(assigns) do
-    ~H"""
-    <div class="navigation-btn-container pressable">
-      <div class="navigation-btn">
-        <.icon name="hero-arrow-left-solid" class="h-6 w-6" />
-      </div>
-    </div>
-    """
+  defp refresh_products(socket, product) do
+    socket = assign_saved_product(socket, product)
+    list_params = Map.get(socket.assigns, :list_params, %{})
+
+    case Marketplaces.list_products_by_user(
+           list_params,
+           socket.assigns.current_user
+         ) do
+      {:ok, {products, meta}} ->
+        socket
+        |> assign(:products, products)
+        |> assign(:meta, meta)
+        |> assign_selection_options()
+        |> assign_filter_fields()
+        |> assign(filter_fields_form: to_form(meta))
+        |> maybe_include_selected_product()
+
+      _error ->
+        products =
+          Enum.map(socket.assigns.products, fn existing ->
+            if existing.id == product.id, do: product, else: existing
+          end)
+
+        assign(socket, :products, products)
+    end
   end
 
   @spec maybe_render_category(String.t() | nil) :: String.t()
@@ -217,10 +298,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp get_limit, do: Product.limit()
 
   defp can_edit_products?(user), do: Accounts.can_edit_products?(user)
-  defp can_delete_products?(user), do: Accounts.can_edit_products?(user)
+  defp can_delete_products?(user), do: Accounts.can_delete_products?(user)
 
-  defp expanded_product?(expanded_product_id, product_id),
-    do: expanded_product_id == product_id
+  defp expanded_product?(expanded, product_id),
+    do: ExpandableList.expanded?(expanded, product_id)
 
   defp products_index_path(meta) do
     Flop.Phoenix.build_path(~p"/admin/marketplaces/products", meta.flop,
@@ -228,20 +309,26 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     )
   end
 
-  defp product_edit_path(product_id, meta) do
-    Flop.Phoenix.build_path(
-      ~p"/admin/marketplaces/products/#{product_id}/edit",
-      meta.flop,
-      backend: meta.backend
-    )
+  defp product_expand_path(product, user, meta) do
+    path =
+      if can_edit_products?(user) do
+        ~p"/admin/marketplaces/products/#{product}/edit"
+      else
+        ~p"/admin/marketplaces/products/#{product}"
+      end
+
+    Flop.Phoenix.build_path(path, meta.flop, backend: meta.backend)
   end
 
-  defp toggle_expand_path(product_id, expanded_product_id, meta) do
-    case expanded_product?(expanded_product_id, product_id) do
+  defp toggle_expand_path(product, user, expanded, meta) do
+    case expanded_product?(expanded, product.id) do
       true -> products_index_path(meta)
-      false -> product_edit_path(product_id, meta)
+      false -> product_expand_path(product, user, meta)
     end
   end
+
+  defp product_price(nil), do: "–"
+  defp product_price(price), do: "$#{price}"
 
   defp render_header_action(assigns) do
     ~H"""

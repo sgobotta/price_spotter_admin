@@ -279,6 +279,41 @@ defmodule PriceSpotter.Marketplaces do
   def get_product!(id), do: Repo.get!(Product, id)
 
   @doc """
+  Gets a single product the user is allowed to see.
+
+  Admins can load any product. Customers can only load products from
+  suppliers they have been granted. Returns `nil` if the product does not
+  exist or the user cannot access it.
+  """
+  @spec get_product_for_user(term(), User.t()) :: Product.t() | nil
+  def get_product_for_user(id, %User{role: :admin}), do: Repo.get(Product, id)
+
+  def get_product_for_user(id, %User{} = user) do
+    from(
+      p in Product,
+      join: us in Relations.UserSupplier,
+      on: us.supplier_id == p.supplier_id and us.user_id == ^user.id,
+      where: p.id == ^id,
+      select: p
+    )
+    |> Repo.one()
+  end
+
+  @doc """
+  Gets a single product the user is allowed to see.
+
+  Raises `Ecto.NoResultsError` if the product does not exist or the user
+  cannot access it.
+  """
+  @spec get_product_for_user!(term(), User.t()) :: Product.t()
+  def get_product_for_user!(id, %User{} = user) do
+    case get_product_for_user(id, user) do
+      %Product{} = product -> product
+      nil -> raise Ecto.NoResultsError, queryable: Product
+    end
+  end
+
+  @doc """
   Returns all products sharing the same EAN.
   """
   @spec list_products_by_ean(String.t()) :: [Product.t()]
@@ -454,6 +489,21 @@ defmodule PriceSpotter.Marketplaces do
   """
   def delete_product(%Product{} = product) do
     Repo.delete(product)
+  end
+
+  @doc """
+  Deletes a product if the user is allowed to.
+
+  Returns `{:error, :unauthorized}` when the user cannot delete products.
+  """
+  @spec delete_product_for_user(Product.t(), User.t()) ::
+          {:ok, Product.t()} | {:error, :unauthorized | Ecto.Changeset.t()}
+  def delete_product_for_user(%Product{} = product, %User{} = user) do
+    if PriceSpotter.Accounts.can_delete_products?(user) do
+      delete_product(product)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   @doc """

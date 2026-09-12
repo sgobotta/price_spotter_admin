@@ -1,5 +1,8 @@
 <div class="min-w-0 max-w-full">
-  <div class="my-4 min-w-0">
+  <div
+    id="product-show-header"
+    class="sticky top-0 z-40 -mx-4 mb-4 border-b border-zinc-200 bg-zinc-100 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-800 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+  >
     <.header class="min-w-0">
       <span class="block truncate"><%= @product.name %></span>
       <:subtitle>
@@ -13,16 +16,19 @@
             id="edit-button"
             patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
             phx-click={JS.push_focus()}
+            class="inline-flex items-center justify-center rounded-lg py-2 px-3 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
           >
-            <.button class="bg-zinc-700 text-zinc-100 hover:bg-zinc-600 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300">
-              <%= gettext("Edit Product") %>
-            </.button>
+            <.icon name="hero-pencil-solid" class="h-4 w-4" />
+            <span class="sr-only"><%= gettext("Edit Product") %></span>
           </.link>
         <% end %>
       </:actions>
       <:actions>
-        <%= if Accounts.can_edit_products?(@current_user) do %>
-          <.link
+        <%= if Accounts.can_delete_products?(@current_user) do %>
+          <.button
+            id="delete-button"
+            type="button"
+            class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
             phx-click={
               JS.push("delete", value: %{id: @product.id})
               |> hide("##{@product.id}")
@@ -31,63 +37,48 @@
               gettext("Delete product \"%{name}\"?", name: @product.name)
             }
           >
-            <.button class="bg-rose-500 text-zinc-100 hover:bg-rose-400">
-              <%= gettext("Delete product") %>
-              <.icon name="hero-trash-solid" class="ml-1 h-4 w-4" />
-            </.button>
-          </.link>
+            <.icon name="hero-trash-solid" class="h-4 w-4" />
+            <span class="sr-only"><%= gettext("Delete product") %></span>
+          </.button>
         <% end %>
       </:actions>
     </.header>
   </div>
 
   <div id={@product.id} class="my-8 grid min-w-0 gap-6">
-    <section class="min-w-0 max-w-full overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
-      <div class="flex flex-col gap-3 border-b border-zinc-200 p-4 dark:border-zinc-700 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div class="text-sm text-zinc-500 dark:text-zinc-400">
-          <%= gettext("Product information") %>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <.pill
-            text={String.replace(@product.supplier_name, "-", " ")}
-            variant={:danger}
+    <section class="min-w-0 max-w-full overflow-hidden rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+      <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        <div class="mx-auto h-40 w-40 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 sm:mx-0 sm:h-44 sm:w-44">
+          <img
+            :if={@product.img_url != nil}
+            src={@product.img_url}
+            alt={gettext("%{name} image", name: @product.name)}
+            class="h-full w-full object-contain"
           />
-          <.pill
-            text={maybe_render_category(@product.category)}
-            variant={:info}
-          />
-          <.pill
-            text={
-              if @product.price == nil,
-                do: gettext("No price yet"),
-                else: render_price(@product.price)
-            }
-            variant={if @product.price == nil, do: :warning, else: :success}
-          />
-        </div>
-      </div>
-
-      <div class="grid min-w-0 gap-6 p-4 sm:p-6 md:grid-cols-2">
-        <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
-          <div class="aspect-square w-full max-w-full overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
-            <img
-              :if={@product.img_url != nil}
-              src={@product.img_url}
-              alt={gettext("%{name} image", name: @product.name)}
-              class="h-full w-full max-w-full object-cover"
-            />
-          </div>
         </div>
 
         <dl
           id="product-details-list"
-          class="min-w-0 divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700"
+          class="min-w-0 w-full flex-1 divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700"
         >
-          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
-            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              <%= gettext("EAN") %>
-            </dt>
-            <dd class="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-200">
+          <.detail_row id="product-detail-supplier" label={gettext("Supplier")}>
+            <%= String.replace(@product.supplier_name, "-", " ") %>
+          </.detail_row>
+
+          <.detail_row id="product-detail-category" label={gettext("Category")}>
+            <%= maybe_render_category(@product.category) %>
+          </.detail_row>
+
+          <.detail_row id="product-detail-price" label={gettext("Price")}>
+            <%= if @product.price == nil do %>
+              <%= gettext("No price yet") %>
+            <% else %>
+              <%= render_price(@product.price) %>
+            <% end %>
+          </.detail_row>
+
+          <.detail_row id="product-detail-ean" label={gettext("EAN")}>
+            <div class="flex items-center justify-end gap-2">
               <.render_ean
                 ean={format_ean_string(@product.ean)}
                 has_code={@product.ean != nil}
@@ -116,32 +107,38 @@
                   />
                 <% end %>
               </span>
-            </dd>
-          </div>
+            </div>
+          </.detail_row>
 
-          <div class="flex items-center justify-between gap-4 p-3 sm:p-4">
-            <dt class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              <%= gettext("External link") %>
-            </dt>
-            <dd class="text-sm">
-              <a
-                :if={@product.supplier_url != nil}
-                href={@product.supplier_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 text-zinc-600 hover:text-sky-500 dark:text-zinc-300"
-              >
-                <.icon name="hero-link-solid" class="h-4 w-4" />
-                <%= gettext("Open") %>
-              </a>
-              <span
-                :if={@product.supplier_url == nil}
-                class="text-zinc-500 dark:text-zinc-400"
-              >
-                <%= gettext("Unavailable") %>
-              </span>
-            </dd>
-          </div>
+          <.detail_row
+            id="product-detail-external-link"
+            label={gettext("External link")}
+          >
+            <a
+              :if={@product.supplier_url != nil}
+              href={@product.supplier_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1 text-zinc-600 hover:text-sky-500 dark:text-zinc-300"
+            >
+              <.icon name="hero-link-solid" class="h-4 w-4" />
+              <%= gettext("Open") %>
+            </a>
+            <span
+              :if={@product.supplier_url == nil}
+              class="text-zinc-500 dark:text-zinc-400"
+            >
+              <%= gettext("Unavailable") %>
+            </span>
+          </.detail_row>
+
+          <.detail_row
+            :for={entry <- product_meta_rows(@product.meta)}
+            id={entry.id}
+            label={entry.label}
+          >
+            <%= entry.value %>
+          </.detail_row>
         </dl>
       </div>
     </section>
@@ -237,39 +234,79 @@
       <li
         :for={listing <- @ean_listings.visible}
         id={"ean-listing-#{listing.id}"}
-        class="grid grid-cols-2 items-center gap-3 p-3 sm:p-4"
       >
-        <div class="min-w-0 space-y-2">
-          <.pill
-            text={String.replace(listing.supplier_name, "-", " ")}
-            variant={:danger}
-          />
-          <a
-            href={~p"/admin/marketplaces/products/#{listing}"}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={listing.name}
-            class="flex min-w-0 max-w-full items-center gap-1 text-sm font-medium text-zinc-800 hover:text-sky-600 dark:text-zinc-100 dark:hover:text-sky-300"
-          >
-            <span class="min-w-0 truncate"><%= listing.name %></span>
-            <.icon name="hero-link-solid" class="h-4 w-4 shrink-0" />
-          </a>
-        </div>
+        <.link
+          id={"ean-listing-#{listing.id}-show"}
+          navigate={~p"/admin/marketplaces/products/#{listing}/show"}
+          class="flex items-center gap-3 p-3 sm:p-4 hover:bg-sky-50 dark:hover:bg-sky-950/40"
+        >
+          <div class="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
+            <img
+              :if={listing.img_url != nil}
+              src={listing.img_url}
+              alt=""
+              class="h-full w-full object-contain"
+            />
+          </div>
 
-        <div class="min-w-0 text-sm">
-          <div class="font-semibold text-zinc-500 dark:text-zinc-400">
-            <%= if listing.price == nil do %>
-              <%= gettext("No price yet") %>
-            <% else %>
-              <%= render_price(listing.price) %>
-            <% end %>
+          <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <.pill
+              text={String.replace(listing.supplier_name, "-", " ")}
+              variant={:danger}
+            />
+            <.pill
+              :if={listing.category != nil}
+              text={maybe_render_category(listing.category)}
+              variant={:info}
+            />
+            <span
+              :for={entry <- product_meta_rows(listing.meta)}
+              id={"ean-listing-#{listing.id}-#{entry.id}"}
+              class="inline-flex items-center gap-1 rounded-md bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              <span class="font-medium"><%= entry.label %></span>
+              <span><%= entry.value %></span>
+            </span>
           </div>
-          <div class="text-zinc-500 dark:text-zinc-400">
-            <%= gettext("Last price update") %>: <%= TimeAgo.time_ago(
-              listing.price_updated_at
+
+          <div class="shrink-0 text-right">
+            <div class="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+              <%= if listing.price == nil do %>
+                <%= gettext("No price yet") %>
+              <% else %>
+                <%= render_price(listing.price) %>
+              <% end %>
+            </div>
+            <div
+              :if={delta = price_delta(listing.price, @product.price)}
+              id={"ean-listing-#{listing.id}-delta"}
+              class={[
+                "text-xs font-medium",
+                delta.cmp == :lt && "text-rose-600 dark:text-rose-400",
+                delta.cmp == :gt && "text-emerald-600 dark:text-emerald-400",
+                delta.cmp == :eq && "text-zinc-500 dark:text-zinc-400"
+              ]}
+            >
+              <%= delta.label %>
+            </div>
+            <p
+              class="mt-1 text-xs italic text-zinc-500 dark:text-zinc-400"
+              title={gettext("Last price update")}
+            >
+              <%= TimeAgo.time_ago(listing.price_updated_at) %>
+            </p>
+          </div>
+
+          <.icon
+            name="hero-chevron-right-solid"
+            class="h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500"
+          />
+          <span class="sr-only">
+            <%= gettext("View %{supplier} details",
+              supplier: String.replace(listing.supplier_name, "-", " ")
             ) %>
-          </div>
-        </div>
+          </span>
+        </.link>
       </li>
     </ul>
 
@@ -304,7 +341,7 @@
     :if={@live_action == :edit}
     id="product-modal"
     show
-    on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}
+    on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}/show")}
   >
     <.live_component
       module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
@@ -312,7 +349,7 @@
       title={@page_title}
       action={@live_action}
       product={@product}
-      patch={~p"/admin/marketplaces/products/#{@product}"}
+      patch={~p"/admin/marketplaces/products/#{@product}/show"}
     />
   </.modal>
 </div>

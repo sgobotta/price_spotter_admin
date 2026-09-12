@@ -52,7 +52,8 @@ defmodule PriceSpotterWeb.Router do
           end
 
           live "/", ProductLive.Index, :index
-          live "/:id", ProductLive.Show, :show
+          live "/:id/show", ProductLive.Show, :show
+          live "/:id", ProductLive.Index, :show
         end
 
         scope "/suppliers" do

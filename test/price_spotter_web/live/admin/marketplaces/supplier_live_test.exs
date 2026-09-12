@@ -33,7 +33,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
 
       assert has_element?(
                index_live,
-               "button#suppliers-#{supplier.id}-header"
+               "#suppliers-#{supplier.id}-header[role='button']"
              )
 
       html =

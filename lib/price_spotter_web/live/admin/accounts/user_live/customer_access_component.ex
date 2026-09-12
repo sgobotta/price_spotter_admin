@@ -40,9 +40,10 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
                 phx-value-id={grant.id}
                 phx-target={@myself}
                 data-confirm={gettext("Remove this access?")}
-                class="text-rose-600 hover:text-rose-800"
+                class="inline-flex text-rose-600 hover:text-rose-800"
               >
-                <%= gettext("Remove") %>
+                <.icon name="hero-trash-solid" class="h-4 w-4" />
+                <span class="sr-only"><%= gettext("Remove") %></span>
               </.link>
             </td>
           </tr>
@@ -97,17 +98,17 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLive.CustomerAccessComponent do
           </div>
         </div>
 
-        <button
-          type="button"
-          phx-click="add_row"
-          phx-target={@myself}
-          class="inline-flex items-center gap-2 rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-700 hover:border-zinc-400 hover:bg-zinc-200 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
-        >
-          <.icon name="hero-plus-solid" class="h-4 w-4" />
-          <%= gettext("+ Add another") %>
-        </button>
+        <div class="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            phx-click="add_row"
+            phx-target={@myself}
+            class="inline-flex items-center rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-zinc-700 hover:border-zinc-400 hover:bg-zinc-200 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
+          >
+            <.icon name="hero-plus-solid" class="h-4 w-4" />
+            <span class="sr-only"><%= gettext("Add another") %></span>
+          </button>
 
-        <div>
           <.button phx-disable-with={gettext("Saving...")}>
             <%= gettext("Save access") %>
           </.button>

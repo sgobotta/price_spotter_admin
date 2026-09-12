@@ -18,13 +18,13 @@ msgid_plural "%{minutes} minutes ago"
 msgstr[0] "Hace %{minutes} minuto"
 msgstr[1] "Hace %{minutes} minutos"
 
-#: lib/price_spotter_web/components/core_components.ex:560
+#: lib/price_spotter_web/components/core_components.ex:586
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Acciones"
 
-#: lib/price_spotter_web/components/core_components.ex:107
-#: lib/price_spotter_web/components/core_components.ex:181
+#: lib/price_spotter_web/components/core_components.ex:133
+#: lib/price_spotter_web/components/core_components.ex:207
 #, elixir-autogen, elixir-format
 msgid "close"
 msgstr "cerrar"
@@ -57,31 +57,33 @@ msgid_plural "%{years} years ago"
 msgstr[0] "Hace %{years} año"
 msgstr[1] "Hace %{years} años"
 
-#: lib/price_spotter_web/components/core_components.ex:215
+#: lib/price_spotter_web/components/core_components.ex:241
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr "Intentando reconectar"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:300
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:337
 #, elixir-autogen, elixir-format
 msgid "Back to products"
 msgstr "Volver a productos"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:32
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:167
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:210
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:248
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:291
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:68
 #, elixir-autogen, elixir-format
 msgid "Category"
 msgstr "Categoría"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:80
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:100
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:18
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:101
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:280
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:115
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:22
 #, elixir-autogen, elixir-format
 msgid "Edit Product"
 msgstr "Actualizar producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:124
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:115
 #, elixir-autogen, elixir-format
 msgid "External link"
 msgstr "Enlace externo"
@@ -91,12 +93,13 @@ msgstr "Enlace externo"
 msgid "Img url"
 msgstr "URL de imagen"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:155
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:152
 #, elixir-autogen, elixir-format
 msgid "Last price"
 msgstr "Ultimo Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:94
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:111
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:125
 #, elixir-autogen, elixir-format
 msgid "Listing Products"
 msgstr "Lista de productos"
@@ -110,31 +113,33 @@ msgstr "Lista de productos"
 msgid "Name"
 msgstr "Nombre"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:87
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:118
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:7
 #, elixir-autogen, elixir-format
 msgid "New Product"
 msgstr "Nuevo Producto"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:29
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:207
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:288
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:72
 #, elixir-autogen, elixir-format
 msgid "Price"
 msgstr "Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:155
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:205
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:236
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:286
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:121
 #, elixir-autogen, elixir-format
 msgid "Product"
 msgstr "Producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:115
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:117
 #, elixir-autogen, elixir-format
 msgid "Product created successfully"
 msgstr "Producto creado"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:100
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:138
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:179
 #, elixir-autogen, elixir-format
 msgid "Product updated successfully"
 msgstr "Producto Actualizado"
@@ -144,7 +149,7 @@ msgstr "Producto Actualizado"
 msgid "Save Product"
 msgstr "Guardar"
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:111
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:112
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:40
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:59
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:26
@@ -153,17 +158,17 @@ msgstr "Guardar"
 msgid "Saving..."
 msgstr "Guardando..."
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:208
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:99
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:114
 #, elixir-autogen, elixir-format
 msgid "Show Product"
 msgstr "Detalle de Producto"
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:25
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:71
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:173
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:209
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:123
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:72
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:254
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:290
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:124
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:64
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:2
 #, elixir-autogen, elixir-format
 msgid "Supplier"
@@ -184,7 +189,7 @@ msgstr "Web en proveedor"
 msgid "Use this form to manage product records in your database."
 msgstr "Utiliza este formulario para administrar los registros de la base."
 
-#: lib/price_spotter_web/components/core_components.ex:210
+#: lib/price_spotter_web/components/core_components.ex:236
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr "Sin conexión a internet"
@@ -194,22 +199,23 @@ msgstr "Sin conexión a internet"
 msgid "Internal id"
 msgstr "ID interno"
 
-#: lib/price_spotter_web/components/core_components.ex:202
+#: lib/price_spotter_web/components/core_components.ex:228
 #, elixir-autogen, elixir-format
 msgid "Error!"
 msgstr "Error!"
 
-#: lib/price_spotter_web/components/core_components.ex:201
+#: lib/price_spotter_web/components/core_components.ex:227
 #, elixir-autogen, elixir-format
 msgid "Success!"
 msgstr "Éxito!"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:35
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:41
 #, elixir-autogen, elixir-format
 msgid "Delete product"
 msgstr "Borrar producto"
 
 #: lib/price_spotter_web/components/time_ago.ex:4
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:219
 #, elixir-autogen, elixir-format
 msgid "Unknown"
 msgstr "Desconocido"
@@ -224,47 +230,48 @@ msgstr "Recién"
 msgid "less than a minute ago"
 msgstr "Hace menos de un minuto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:169
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:250
 #, elixir-autogen, elixir-format
 msgid "All categories"
 msgstr "Todas las categorías"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:175
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:256
 #, elixir-autogen, elixir-format
 msgid "All suppliers"
 msgstr "Todos los proveedores"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:122
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:134
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:208
 #, elixir-autogen, elixir-format
 msgid "Last Price"
-msgstr "Ultimo Precio"
+msgstr "Último Precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:179
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:260
 #, elixir-autogen, elixir-format
 msgid "Last Update"
-msgstr "Ultima Actualización"
+msgstr "Última Actualización"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:190
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:271
 #, elixir-autogen, elixir-format
 msgid "Max Price"
 msgstr "Hasta $"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:184
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:265
 #, elixir-autogen, elixir-format
 msgid "Min Price"
 msgstr "Desde $"
 
-#: lib/price_spotter_web/components/core_components.ex:790
+#: lib/price_spotter_web/components/core_components.ex:816
 #, elixir-autogen, elixir-format
 msgid "Clear Filters"
 msgstr "Resetear Filtros"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:192
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:273
 #, elixir-autogen, elixir-format
 msgid "Choose a maximum price"
 msgstr "Elegí un precio máximo"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:186
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:267
 #, elixir-autogen, elixir-format
 msgid "Choose a minimum price"
 msgstr "Elegí un precio mínimo"
@@ -276,22 +283,22 @@ msgstr "Elegí un precio mínimo"
 msgid "Export"
 msgstr "Exportar"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:157
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:238
 #, elixir-autogen, elixir-format
 msgid "Filter by product name"
 msgstr "Filtro por nombre de producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:211
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:292
 #, elixir-autogen, elixir-format
 msgid "Image URL"
 msgstr "URL de imagen"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:208
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:289
 #, elixir-autogen, elixir-format
 msgid "Last Price Update"
 msgstr "Ultima actualización"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:212
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:293
 #, elixir-autogen, elixir-format
 msgid "Product URL"
 msgstr "Producto"
@@ -564,7 +571,7 @@ msgid "Price Spotter"
 msgstr "Price Spotter"
 
 #: lib/price_spotter_web/components/sidebar_component.ex:29
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:30
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:38
 #, elixir-autogen, elixir-format
 msgid "Products"
 msgstr "Productos"
@@ -609,8 +616,8 @@ msgstr "No tienes cuenta?"
 msgid "Sign up"
 msgstr "Registrarme"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:227
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:31
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:259
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:37
 #, elixir-autogen, elixir-format
 msgid "Delete product \"%{name}\"?"
 msgstr "Borrar producto \"%{name}\"?"
@@ -667,7 +674,7 @@ msgid "New User"
 msgstr "Nuev@ Usuari@"
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:26
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:82
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:83
 #: lib/price_spotter_web/live/admin/accounts/user_live/form_component.ex:35
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.ex:133
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:17
@@ -793,38 +800,39 @@ msgstr "Este es un registro de la base de datos."
 msgid "Export all pages?"
 msgstr "¿Exportar todas las páginas?"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:177
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:174
 #, elixir-autogen, elixir-format
 msgid "Daily"
 msgstr "Diario"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:201
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:198
 #, elixir-autogen, elixir-format
 msgid "Monthly"
 msgstr "Mes"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:189
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:186
 #, elixir-autogen, elixir-format
 msgid "Weekly"
 msgstr "Semanal"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:38
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:160
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:206
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:88
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:241
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:287
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:80
 #, elixir-autogen, elixir-format
 msgid "EAN"
 msgstr "EAN"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:62
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:262
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:74
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:275
 #, elixir-autogen, elixir-format
 msgid "No price yet"
 msgstr "Sin precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:132
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:255
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:291
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:213
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:221
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:392
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:428
 #, elixir-autogen, elixir-format
 msgid "Unassigned"
 msgstr "No asignado"
@@ -834,17 +842,17 @@ msgstr "No asignado"
 msgid "must be numbers only"
 msgstr "debe contener número únicamente"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:162
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:243
 #, elixir-autogen, elixir-format
 msgid "Search by EAN"
 msgstr "Búsqueda por EAN"
 
-#: lib/price_spotter_web/components/core_components.ex:758
+#: lib/price_spotter_web/components/core_components.ex:784
 #, elixir-autogen, elixir-format
 msgid "New"
 msgstr "Nuevo"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:128
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:142
 #, elixir-autogen, elixir-format
 msgid "No products found."
 msgstr "No se encontraron productos."
@@ -897,15 +905,11 @@ msgid_plural "%{count} EANs"
 msgstr[0] "%{count} EAN"
 msgstr[1] "%{count} EANs"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:76
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:201
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:55
 #, elixir-autogen, elixir-format
 msgid "%{name} image"
 msgstr "Imagen de %{name}"
-
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:107
-#, elixir-autogen, elixir-format
-msgid "+ Add another"
-msgstr "+ Agregar otro"
 
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:63
 #, elixir-autogen, elixir-format
@@ -928,18 +932,17 @@ msgstr "Actualizado"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:83
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:84
 #, elixir-autogen, elixir-format
 msgid "Choose a role"
 msgstr "Elegí un rol"
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:72
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:73
 #, elixir-autogen, elixir-format
 msgid "Choose a supplier"
 msgstr "Elegí un proveedor"
 
-#: lib/price_spotter_web/components/list_components.ex:195
-#: lib/price_spotter_web/components/list_components.ex:217
+#: lib/price_spotter_web/components/list_components.ex:200
 #, elixir-autogen, elixir-format
 msgid "Collapse"
 msgstr "Contraer"
@@ -967,7 +970,7 @@ msgstr "Acceso de cliente actualizado con éxito"
 
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:49
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:135
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:233
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:266
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:59
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -978,15 +981,10 @@ msgstr "Borrar"
 msgid "Delete user"
 msgstr "Borrar usuari@"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:6
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:9
 #, elixir-autogen, elixir-format
 msgid "Detailed view with current product metadata and price trend."
 msgstr "Vista detallada con los metadatos actuales del producto y la tendencia de precios."
-
-#: lib/price_spotter_web/components/list_components.ex:195
-#, elixir-autogen, elixir-format
-msgid "Details"
-msgstr "Detalles"
 
 #: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:178
 #: lib/price_spotter_web/live/admin/extractor/spider_live/index.html.heex:220
@@ -1010,7 +1008,7 @@ msgstr "Editar"
 msgid "Email Address"
 msgstr "Dirección de email"
 
-#: lib/price_spotter_web/components/list_components.ex:217
+#: lib/price_spotter_web/components/list_components.ex:200
 #, elixir-autogen, elixir-format
 msgid "Expand"
 msgstr "Expandir"
@@ -1059,7 +1057,7 @@ msgstr "Sin subas de precio en las últimas 24h."
 msgid "No spiders found."
 msgstr "No se encontraron spiders."
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:52
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:53
 #, elixir-autogen, elixir-format
 msgid "No supplier access granted yet."
 msgstr "Todavía no se otorgó acceso a proveedores."
@@ -1069,7 +1067,8 @@ msgstr "Todavía no se otorgó acceso a proveedores."
 msgid "One EAN per line or comma separated"
 msgstr "Un EAN por línea o separados por comas"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:135
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:232
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:125
 #, elixir-autogen, elixir-format
 msgid "Open"
 msgstr "Abrir"
@@ -1079,8 +1078,8 @@ msgstr "Abrir"
 msgid "Price decreases"
 msgstr "Bajas de precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:152
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:165
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:149
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:162
 #, elixir-autogen, elixir-format
 msgid "Price history"
 msgstr "Historial de precios"
@@ -1090,12 +1089,7 @@ msgstr "Historial de precios"
 msgid "Price increases"
 msgstr "Subas de precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:48
-#, elixir-autogen, elixir-format
-msgid "Product information"
-msgstr "Información del producto"
-
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:45
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:46
 #, elixir-autogen, elixir-format
 msgid "Remove"
 msgstr "Quitar"
@@ -1133,7 +1127,7 @@ msgstr "Guardar"
 msgid "Save EANs"
 msgstr "Guardar EANs"
 
-#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:112
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:113
 #, elixir-autogen, elixir-format
 msgid "Save access"
 msgstr "Guardar acceso"
@@ -1142,11 +1136,6 @@ msgstr "Guardar acceso"
 #, elixir-autogen, elixir-format
 msgid "Scraped in 24h"
 msgstr "Escaneados en 24h"
-
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:217
-#, elixir-autogen, elixir-format
-msgid "Supplier page"
-msgstr "Página del proveedor"
 
 #: lib/price_spotter_web/controllers/page_html/home.html.heex:103
 #, elixir-autogen, elixir-format
@@ -1163,7 +1152,7 @@ msgstr "Mayor suba de precio"
 msgid "Total products"
 msgstr "Total de productos"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:141
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:131
 #, elixir-autogen, elixir-format
 msgid "Unavailable"
 msgstr "No disponible"
@@ -1311,31 +1300,31 @@ msgstr "Guardar programación"
 msgid "This extractor will run"
 msgstr "Este extractor se ejecutará"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:282
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:319
 #, elixir-autogen, elixir-format
 msgid "%{count} more supplier sells this product"
 msgid_plural "%{count} more suppliers sell this product"
 msgstr[0] "%{count} proveedor más vende este producto"
 msgstr[1] "%{count} proveedores más venden este producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:289
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:326
 #, elixir-autogen, elixir-format
 msgid "%{count} other supplier sells this product"
 msgid_plural "%{count} other suppliers sell this product"
 msgstr[0] "%{count} otro proveedor vende este producto"
 msgstr[1] "%{count} otros proveedores venden este producto"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:268
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:294
 #, elixir-autogen, elixir-format
 msgid "Last price update"
 msgstr "Última actualización de precio"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:224
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:221
 #, elixir-autogen, elixir-format
 msgid "Same product at other suppliers"
 msgstr "El mismo producto en otros proveedores"
 
-#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:227
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:224
 #, elixir-autogen, elixir-format
 msgid "This EAN is also listed by other suppliers."
 msgstr "Este EAN también está listado en otros proveedores."
@@ -1419,3 +1408,82 @@ msgstr "Algunos parámetros de ejecución tienen un formato inválido"
 #, elixir-autogen, elixir-format
 msgid "You are about to reset %{name} wait knobs to class defaults."
 msgstr "Estás por restablecer los tiempos de espera de %{name} a los valores predeterminados."
+
+#: lib/price_spotter_web/live/admin/accounts/user_live/customer_access_component.ex:109
+#, elixir-autogen, elixir-format
+msgid "Add another"
+msgstr "+ Agregar otro"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:129
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:214
+#, elixir-autogen, elixir-format
+msgid "Last updated"
+msgstr "Última actualización"
+
+#: lib/price_spotter_web/components/core_components.ex:53
+#, elixir-autogen, elixir-format
+msgid "Next"
+msgstr "Siguiente"
+
+#: lib/price_spotter_web/components/core_components.ex:49
+#, elixir-autogen, elixir-format
+msgid "Previous"
+msgstr "Anterior"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:247
+#, elixir-autogen, elixir-format
+msgid "Analytics"
+msgstr "Análisis"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:370
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:372
+#, elixir-autogen, elixir-format
+msgid "In stock"
+msgstr "En stock"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:360
+#, elixir-autogen, elixir-format
+msgid "List price"
+msgstr "Precio de lista"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:381
+#, elixir-autogen, elixir-format
+msgid "No"
+msgstr "No"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:371
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:373
+#, elixir-autogen, elixir-format
+msgid "Out of stock"
+msgstr "Sin stock"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:361
+#, elixir-autogen, elixir-format
+msgid "Price per kg"
+msgstr "Precio por kg"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:362
+#, elixir-autogen, elixir-format
+msgid "Price without taxes"
+msgstr "Precio sin impuestos"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:359
+#, elixir-autogen, elixir-format
+msgid "Stock"
+msgstr "Stock"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:381
+#, elixir-autogen, elixir-format
+msgid "Yes"
+msgstr "Sí"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:163
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:54
+#, elixir-autogen, elixir-format
+msgid "You are not allowed to delete products"
+msgstr "No tenés permiso para eliminar productos"
+
+#: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:305
+#, elixir-autogen, elixir-format
+msgid "View %{supplier} details"
+msgstr "Ver detalles de %{supplier}"

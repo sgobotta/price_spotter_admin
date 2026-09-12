@@ -105,6 +105,28 @@ defmodule PriceSpotter.MarketplacesTest do
       end
     end
 
+    test "delete_product_for_user/2 deletes when the user is an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      product = product_fixture()
+
+      assert {:ok, %Product{}} =
+               Marketplaces.delete_product_for_user(product, admin)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_product!(product.id)
+      end
+    end
+
+    test "delete_product_for_user/2 rejects a customer" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      product = product_fixture()
+
+      assert {:error, :unauthorized} =
+               Marketplaces.delete_product_for_user(product, user)
+
+      assert Marketplaces.get_product!(product.id).id == product.id
+    end
+
     test "change_product/1 returns a product changeset" do
       product = product_fixture()
       assert %Ecto.Changeset{} = Marketplaces.change_product(product)
@@ -288,6 +310,61 @@ defmodule PriceSpotter.MarketplacesTest do
                Marketplaces.list_products_by_user(%{}, user)
 
       assert result.id == granted_product.id
+    end
+
+    test "get_product_for_user!/2 returns any product for an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      product = product_fixture()
+
+      assert Marketplaces.get_product_for_user!(product.id, admin).id ==
+               product.id
+    end
+
+    test "get_product_for_user!/2 returns a product from a granted supplier" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      product =
+        product_fixture(%{
+          internal_id: "granted-#{System.unique_integer()}",
+          supplier_id: granted_supplier.id
+        })
+
+      assert Marketplaces.get_product_for_user!(product.id, user).id ==
+               product.id
+    end
+
+    test "get_product_for_user!/2 raises when the customer cannot access the product" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      other_supplier = SuppliersFixtures.create()
+
+      product =
+        product_fixture(%{
+          internal_id: "other-#{System.unique_integer()}",
+          supplier_id: other_supplier.id
+        })
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_product_for_user!(product.id, user)
+      end
+    end
+
+    test "get_product_for_user/2 returns nil when the customer cannot access the product" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      other_supplier = SuppliersFixtures.create()
+
+      product =
+        product_fixture(%{
+          internal_id: "other-#{System.unique_integer()}",
+          supplier_id: other_supplier.id
+        })
+
+      assert Marketplaces.get_product_for_user(product.id, user) == nil
     end
 
     test "list_product_categories_by_user/1 returns every category for an admin" do
