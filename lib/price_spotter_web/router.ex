@@ -88,6 +88,7 @@ defmodule PriceSpotterWeb.Router do
         pipe_through [:require_authenticated_user, :admin]
 
         live "/spiders", SpiderLive.Index, :index
+        live "/candidates", CandidateLive.Index, :index
       end
 
       get "/products/export", ExportController, :create
