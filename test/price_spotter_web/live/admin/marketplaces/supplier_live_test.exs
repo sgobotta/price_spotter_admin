@@ -33,7 +33,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
 
       html =
         index_live
-        |> element("#suppliers-#{supplier.id}-toggle-expand")
+        |> element("#suppliers-#{supplier.id}-header")
         |> render_click()
 
       assert html =~ "suppliers-#{supplier.id}-expand"
@@ -45,7 +45,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
 
       html =
         index_live
-        |> element("#suppliers-#{supplier.id}-toggle-expand")
+        |> element("#suppliers-#{supplier.id}-header")
         |> render_click()
 
       assert html =~ "suppliers-#{supplier.id}-expand"
@@ -85,7 +85,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
       index_live
-      |> element("#suppliers-#{supplier.id}-toggle-expand")
+      |> element("#suppliers-#{supplier.id}-header")
       |> render_click()
 
       assert index_live
@@ -117,7 +117,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
 
       index_live
-      |> element("#suppliers-#{supplier.id}-toggle-expand")
+      |> element("#suppliers-#{supplier.id}-header")
       |> render_click()
 
       assert index_live

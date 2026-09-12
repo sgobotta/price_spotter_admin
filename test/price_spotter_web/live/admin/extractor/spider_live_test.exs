@@ -39,7 +39,7 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLiveTest do
 
   defp expand(view, key) do
     view
-    |> element("#spiders-#{key}-toggle-expand")
+    |> element("#spiders-#{key}-header")
     |> render_click()
   end
 
