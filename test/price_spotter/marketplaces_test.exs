@@ -424,6 +424,84 @@ defmodule PriceSpotter.MarketplacesTest do
                granted_supplier.name
              ]
     end
+
+    test "list_suppliers_for_user/2 returns every supplier for an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert {:ok, {[result], _meta}} =
+               Marketplaces.list_suppliers_for_user(%{}, admin)
+
+      assert result.id == supplier.id
+    end
+
+    test "list_suppliers_for_user/2 scopes a non-admin user to granted suppliers" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      _other_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      assert {:ok, {[result], _meta}} =
+               Marketplaces.list_suppliers_for_user(%{}, user)
+
+      assert result.id == granted_supplier.id
+    end
+
+    test "get_supplier_for_user/2 returns nil when a customer is not granted" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+      other_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      assert Marketplaces.get_supplier_for_user(granted_supplier.id, user).id ==
+               granted_supplier.id
+
+      assert Marketplaces.get_supplier_for_user(other_supplier.id, user) == nil
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_supplier_for_user!(other_supplier.id, user)
+      end
+    end
+
+    test "user_has_suppliers?/1 is true for admins and granted customers" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+
+      refute Marketplaces.user_has_suppliers?(user)
+      assert Marketplaces.user_has_suppliers?(admin)
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      assert Marketplaces.user_has_suppliers?(user)
+    end
+
+    test "subscribed_to_supplier?/2 is true for admins and granted customers" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert Marketplaces.subscribed_to_supplier?(admin, supplier.id)
+      refute Marketplaces.subscribed_to_supplier?(user, supplier.id)
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: supplier.id
+      })
+
+      assert Marketplaces.subscribed_to_supplier?(user, supplier.id)
+    end
   end
 
   describe "other ean listings" do
@@ -456,6 +534,7 @@ defmodule PriceSpotter.MarketplacesTest do
 
       assert Marketplaces.list_other_ean_listings(product, user) == %{
                visible: [],
+               hidden_suppliers: [],
                hidden_supplier_count: 0
              }
     end
@@ -524,10 +603,21 @@ defmodule PriceSpotter.MarketplacesTest do
           supplier_name: hidden_supplier_b.name
         })
 
-      assert %{visible: [result], hidden_supplier_count: 2} =
-               Marketplaces.list_other_ean_listings(current, user)
+      assert %{
+               visible: [result],
+               hidden_supplier_count: 2,
+               hidden_suppliers: hidden
+             } = Marketplaces.list_other_ean_listings(current, user)
 
       assert result.id == visible.id
+
+      assert MapSet.new(hidden, & &1.id) ==
+               MapSet.new([hidden_supplier_a.id, hidden_supplier_b.id])
+
+      assert MapSet.new(hidden, & &1.name) ==
+               MapSet.new([hidden_supplier_a.name, hidden_supplier_b.name])
+
+      refute Enum.any?(hidden, &Map.has_key?(&1, :price))
     end
 
     test "treats unassigned listings as other suppliers by name" do
@@ -849,6 +939,28 @@ defmodule PriceSpotter.MarketplacesTest do
       assert_raise Ecto.NoResultsError, fn ->
         Marketplaces.get_supplier!(supplier.id)
       end
+    end
+
+    test "delete_supplier_for_user/2 deletes when the user is an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert {:ok, %Supplier{}} =
+               Marketplaces.delete_supplier_for_user(supplier, admin)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_supplier!(supplier.id)
+      end
+    end
+
+    test "delete_supplier_for_user/2 rejects a customer" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      supplier = SuppliersFixtures.create()
+
+      assert {:error, :unauthorized} =
+               Marketplaces.delete_supplier_for_user(supplier, user)
+
+      assert Marketplaces.get_supplier!(supplier.id).id == supplier.id
     end
 
     test "change_supplier/1 returns a supplier changeset" do

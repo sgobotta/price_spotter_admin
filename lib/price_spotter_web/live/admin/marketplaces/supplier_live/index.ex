@@ -1,6 +1,7 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
   use PriceSpotterWeb, :live_view
 
+  alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
   alias PriceSpotter.Marketplaces.Supplier
   alias PriceSpotterWeb.Admin.ExpandableList
@@ -17,11 +18,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    case Marketplaces.list_suppliers(params) do
+    user = socket.assigns.current_user
+
+    case Marketplaces.list_suppliers_for_user(params, user) do
       {:ok, {suppliers, meta}} ->
         {:noreply,
          socket
          |> assign(suppliers: suppliers, meta: meta)
+         |> assign(
+           :has_granted_suppliers,
+           Marketplaces.user_has_suppliers?(user)
+         )
          |> assign(filter_fields: filter_fields())
          |> apply_action(socket.assigns.live_action, params)}
 
@@ -65,16 +72,31 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    supplier = Marketplaces.get_supplier!(id)
-    {:ok, _} = Marketplaces.delete_supplier(supplier)
+    user = socket.assigns.current_user
 
-    {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/suppliers")}
+    case Marketplaces.get_supplier_for_user(id, user) do
+      nil ->
+        {:noreply, unauthorized_delete(socket)}
+
+      supplier ->
+        case Marketplaces.delete_supplier_for_user(supplier, user) do
+          {:ok, _} ->
+            {:noreply,
+             push_patch(socket, to: ~p"/admin/marketplaces/suppliers")}
+
+          {:error, :unauthorized} ->
+            {:noreply, unauthorized_delete(socket)}
+        end
+    end
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, gettext("Edit Supplier"))
-    |> assign(:supplier, Marketplaces.get_supplier!(id))
+    |> assign(
+      :supplier,
+      Marketplaces.get_supplier_for_user!(id, socket.assigns.current_user)
+    )
   end
 
   defp apply_action(socket, :new, _params) do
@@ -97,6 +119,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
       ) do
     {:noreply, socket}
   end
+
+  defp unauthorized_delete(socket) do
+    put_flash(
+      socket,
+      :error,
+      gettext("You are not allowed to delete suppliers")
+    )
+  end
+
+  defp empty_suppliers_label(true), do: gettext("No suppliers found.")
+
+  defp empty_suppliers_label(false),
+    do: gettext("You don't have access to any suppliers.")
 
   defp filter_fields do
     [

@@ -888,6 +888,16 @@ msgstr ""
 msgid "No suppliers found."
 msgstr ""
 
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:133
+#, elixir-autogen, elixir-format
+msgid "You don't have access to any suppliers."
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:8
+#, elixir-autogen, elixir-format
+msgid "Subscribed"
+msgstr ""
+
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:22
 #, elixir-autogen, elixir-format
 msgid "No users found."
@@ -1481,6 +1491,11 @@ msgstr ""
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.ex:54
 #, elixir-autogen, elixir-format
 msgid "You are not allowed to delete products"
+msgstr ""
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:127
+#, elixir-autogen, elixir-format
+msgid "You are not allowed to delete suppliers"
 msgstr ""
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:305

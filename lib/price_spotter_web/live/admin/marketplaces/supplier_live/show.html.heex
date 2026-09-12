@@ -1,10 +1,29 @@
 <.header>
-  <%= gettext("Supplier") %> <%= @supplier.id %>
+  <%= @supplier.name %>
   <:subtitle>
-    <%= gettext("This is a supplier record from your database.") %>
+    <span id="supplier-subscribed" class="inline-flex items-center gap-2">
+      <%= gettext("Subscribed") %>
+      <.icon
+        :if={@subscribed? == true}
+        name="hero-check-circle-solid"
+        class="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+      />
+      <span :if={@subscribed? == true} class="sr-only">
+        <%= gettext("Yes") %>
+      </span>
+      <.icon
+        :if={@subscribed? == false}
+        name="hero-x-circle-solid"
+        class="h-5 w-5 text-rose-600 dark:text-rose-400"
+      />
+      <span :if={@subscribed? == false} class="sr-only">
+        <%= gettext("No") %>
+      </span>
+    </span>
   </:subtitle>
   <:actions>
     <.link
+      :if={Accounts.can_edit_suppliers?(@current_user)}
       patch={~p"/admin/marketplaces/suppliers/#{@supplier}/show/edit"}
       phx-click={JS.push_focus()}
     >
@@ -12,10 +31,6 @@
     </.link>
   </:actions>
 </.header>
-
-<.list>
-  <:item title={gettext("Name")}><%= @supplier.name %></:item>
-</.list>
 
 <.back navigate={~p"/admin/marketplaces/suppliers"}>
   <%= gettext("Back to suppliers") %>

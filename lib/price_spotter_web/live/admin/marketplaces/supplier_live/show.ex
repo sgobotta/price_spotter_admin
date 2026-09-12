@@ -1,19 +1,27 @@
 defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Show do
   use PriceSpotterWeb, :live_view
 
+  alias PriceSpotter.Accounts
   alias PriceSpotter.Marketplaces
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(_params, session, socket) do
+    {:ok, assign_defaults(session, socket)}
   end
 
   @impl true
   def handle_params(%{"id" => id}, _uri, socket) do
+    supplier = Marketplaces.get_supplier!(id)
+    user = socket.assigns.current_user
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:supplier, Marketplaces.get_supplier!(id))}
+     |> assign(:supplier, supplier)
+     |> assign(
+       :subscribed?,
+       Marketplaces.subscribed_to_supplier?(user, supplier.id)
+     )}
   end
 
   @impl true

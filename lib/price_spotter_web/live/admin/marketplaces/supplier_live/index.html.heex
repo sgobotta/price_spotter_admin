@@ -1,7 +1,10 @@
 <.header>
   <%= gettext("Listing Suppliers") %>
   <:actions>
-    <.link patch={~p"/admin/marketplaces/suppliers/new"}>
+    <.link
+      :if={Accounts.can_create_suppliers?(@current_user)}
+      patch={~p"/admin/marketplaces/suppliers/new"}
+    >
       <.button><%= gettext("New Supplier") %></.button>
     </.link>
   </:actions>
@@ -18,7 +21,7 @@
 
   <.list_group id="suppliers" items={@suppliers}>
     <:empty_state>
-      <.no_results_found label={gettext("No suppliers found.")} />
+      <.no_results_found label={empty_suppliers_label(@has_granted_suppliers)} />
     </:empty_state>
     <:row :let={supplier}>
       <.expandable_list_row
@@ -39,6 +42,7 @@
               <%= gettext("Show") %>
             </.link>
             <.link
+              :if={Accounts.can_edit_suppliers?(@current_user)}
               id={"suppliers-edit-#{supplier.id}"}
               patch={~p"/admin/marketplaces/suppliers/#{supplier}/edit"}
               class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
@@ -46,6 +50,7 @@
               <%= gettext("Edit") %>
             </.link>
             <.button
+              :if={Accounts.can_delete_suppliers?(@current_user)}
               id={"suppliers-delete-#{supplier.id}"}
               phx-click={
                 JS.push("delete", value: %{id: supplier.id})

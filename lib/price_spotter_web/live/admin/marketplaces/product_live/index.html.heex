@@ -127,12 +127,12 @@
         <:col
           field={:price_updated_at}
           label={gettext("Last updated")}
-          class="ml-auto w-52 shrink-0 whitespace-nowrap"
+          class="ml-auto w-52 shrink-0 justify-center whitespace-nowrap text-center"
         />
         <:col
           field={:price}
           label={gettext("Last Price")}
-          class="w-36 shrink-0 whitespace-nowrap"
+          class="w-36 shrink-0 justify-center whitespace-nowrap text-center"
         />
         <:col class="w-4 shrink-0"></:col>
       </.list_header>
@@ -176,10 +176,10 @@
               </div>
             </:subtitle>
             <:meta :if={!expanded_product?(@expanded, product.id)}>
-              <span class="flex w-52 shrink-0 items-center whitespace-nowrap text-xs text-zinc-500 dark:text-zinc-400">
+              <span class="flex w-52 shrink-0 items-center justify-center whitespace-nowrap text-center text-xs text-zinc-500 dark:text-zinc-400">
                 <%= TimeAgo.time_ago(product.price_updated_at) %>
               </span>
-              <span class="flex w-36 shrink-0 items-center">
+              <span class="flex w-36 shrink-0 items-center justify-center">
                 <.pill
                   text={product_price(product.price)}
                   variant={

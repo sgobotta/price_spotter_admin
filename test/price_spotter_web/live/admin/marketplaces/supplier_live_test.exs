@@ -137,11 +137,14 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
     setup [:create_supplier, :register_and_log_in_admin]
 
     test "displays supplier", %{conn: conn, supplier: supplier} do
-      {:ok, _show_live, html} =
+      {:ok, show_live, html} =
         live(conn, ~p"/admin/marketplaces/suppliers/#{supplier}")
 
       assert html =~ gettext("Show Supplier")
       assert html =~ supplier.name
+      assert html =~ gettext("Subscribed")
+      assert has_element?(show_live, "#supplier-subscribed")
+      assert html =~ "hero-check-circle-solid"
     end
 
     test "updates supplier within modal", %{conn: conn, supplier: supplier} do
@@ -169,6 +172,92 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
       html = render(show_live)
       assert html =~ gettext("Supplier updated successfully")
       assert html =~ "some updated name"
+    end
+  end
+
+  describe "Index as customer" do
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+
+    setup [:register_and_log_in_user]
+
+    test "shows suppliers in the sidebar", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      assert has_element?(index_live, "nav a", gettext("Suppliers"))
+    end
+
+    test "shows an empty-access message when the user has no suppliers", %{
+      conn: conn
+    } do
+      {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      assert html =~ gettext("You don't have access to any suppliers.")
+      refute html =~ gettext("New Supplier")
+    end
+
+    test "lists only granted suppliers and hides admin actions", %{
+      conn: conn,
+      user: user
+    } do
+      granted = SuppliersFixtures.create()
+      other = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted.id
+      })
+
+      {:ok, index_live, html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      assert html =~ granted.name
+      refute html =~ other.name
+      refute html =~ gettext("New Supplier")
+      refute has_element?(index_live, "#suppliers-edit-#{granted.id}")
+      refute has_element?(index_live, "#suppliers-delete-#{granted.id}")
+    end
+
+    test "redirects away from the new supplier page", %{conn: conn} do
+      assert {:error, {:redirect, %{to: "/"}}} =
+               live(conn, ~p"/admin/marketplaces/suppliers/new")
+    end
+  end
+
+  describe "Show as customer" do
+    alias PriceSpotter.Marketplaces.Relations.UsersSuppliersFixtures
+
+    setup [:register_and_log_in_user]
+
+    test "displays a granted supplier without edit actions", %{
+      conn: conn,
+      user: user
+    } do
+      granted = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted.id
+      })
+
+      {:ok, _show_live, html} =
+        live(conn, ~p"/admin/marketplaces/suppliers/#{granted}")
+
+      assert html =~ gettext("Show Supplier")
+      assert html =~ granted.name
+      assert html =~ gettext("Subscribed")
+      assert html =~ "hero-check-circle-solid"
+      refute html =~ gettext("Edit supplier")
+    end
+
+    test "shows an ungranted supplier as not subscribed", %{conn: conn} do
+      other = SuppliersFixtures.create()
+
+      {:ok, _show_live, html} =
+        live(conn, ~p"/admin/marketplaces/suppliers/#{other}")
+
+      assert html =~ other.name
+      assert html =~ gettext("Subscribed")
+      assert html =~ "hero-x-circle-solid"
+      refute html =~ gettext("Edit supplier")
     end
   end
 end

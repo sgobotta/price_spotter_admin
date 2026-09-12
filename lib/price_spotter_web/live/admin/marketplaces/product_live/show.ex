@@ -462,8 +462,13 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     )
   end
 
-  defp empty_ean_listings, do: %{visible: [], hidden_supplier_count: 0}
+  defp empty_ean_listings,
+    do: %{visible: [], hidden_suppliers: [], hidden_supplier_count: 0}
 
   defp has_ean_listings?(%{visible: [], hidden_supplier_count: 0}), do: false
   defp has_ean_listings?(_ean_listings), do: true
+
+  defp supplier_display_name(nil), do: gettext("Unassigned")
+
+  defp supplier_display_name(name), do: String.replace(name, "-", " ")
 end

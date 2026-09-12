@@ -30,7 +30,6 @@ defmodule PriceSpotterWeb.SidebarComponent do
         active={active?(@current_path, "/admin/marketplaces/products")}
       />
       <.sidebar_link
-        :if={@current_user.role == :admin}
         navigate={~p"/admin/marketplaces/suppliers"}
         icon="hero-building-storefront-solid"
         label={gettext("Suppliers")}

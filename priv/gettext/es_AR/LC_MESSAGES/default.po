@@ -888,6 +888,16 @@ msgstr "No se encontraron resultados."
 msgid "No suppliers found."
 msgstr "No se encontraron proveedores."
 
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:133
+#, elixir-autogen, elixir-format
+msgid "You don't have access to any suppliers."
+msgstr "No tenés acceso a ningún proveedor."
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.html.heex:8
+#, elixir-autogen, elixir-format
+msgid "Subscribed"
+msgstr "Suscripto"
+
 #: lib/price_spotter_web/live/admin/accounts/user_live/index.html.heex:22
 #, elixir-autogen, elixir-format
 msgid "No users found."
@@ -1311,8 +1321,8 @@ msgstr[1] "%{count} proveedores más venden este producto"
 #, elixir-autogen, elixir-format
 msgid "%{count} other supplier sells this product"
 msgid_plural "%{count} other suppliers sell this product"
-msgstr[0] "%{count} otro proveedor vende este producto"
-msgstr[1] "%{count} otros proveedores venden este producto"
+msgstr[0] "Otro proveedor vende este producto"
+msgstr[1] "Otros %{count} proveedores venden este producto"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:294
 #, elixir-autogen, elixir-format
@@ -1482,6 +1492,11 @@ msgstr "Sí"
 #, elixir-autogen, elixir-format
 msgid "You are not allowed to delete products"
 msgstr "No tenés permiso para eliminar productos"
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:127
+#, elixir-autogen, elixir-format
+msgid "You are not allowed to delete suppliers"
+msgstr "No tenés permiso para eliminar proveedores"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/show.html.heex:305
 #, elixir-autogen, elixir-format

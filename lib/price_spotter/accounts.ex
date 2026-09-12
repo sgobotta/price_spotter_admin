@@ -572,4 +572,13 @@ defmodule PriceSpotter.Accounts do
 
   def can_delete_products?(%User{role: :admin}), do: true
   def can_delete_products?(%User{role: _}), do: false
+
+  def can_create_suppliers?(%User{role: :admin}), do: true
+  def can_create_suppliers?(%User{role: _role}), do: false
+
+  def can_edit_suppliers?(%User{role: :admin}), do: true
+  def can_edit_suppliers?(%User{role: _role}), do: false
+
+  def can_delete_suppliers?(%User{role: :admin}), do: true
+  def can_delete_suppliers?(%User{role: _}), do: false
 end

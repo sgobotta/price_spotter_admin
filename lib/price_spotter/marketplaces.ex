@@ -328,8 +328,14 @@ defmodule PriceSpotter.Marketplaces do
 
   def list_products_by_ean(_ean), do: []
 
+  @type hidden_supplier :: %{
+          id: String.t() | nil,
+          name: String.t() | nil
+        }
+
   @type ean_listings :: %{
           visible: [Product.t()],
+          hidden_suppliers: [hidden_supplier()],
           hidden_supplier_count: non_neg_integer()
         }
 
@@ -337,7 +343,8 @@ defmodule PriceSpotter.Marketplaces do
   Returns other-supplier listings that share `product`'s EAN, split by
   whether the user can access those suppliers.
 
-  Hidden matches are counted by distinct supplier, not product row.
+  Hidden matches are listed by distinct supplier name and id only, with
+  no product prices.
   """
   @spec list_other_ean_listings(Product.t(), User.t()) :: ean_listings()
   def list_other_ean_listings(%Product{ean: ean} = product, %User{} = user)
@@ -347,14 +354,21 @@ defmodule PriceSpotter.Marketplaces do
       |> other_ean_products()
       |> partition_ean_listings(user)
 
+    hidden_suppliers = distinct_hidden_suppliers(hidden)
+
     %{
       visible: visible,
-      hidden_supplier_count: count_distinct_suppliers(hidden)
+      hidden_suppliers: hidden_suppliers,
+      hidden_supplier_count: length(hidden_suppliers)
     }
   end
 
   def list_other_ean_listings(_product, _user),
-    do: %{visible: [], hidden_supplier_count: 0}
+    do: %{
+      visible: [],
+      hidden_suppliers: [],
+      hidden_supplier_count: 0
+    }
 
   defp other_ean_products(%Product{
          id: product_id,
@@ -405,11 +419,12 @@ defmodule PriceSpotter.Marketplaces do
     |> MapSet.new()
   end
 
-  defp count_distinct_suppliers(products) do
+  defp distinct_hidden_suppliers(products) do
     products
-    |> Enum.map(&ean_listing_supplier_key/1)
-    |> Enum.uniq()
-    |> length()
+    |> Enum.uniq_by(&ean_listing_supplier_key/1)
+    |> Enum.map(fn %Product{supplier_id: id, supplier_name: name} ->
+      %{id: id, name: name}
+    end)
   end
 
   defp ean_listing_supplier_key(%Product{supplier_id: nil, supplier_name: name}),
@@ -1127,6 +1142,33 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @doc """
+  Returns a Flop-paginated list of suppliers the user is allowed to see.
+
+  Admins see every supplier. Customers only see suppliers they have been
+  granted.
+  """
+  @spec list_suppliers_for_user(map(), User.t()) ::
+          {:ok, {[Supplier.t()], Flop.Meta.t()}} | {:error, Flop.Meta.t()}
+  def list_suppliers_for_user(params, %User{role: :admin}) do
+    list_suppliers(params)
+  end
+
+  def list_suppliers_for_user(params, %User{} = user) do
+    query =
+      from(
+        s in Supplier,
+        join: us in Relations.UserSupplier,
+        on: us.supplier_id == s.id and us.user_id == ^user.id,
+        select: s
+      )
+
+    with {:ok, flop} <- Flop.validate(params, for: Supplier) do
+      flop = PriceSpotter.Flop.Helpers.ensure_unique_order(flop)
+      {:ok, Flop.run(query, flop, for: Supplier)}
+    end
+  end
+
+  @doc """
   Given a user, returns a list of suppliers the user has access to.
   """
   @spec list_suppliers_by_user(User.t()) :: [String.t()]
@@ -1149,6 +1191,19 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @doc """
+  Returns whether the user can see at least one supplier.
+
+  Admins always can, even when the catalog is empty.
+  """
+  @spec user_has_suppliers?(User.t()) :: boolean()
+  def user_has_suppliers?(%User{role: :admin}), do: true
+
+  def user_has_suppliers?(%User{id: user_id}) do
+    from(us in Relations.UserSupplier, where: us.user_id == ^user_id)
+    |> Repo.exists?()
+  end
+
+  @doc """
   Gets a single supplier.
 
   Raises `Ecto.NoResultsError` if the Supplier does not exist.
@@ -1163,6 +1218,58 @@ defmodule PriceSpotter.Marketplaces do
 
   """
   def get_supplier!(id), do: Repo.get!(Supplier, id)
+
+  @doc """
+  Gets a single supplier the user is allowed to see.
+
+  Admins can load any supplier. Customers can only load suppliers they
+  have been granted. Returns `nil` if the supplier does not exist or the
+  user cannot access it.
+  """
+  @spec get_supplier_for_user(term(), User.t()) :: Supplier.t() | nil
+  def get_supplier_for_user(id, %User{role: :admin}),
+    do: Repo.get(Supplier, id)
+
+  def get_supplier_for_user(id, %User{} = user) do
+    from(
+      s in Supplier,
+      join: us in Relations.UserSupplier,
+      on: us.supplier_id == s.id and us.user_id == ^user.id,
+      where: s.id == ^id,
+      select: s
+    )
+    |> Repo.one()
+  end
+
+  @doc """
+  Gets a single supplier the user is allowed to see.
+
+  Raises `Ecto.NoResultsError` if the supplier does not exist or the user
+  cannot access it.
+  """
+  @spec get_supplier_for_user!(term(), User.t()) :: Supplier.t()
+  def get_supplier_for_user!(id, %User{} = user) do
+    case get_supplier_for_user(id, user) do
+      %Supplier{} = supplier -> supplier
+      nil -> raise Ecto.NoResultsError, queryable: Supplier
+    end
+  end
+
+  @doc """
+  Returns whether `user` is subscribed to the given supplier.
+
+  Admins are always subscribed. Customers are subscribed when they have
+  a `users_suppliers` grant.
+  """
+  @spec subscribed_to_supplier?(User.t(), term()) :: boolean()
+  def subscribed_to_supplier?(%User{role: :admin}, _supplier_id), do: true
+
+  def subscribed_to_supplier?(%User{id: user_id}, supplier_id) do
+    from(us in Relations.UserSupplier,
+      where: us.user_id == ^user_id and us.supplier_id == ^supplier_id
+    )
+    |> Repo.exists?()
+  end
 
   @doc """
   Creates a supplier.
@@ -1214,6 +1321,21 @@ defmodule PriceSpotter.Marketplaces do
   """
   def delete_supplier(%Supplier{} = supplier) do
     Repo.delete(supplier)
+  end
+
+  @doc """
+  Deletes a supplier if the user is allowed to.
+
+  Returns `{:error, :unauthorized}` when the user cannot delete suppliers.
+  """
+  @spec delete_supplier_for_user(Supplier.t(), User.t()) ::
+          {:ok, Supplier.t()} | {:error, :unauthorized | Ecto.Changeset.t()}
+  def delete_supplier_for_user(%Supplier{} = supplier, %User{} = user) do
+    if PriceSpotter.Accounts.can_delete_suppliers?(user) do
+      delete_supplier(supplier)
+    else
+      {:error, :unauthorized}
+    end
   end
 
   @doc """
