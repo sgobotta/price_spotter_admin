@@ -15,11 +15,17 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
           assign(socket,
             spiders: spiders,
             eans_drafts: eans_drafts_from_spiders(spiders),
+            params_drafts: params_drafts_from_spiders(spiders),
             load_error: nil
           )
 
         {:error, %{message: message}} ->
-          assign(socket, spiders: [], eans_drafts: %{}, load_error: message)
+          assign(socket,
+            spiders: [],
+            eans_drafts: %{},
+            params_drafts: %{},
+            load_error: message
+          )
       end
 
     {:ok,
@@ -35,6 +41,8 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
        ean_save_confirm: nil,
        cron_save_confirm: nil,
        toggle_confirm: nil,
+       params_errors: %{},
+       params_reset_confirm: nil,
        expanded: ExpandableList.new()
      )
      |> stream(:run_log, [])}
@@ -207,46 +215,74 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   end
 
   @impl true
+  def handle_event("update_params", %{"key" => key} = params, socket) do
+    drafts = Map.get(params, "params") || %{}
+
+    {:noreply,
+     socket
+     |> update(:params_drafts, &Map.put(&1, key, drafts))
+     |> update(:params_errors, &Map.delete(&1, key))}
+  end
+
+  @impl true
+  def handle_event("save_params", %{"key" => key} = params, socket) do
+    drafts =
+      Map.get(params, "params") ||
+        Map.get(socket.assigns.params_drafts, key, %{})
+
+    persist_params(
+      update(socket, :params_drafts, &Map.put(&1, key, drafts)),
+      key,
+      drafts
+    )
+  end
+
+  @impl true
+  def handle_event("prompt_reset_params", %{"key" => key}, socket) do
+    case find_spider(socket.assigns.spiders, key) do
+      nil ->
+        {:noreply, socket}
+
+      %Spider{name: name} ->
+        {:noreply,
+         assign(socket, :params_reset_confirm, %{key: key, name: name})}
+    end
+  end
+
+  @impl true
+  def handle_event("cancel_reset_params", _params, socket) do
+    {:noreply, assign(socket, :params_reset_confirm, nil)}
+  end
+
+  @impl true
+  def handle_event("confirm_reset_params", _params, socket) do
+    case socket.assigns.params_reset_confirm do
+      nil ->
+        {:noreply, socket}
+
+      %{key: key} ->
+        reset_params(assign(socket, :params_reset_confirm, nil), key)
+    end
+  end
+
+  @impl true
   def handle_event("run", %{"key" => key, "dry_run" => dry_run}, socket) do
     dry_run? = dry_run == "true"
     eans = Extractor.parse_eans(Map.get(socket.assigns.eans_drafts, key))
+    spider = find_spider(socket.assigns.spiders, key)
 
-    case Extractor.trigger_run(key, dry_run: dry_run?, eans: eans) do
-      {:ok,
-       %{run_id: run_id, stream_token: stream_token, stream_url: stream_url}} ->
-        case Extractor.watch_run(run_id, stream_url, stream_token, self()) do
-          {:ok, _pid} ->
-            spider = find_spider(socket.assigns.spiders, key)
+    case run_params(socket, spider, key) do
+      {:ok, params} ->
+        start_run(socket, key, dry_run?, eans, params)
 
-            {:noreply,
-             socket
-             |> assign(
-               active_run: %{
-                 spider_key: key,
-                 spider_name: spider && spider.name,
-                 run_id: run_id,
-                 dry_run: dry_run?,
-                 eans: eans,
-                 status: :running,
-                 stats: nil
-               },
-               log_seq: 0
-             )
-             |> stream(:run_log, [], reset: true)}
-
-          {:error, reason} ->
-            {:noreply,
-             put_flash(
-               socket,
-               :error,
-               gettext("Could not connect to the run stream: %{reason}",
-                 reason: inspect(reason)
-               )
-             )}
-        end
-
-      {:error, %{message: message}} ->
-        {:noreply, put_flash(socket, :error, message)}
+      {:error, details} ->
+        {:noreply,
+         socket
+         |> update(:params_errors, &Map.put(&1, key, details))
+         |> put_flash(
+           :error,
+           gettext("Some runtime params have an invalid format")
+         )}
     end
   end
 
@@ -305,6 +341,110 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
 
       _other ->
         {:noreply, socket}
+    end
+  end
+
+  defp start_run(socket, key, dry_run?, eans, params) do
+    case Extractor.trigger_run(key,
+           dry_run: dry_run?,
+           eans: eans,
+           params: params
+         ) do
+      {:ok,
+       %{run_id: run_id, stream_token: stream_token, stream_url: stream_url}} ->
+        case Extractor.watch_run(run_id, stream_url, stream_token, self()) do
+          {:ok, _pid} ->
+            spider = find_spider(socket.assigns.spiders, key)
+
+            {:noreply,
+             socket
+             |> assign(
+               active_run: %{
+                 spider_key: key,
+                 spider_name: spider && spider.name,
+                 run_id: run_id,
+                 dry_run: dry_run?,
+                 eans: eans,
+                 status: :running,
+                 stats: nil
+               },
+               log_seq: 0
+             )
+             |> stream(:run_log, [], reset: true)}
+
+          {:error, reason} ->
+            {:noreply,
+             put_flash(
+               socket,
+               :error,
+               gettext("Could not connect to the run stream: %{reason}",
+                 reason: inspect(reason)
+               )
+             )}
+        end
+
+      {:error, %{message: message}} ->
+        {:noreply, put_flash(socket, :error, message)}
+    end
+  end
+
+  defp persist_params(socket, key, drafts) do
+    case find_spider(socket.assigns.spiders, key) do
+      nil ->
+        {:noreply, socket}
+
+      spider ->
+        case Extractor.validate_runtime_params(
+               spider.runtime_params,
+               drafts
+             ) do
+          {:ok, parsed} ->
+            key
+            |> Extractor.update_params(parsed)
+            |> handle_params_save_result(socket, key)
+
+          {:error, %{details: details}} ->
+            {:noreply,
+             socket
+             |> update(:params_errors, &Map.put(&1, key, details))}
+        end
+    end
+  end
+
+  defp reset_params(socket, key) do
+    case Extractor.update_params(key, nil) do
+      {:ok, updated} ->
+        {:noreply,
+         socket
+         |> apply_params_spider(updated)
+         |> put_flash(
+           :info,
+           gettext("Runtime params reset to defaults")
+         )}
+
+      {:error, %{message: message}} ->
+        {:noreply, put_flash(socket, :error, message)}
+    end
+  end
+
+  defp run_params(_socket, nil, _key), do: {:ok, %{}}
+
+  defp run_params(socket, spider, key) do
+    if Spider.runtime_configurable?(spider) do
+      drafts = Map.get(socket.assigns.params_drafts, key, %{})
+
+      case Extractor.validate_runtime_params(
+             spider.runtime_params,
+             drafts
+           ) do
+        {:ok, parsed} ->
+          {:ok, Extractor.runtime_param_diffs(spider.runtime_params, parsed)}
+
+        {:error, %{details: details}} ->
+          {:error, details}
+      end
+    else
+      {:ok, %{}}
     end
   end
 
@@ -377,6 +517,17 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
      |> put_cron_error(key, message)}
   end
 
+  defp handle_params_save_result({:ok, updated_spider}, socket, _key) do
+    {:noreply,
+     socket
+     |> apply_params_spider(updated_spider)
+     |> put_flash(:info, gettext("Runtime params saved"))}
+  end
+
+  defp handle_params_save_result({:error, %{message: message}}, socket, _key) do
+    {:noreply, put_flash(socket, :error, message)}
+  end
+
   defp ean_format_error_message(%{ean: ean, reason: :non_numeric}) do
     gettext("%{ean} — must contain only digits", ean: ean)
   end
@@ -392,6 +543,28 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
       eans = get_in(spider.input_config || %{}, ["eans"]) || []
       {spider.name, Enum.join(eans, "\n")}
     end)
+  end
+
+  defp params_drafts_from_spiders(spiders) do
+    Map.new(spiders, fn spider ->
+      {spider.name, params_draft_from_spider(spider)}
+    end)
+  end
+
+  defp params_draft_from_spider(%Spider{runtime_params: params}) do
+    Map.new(params, fn {name, spec} ->
+      {name, spec |> Map.get("value") |> to_string()}
+    end)
+  end
+
+  defp apply_params_spider(socket, %Spider{name: name} = updated) do
+    socket
+    |> update_spider(updated)
+    |> update(
+      :params_drafts,
+      &Map.put(&1, name, params_draft_from_spider(updated))
+    )
+    |> update(:params_errors, &Map.delete(&1, name))
   end
 
   defp update_spider(socket, %Spider{name: name} = updated) do
@@ -475,4 +648,53 @@ defmodule PriceSpotterWeb.Admin.Extractor.SpiderLive.Index do
   defp run_status("stopping"), do: :stopping
 
   defp run_status(_status), do: :running
+
+  defp sorted_runtime_params(%Spider{runtime_params: params}) do
+    Enum.sort_by(params, fn {name, _spec} -> name end)
+  end
+
+  defp param_draft(drafts, spider_name, name, spec) do
+    drafts
+    |> Map.get(spider_name, %{})
+    |> Map.get(name, spec |> Map.get("value") |> to_string())
+  end
+
+  defp param_min(name) do
+    if String.contains?(name, "timeout"), do: 1, else: 0
+  end
+
+  defp param_field_errors(details, name) do
+    details
+    |> Map.get(:invalid_params, [])
+    |> Enum.filter(&(&1.name == name))
+    |> Enum.map(&param_error_message/1)
+  end
+
+  defp param_error_message(%{name: name, reason: :invalid_format}) do
+    gettext("%{name} must be an integer", name: param_label(name))
+  end
+
+  defp param_error_message(%{name: name, reason: :out_of_range}) do
+    if String.contains?(name, "timeout") do
+      gettext("%{name} must be at least 1", name: param_label(name))
+    else
+      gettext("%{name} must be at least 0", name: param_label(name))
+    end
+  end
+
+  defp param_error_message(%{name: name, reason: :unknown_key}) do
+    gettext("%{name} is not supported", name: param_label(name))
+  end
+
+  defp param_label("search_input_timeout_ms"),
+    do: gettext("Search input timeout (ms)")
+
+  defp param_label("match_timeout_ms"), do: gettext("Match timeout (ms)")
+
+  defp param_label("debounce_ms"), do: gettext("Debounce (ms)")
+
+  defp param_label("optional_field_timeout_ms"),
+    do: gettext("Optional field timeout (ms)")
+
+  defp param_label(name), do: name
 end
