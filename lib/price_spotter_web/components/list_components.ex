@@ -12,8 +12,7 @@ defmodule PriceSpotterWeb.ListComponents do
   import PriceSpotterWeb.Gettext
 
   @doc """
-  Renders a list of rows inside a bordered container, with an empty state
-  shown when `items` is empty.
+  Renders a list of rows, with an empty state shown when `items` is empty.
 
   ## Examples
 
@@ -37,7 +36,6 @@ defmodule PriceSpotterWeb.ListComponents do
       id={@id}
       class={[
         "divide-y divide-zinc-200 overflow-x-hidden dark:divide-zinc-700",
-        "rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900",
         @class
       ]}
     >
@@ -142,14 +140,17 @@ defmodule PriceSpotterWeb.ListComponents do
     ~H"""
     <div id={@id} class="flex min-w-0 flex-col px-4 py-3">
       <div class="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <button
+        <div
           id={"#{@id}-header"}
-          type="button"
+          role="button"
+          tabindex="0"
           phx-click={@header_click}
+          phx-keydown={JS.dispatch("click")}
+          phx-key="Enter"
           phx-value-key={if @toggle_patch, do: nil, else: @toggle_key}
           aria-expanded={@expanded}
           aria-controls={"#{@id}-expand"}
-          class="flex min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden border-0 bg-transparent p-0 text-left appearance-none"
+          class="flex min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden"
         >
           <div :if={@leading != []} class="shrink-0">
             <%= render_slot(@leading) %>
@@ -197,7 +198,7 @@ defmodule PriceSpotterWeb.ListComponents do
           <span class="sr-only">
             <%= if @expanded, do: gettext("Collapse"), else: gettext("Expand") %>
           </span>
-        </button>
+        </div>
 
         <div
           :if={@actions != []}
@@ -268,7 +269,7 @@ defmodule PriceSpotterWeb.ListComponents do
 
   def list_header(assigns) do
     ~H"""
-    <div class="hidden items-center gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 sm:flex">
+    <div class="hidden items-center gap-3 border-b border-zinc-200 px-4 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-zinc-700 dark:text-zinc-400 sm:flex">
       <%= for col <- @col do %>
         <%= if col[:field] do %>
           <.link
