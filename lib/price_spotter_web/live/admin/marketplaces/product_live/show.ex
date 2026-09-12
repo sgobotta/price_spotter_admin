@@ -39,9 +39,21 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
 
   @impl true
   def handle_event("delete", _params, socket) do
-    {:ok, _} = Marketplaces.delete_product(socket.assigns.product)
+    case Marketplaces.delete_product_for_user(
+           socket.assigns.product,
+           socket.assigns.current_user
+         ) do
+      {:ok, _} ->
+        {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
 
-    {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
+      {:error, :unauthorized} ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           gettext("You are not allowed to delete products")
+         )}
+    end
   end
 
   @impl true

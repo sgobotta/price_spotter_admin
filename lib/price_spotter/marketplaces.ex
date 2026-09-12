@@ -478,6 +478,21 @@ defmodule PriceSpotter.Marketplaces do
   end
 
   @doc """
+  Deletes a product if the user is allowed to.
+
+  Returns `{:error, :unauthorized}` when the user cannot delete products.
+  """
+  @spec delete_product_for_user(Product.t(), User.t()) ::
+          {:ok, Product.t()} | {:error, :unauthorized | Ecto.Changeset.t()}
+  def delete_product_for_user(%Product{} = product, %User{} = user) do
+    if PriceSpotter.Accounts.can_delete_products?(user) do
+      delete_product(product)
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking product changes.
 
   ## Examples

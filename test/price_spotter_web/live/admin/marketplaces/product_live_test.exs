@@ -217,6 +217,42 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert has_element?(index_live, "#product-form-#{product.id}")
     end
 
+    test "keeps an expanded product visible when filters exclude it", %{
+      conn: conn,
+      user: user,
+      product: product
+    } do
+      {:ok, {_products, meta}} =
+        Marketplaces.list_products_by_user(
+          %{
+            "filters" => %{
+              "0" => %{
+                "field" => "name",
+                "op" => "ilike",
+                "value" => "no-such-product-xyz"
+              }
+            }
+          },
+          user
+        )
+
+      path =
+        Flop.Phoenix.build_path(
+          ~p"/admin/marketplaces/products/#{product}/edit",
+          meta.flop,
+          backend: meta.backend
+        )
+
+      {:ok, index_live, _html} = live(conn, path)
+
+      assert has_element?(index_live, "#products-#{product.id}")
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-expand[aria-hidden='false']"
+             )
+    end
+
     test "replaces delete with a trash icon", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
@@ -294,6 +330,18 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
                index_live,
                "#products-#{product.id}-expand[aria-hidden='true']"
              )
+    end
+
+    test "does not delete a product when a customer pushes delete", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+
+      html = render_click(index_live, "delete", %{"id" => product.id})
+
+      assert Marketplaces.get_product!(product.id).id == product.id
+      assert html =~ gettext("You are not allowed to delete products")
     end
   end
 
@@ -680,6 +728,36 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert_error_sent 404, fn ->
         live(conn, ~p"/admin/marketplaces/products/#{other}/show")
       end
+    end
+
+    test "does not delete a product when a customer pushes delete", %{
+      conn: conn,
+      user: user
+    } do
+      supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: supplier.id
+      })
+
+      product =
+        product_fixture(%{
+          internal_id: "owned-#{System.unique_integer([:positive])}",
+          supplier_id: supplier.id,
+          supplier_name: supplier.name
+        })
+
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
+
+      refute has_element?(show_live, "#delete-button")
+      refute html =~ ~s(id="delete-button")
+
+      html = render_click(show_live, "delete", %{})
+
+      assert Marketplaces.get_product!(product.id).id == product.id
+      assert html =~ gettext("You are not allowed to delete products")
     end
   end
 end

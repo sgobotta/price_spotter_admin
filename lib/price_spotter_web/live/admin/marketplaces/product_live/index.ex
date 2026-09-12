@@ -36,7 +36,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          |> assign(filter_fields_form: to_form(meta))
          |> assign_header_action()
          |> assign(:section_title, gettext("Products"))
-         |> apply_action(socket.assigns.live_action, params)}
+         |> apply_action(socket.assigns.live_action, params)
+         |> maybe_include_selected_product()}
 
       _error ->
         {:noreply, push_navigate(socket, to: ~p"/admin/marketplaces/products")}
@@ -75,12 +76,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    product =
-      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
+    user = socket.assigns.current_user
 
-    {:ok, _} = Marketplaces.delete_product(product)
+    product = Marketplaces.get_product_for_user!(id, user)
 
-    {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
+    case Marketplaces.delete_product_for_user(product, user) do
+      {:ok, _} ->
+        {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
+
+      {:error, :unauthorized} ->
+        {:noreply, unauthorized_delete(socket)}
+    end
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
@@ -117,6 +123,33 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
     |> assign(:product, nil)
   end
 
+  defp maybe_include_selected_product(
+         %{
+           assigns: %{
+             live_action: action,
+             product: %Product{id: id} = product,
+             products: products
+           }
+         } = socket
+       )
+       when action in [:show, :edit] and is_binary(id) do
+    if Enum.any?(products, &(&1.id == id)) do
+      socket
+    else
+      assign(socket, :products, [product | products])
+    end
+  end
+
+  defp maybe_include_selected_product(socket), do: socket
+
+  defp unauthorized_delete(socket) do
+    put_flash(
+      socket,
+      :error,
+      gettext("You are not allowed to delete products")
+    )
+  end
+
   @impl true
   def handle_info(
         {PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent,
@@ -143,7 +176,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
         socket
         |> assign(:products, products)
         |> assign(:meta, meta)
+        |> assign_selection_options()
+        |> assign_filter_fields()
         |> assign(filter_fields_form: to_form(meta))
+        |> maybe_include_selected_product()
 
       _error ->
         products =
@@ -247,7 +283,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp get_limit, do: Product.limit()
 
   defp can_edit_products?(user), do: Accounts.can_edit_products?(user)
-  defp can_delete_products?(user), do: Accounts.can_edit_products?(user)
+  defp can_delete_products?(user), do: Accounts.can_delete_products?(user)
 
   defp expanded_product?(expanded, product_id),
     do: ExpandableList.expanded?(expanded, product_id)

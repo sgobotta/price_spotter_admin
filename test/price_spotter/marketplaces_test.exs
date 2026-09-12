@@ -105,6 +105,28 @@ defmodule PriceSpotter.MarketplacesTest do
       end
     end
 
+    test "delete_product_for_user/2 deletes when the user is an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      product = product_fixture()
+
+      assert {:ok, %Product{}} =
+               Marketplaces.delete_product_for_user(product, admin)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_product!(product.id)
+      end
+    end
+
+    test "delete_product_for_user/2 rejects a customer" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      product = product_fixture()
+
+      assert {:error, :unauthorized} =
+               Marketplaces.delete_product_for_user(product, user)
+
+      assert Marketplaces.get_product!(product.id).id == product.id
+    end
+
     test "change_product/1 returns a product changeset" do
       product = product_fixture()
       assert %Ecto.Changeset{} = Marketplaces.change_product(product)
