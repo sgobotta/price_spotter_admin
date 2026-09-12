@@ -211,7 +211,7 @@ defmodule PriceSpotterWeb.ListComponents do
         role="region"
         aria-hidden={if @expanded, do: "false", else: "true"}
         class={[
-          "grid transition-all duration-300 ease-in-out",
+          "grid overflow-hidden transition-all duration-300 ease-in-out",
           if(@expanded,
             do: "grid-rows-[1fr] opacity-100",
             else: "grid-rows-[0fr] opacity-0"
@@ -219,7 +219,11 @@ defmodule PriceSpotterWeb.ListComponents do
         ]}
       >
         <%= if @expanded do %>
-          <div class="overflow-hidden">
+          <div
+            id={"#{@id}-expand-inner"}
+            class="min-h-0 overflow-hidden"
+            phx-remove={keep_panel_during_collapse()}
+          >
             <div class={[
               "mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40",
               @content_class
@@ -237,6 +241,16 @@ defmodule PriceSpotterWeb.ListComponents do
     do: JS.patch(patch)
 
   defp header_click(%{toggle_event: event}), do: event
+
+  # Delay unmount so the grid-rows collapse can animate.
+  defp keep_panel_during_collapse do
+    JS.hide(
+      time: 300,
+      transition:
+        {"transition-all duration-300 ease-in-out", "opacity-100",
+         "opacity-100"}
+    )
+  end
 
   @doc """
   Renders a sortable header row for a `<.list_group>`, replacing a `<thead>`.
