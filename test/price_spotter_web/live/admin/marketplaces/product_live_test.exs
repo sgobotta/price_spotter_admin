@@ -492,6 +492,27 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ "some updated category"
     end
 
+    test "wires the copy EAN button to the hidden EAN input", %{
+      conn: conn,
+      product: product
+    } do
+      ean = "7790070418161"
+
+      {:ok, product} = Marketplaces.update_product(product, %{ean: ean})
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
+
+      assert has_element?(show_live, ~s(input#ean_code[value="#{ean}"]))
+
+      copy_html = show_live |> element("#copy-ean-code") |> render()
+      assert copy_html =~ ~s(data-to="ean_code")
+      refute copy_html =~ ~s(data-to="#ean_code")
+
+      html = show_live |> element("#copy-ean-code") |> render_click()
+      assert html =~ "hero-clipboard-document-check"
+    end
+
     test "shows supplier, category, and price in the details card", %{
       conn: conn,
       product: product
