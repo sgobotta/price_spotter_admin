@@ -301,11 +301,22 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     setup [:create_product, :register_and_log_in_admin]
 
     test "displays product", %{conn: conn, product: product} do
-      {:ok, _show_live, html} =
+      {:ok, show_live, html} =
         live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       assert html =~ gettext("Show Product")
       assert html =~ product.category
+      assert html =~ "sticky top-0"
+      assert html =~ "overflow-x-clip px-4 pb-2"
+      refute html =~ "overflow-x-clip px-4 pb-2 sm:px-6 lg:px-8 pt-2"
+
+      edit_html = show_live |> element("#edit-button") |> render()
+      assert edit_html =~ "hero-pencil-solid"
+      assert edit_html =~ "sr-only"
+
+      delete_html = show_live |> element("#delete-button") |> render()
+      assert delete_html =~ "hero-trash-solid"
+      assert delete_html =~ "sr-only"
     end
 
     test "fills the selected price-history interval button", %{
@@ -368,27 +379,67 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ "some updated category"
     end
 
-    test "keeps supplier, category, and price in pills only", %{
+    test "shows supplier, category, and price in the details card", %{
       conn: conn,
       product: product
     } do
       {:ok, show_live, html} =
         live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
-      assert html =~ product.supplier_name
-      assert html =~ product.category
-      assert html =~ "$#{product.price}"
+      details =
+        show_live
+        |> element("#product-details-list")
+        |> render()
+
+      assert details =~ gettext("Supplier")
+      assert details =~ String.replace(product.supplier_name, "-", " ")
+      assert details =~ gettext("Category")
+      assert details =~ product.category
+      assert details =~ gettext("Price")
+      assert details =~ "$#{product.price}"
+      assert details =~ gettext("EAN")
+      assert details =~ gettext("External link")
+      refute html =~ gettext("Product information")
+    end
+
+    test "renders present meta fields and skips empty or internal ones", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, product} =
+        Marketplaces.update_product(product, %{
+          meta: %{
+            "stock" => true,
+            "list_price" => "6865.00",
+            "price_per_kg" => "21357.78",
+            "price_without_taxes" => "5674.38",
+            "origen" => "seed-dev",
+            "crawl_index" => 12,
+            "empty" => nil
+          }
+        })
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       details =
         show_live
         |> element("#product-details-list")
         |> render()
 
-      refute details =~ gettext("Supplier")
-      refute details =~ gettext("Category")
-      refute details =~ gettext("Price")
-      assert details =~ gettext("EAN")
-      assert details =~ gettext("External link")
+      assert has_element?(show_live, "#product-meta-stock")
+      assert details =~ gettext("Stock")
+      assert details =~ gettext("In stock")
+      assert details =~ gettext("List price")
+      assert details =~ "$6865.00"
+      assert details =~ gettext("Price per kg")
+      assert details =~ "$21357.78"
+      assert details =~ gettext("Price without taxes")
+      assert details =~ "$5674.38"
+      refute has_element?(show_live, "#product-meta-origen")
+      refute has_element?(show_live, "#product-meta-crawl_index")
+      refute has_element?(show_live, "#product-meta-empty")
+      refute details =~ "seed-dev"
     end
 
     test "does not render the EAN listings banner without other suppliers", %{
@@ -415,17 +466,36 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
           internal_id: "other-#{System.unique_integer([:positive])}",
           name: "Other supplier listing",
           supplier_name: "other-supplier",
-          price: "88.5"
+          category: "snacks",
+          price: "88.5",
+          meta: %{
+            "stock" => true,
+            "price_per_kg" => "21357.78"
+          }
         })
 
       {:ok, show_live, html} =
         live(conn, ~p"/admin/marketplaces/products/#{current}/show")
 
+      listing =
+        show_live
+        |> element("#ean-listing-#{other.id}")
+        |> render()
+
       assert has_element?(show_live, "#ean-listings")
       assert html =~ gettext("Same product at other suppliers")
-      assert html =~ other.name
-      assert html =~ "$#{other.price}"
-      assert html =~ gettext("Last price update")
+      assert listing =~ "other supplier"
+      assert listing =~ "snacks"
+      assert listing =~ gettext("Stock")
+      assert listing =~ gettext("In stock")
+      assert listing =~ gettext("Price per kg")
+      assert listing =~ "$21357.78"
+      assert listing =~ "$#{other.price}"
+      assert listing =~ "−$32.0 (−26.6%)"
+      assert listing =~ TimeAgo.time_ago(other.price_updated_at)
+      assert listing =~ "hero-shopping-cart-solid"
+      refute listing =~ ">#{other.name}<"
+      refute listing =~ "77 90070 41816 1"
       refute has_element?(show_live, "#ean-listings-hidden-count")
 
       assert has_element?(
@@ -433,7 +503,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
                "#ean-listing-#{other.id} a[target=_blank]"
              )
 
-      assert html =~ ~p"/admin/marketplaces/products/#{other}/show"
+      assert listing =~ ~p"/admin/marketplaces/products/#{other}/show"
+      assert has_element?(show_live, "#ean-listing-#{other.id} img")
     end
   end
 
@@ -493,8 +564,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       {:ok, show_live, html} =
         live(conn, ~p"/admin/marketplaces/products/#{current}/show")
 
-      assert html =~ visible.name
-      assert html =~ "$#{visible.price}"
+      listing =
+        show_live
+        |> element("#ean-listing-#{visible.id}")
+        |> render()
+
+      assert listing =~ String.replace(visible.supplier_name, "-", " ")
+      assert listing =~ "$#{visible.price}"
+      assert listing =~ "−$43.4 (−36.0%)"
+      refute listing =~ ">#{visible.name}<"
       refute html =~ hidden.name
 
       assert has_element?(show_live, "#ean-listings-hidden-count")
