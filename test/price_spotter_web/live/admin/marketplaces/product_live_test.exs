@@ -179,18 +179,29 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       )
 
       assert html =~ gettext("Show Product")
+      assert has_element?(index_live, "#products-#{product.id}-preview")
       assert has_element?(index_live, "#products-edit-form-#{product.id}")
-      assert has_element?(index_live, "#product-form")
+      assert has_element?(index_live, "#product-form-#{product.id}")
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-expand[aria-hidden='false']"
+             )
+
+      header_html =
+        index_live
+        |> element("#products-#{product.id}-header")
+        |> render()
+
+      refute header_html =~ "$#{product.price}"
 
       assert index_live
-             |> form("#product-form", product: @invalid_attrs)
+             |> form("#product-form-#{product.id}", product: @invalid_attrs)
              |> render_change() =~ dgettext("errors", "can't be blank")
 
       assert index_live
-             |> form("#product-form", product: @update_attrs)
+             |> form("#product-form-#{product.id}", product: @update_attrs)
              |> render_submit()
-
-      assert_patch_path(index_live, ~p"/admin/marketplaces/products")
 
       html = render(index_live)
       assert html =~ gettext("Product updated successfully")
@@ -198,6 +209,36 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ @update_attrs[:name]
       assert html =~ @update_attrs[:price]
       assert html =~ @update_attrs[:supplier_name]
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-expand[aria-hidden='false']"
+             )
+
+      assert has_element?(index_live, "#product-form-#{product.id}")
+    end
+
+    test "replaces delete with a trash icon", %{conn: conn, product: product} do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+
+      index_live
+      |> element("#products-#{product.id}-header")
+      |> render_click()
+
+      assert_patch_path(
+        index_live,
+        ~p"/admin/marketplaces/products/#{product}/edit"
+      )
+
+      assert has_element?(index_live, "#products-delete-#{product.id}")
+
+      delete_html =
+        index_live
+        |> element("#products-delete-#{product.id}")
+        |> render()
+
+      assert delete_html =~ "hero-trash-solid"
+      assert delete_html =~ "sr-only"
     end
 
     @tag :skip
@@ -213,12 +254,56 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
     end
   end
 
+  describe "Index as customer" do
+    setup [:create_product, :register_and_log_in_user, :assoc_user_product]
+
+    test "expands a product without the edit form or /edit redirect", %{
+      conn: conn,
+      product: product
+    } do
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+
+      html =
+        index_live
+        |> element("#products-#{product.id}-header")
+        |> render_click()
+
+      assert_patch_path(
+        index_live,
+        ~p"/admin/marketplaces/products/#{product}"
+      )
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-expand[aria-hidden='false']"
+             )
+
+      assert has_element?(index_live, "#products-#{product.id}-preview")
+      assert html =~ "$#{product.price}"
+      assert html =~ TimeAgo.time_ago(product.price_updated_at)
+      refute has_element?(index_live, "#products-edit-form-#{product.id}")
+      refute has_element?(index_live, "#product-form-#{product.id}")
+      refute has_element?(index_live, "#products-delete-#{product.id}")
+
+      index_live
+      |> element("#products-#{product.id}-header")
+      |> render_click()
+
+      assert_patch_path(index_live, ~p"/admin/marketplaces/products")
+
+      assert has_element?(
+               index_live,
+               "#products-#{product.id}-expand[aria-hidden='true']"
+             )
+    end
+  end
+
   describe "Show" do
     setup [:create_product, :register_and_log_in_admin]
 
     test "displays product", %{conn: conn, product: product} do
       {:ok, _show_live, html} =
-        live(conn, ~p"/admin/marketplaces/products/#{product}")
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       assert html =~ gettext("Show Product")
       assert html =~ product.category
@@ -229,7 +314,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       product: product
     } do
       {:ok, show_live, html} =
-        live(conn, ~p"/admin/marketplaces/products/#{product}")
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       assert html =~ gettext("Daily")
 
@@ -255,7 +340,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
     test "updates product within modal", %{conn: conn, product: product} do
       {:ok, show_live, _html} =
-        live(conn, ~p"/admin/marketplaces/products/#{product}")
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       assert show_live |> element("a#edit-button") |> render_click() =~
                gettext("Edit Product")
@@ -274,7 +359,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
              |> form("#product-form", product: @update_attrs)
              |> render_submit()
 
-      assert_patch(show_live, ~p"/admin/marketplaces/products/#{product}")
+      assert_patch(
+        show_live,
+        ~p"/admin/marketplaces/products/#{product}/show"
+      )
 
       html = render(show_live)
       assert html =~ gettext("Product updated successfully")
@@ -286,7 +374,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       product: product
     } do
       {:ok, show_live, html} =
-        live(conn, ~p"/admin/marketplaces/products/#{product}")
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       assert html =~ product.supplier_name
       assert html =~ product.category
@@ -309,7 +397,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       product: product
     } do
       {:ok, show_live, _html} =
-        live(conn, ~p"/admin/marketplaces/products/#{product}")
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
 
       refute has_element?(show_live, "#ean-listings")
     end
@@ -332,7 +420,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
         })
 
       {:ok, show_live, html} =
-        live(conn, ~p"/admin/marketplaces/products/#{current}")
+        live(conn, ~p"/admin/marketplaces/products/#{current}/show")
 
       assert has_element?(show_live, "#ean-listings")
       assert html =~ gettext("Same product at other suppliers")
@@ -346,7 +434,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
                "#ean-listing-#{other.id} a[target=_blank]"
              )
 
-      assert html =~ ~p"/admin/marketplaces/products/#{other}"
+      assert html =~ ~p"/admin/marketplaces/products/#{other}/show"
     end
   end
 
@@ -404,7 +492,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
         })
 
       {:ok, show_live, html} =
-        live(conn, ~p"/admin/marketplaces/products/#{current}")
+        live(conn, ~p"/admin/marketplaces/products/#{current}/show")
 
       assert html =~ visible.name
       assert html =~ "$#{visible.price}"

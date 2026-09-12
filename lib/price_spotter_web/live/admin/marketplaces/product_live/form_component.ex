@@ -16,7 +16,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
 
       <.form
         for={@form}
-        id="product-form"
+        id={@form_id}
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
@@ -73,6 +73,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign_new(:variant, fn -> :modal end)
+     |> assign_new(:form_id, fn -> "product-form" end)
      |> assign_form(changeset)}
   end
 
@@ -97,8 +98,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Product updated successfully"))
-         |> push_patch(to: socket.assigns.patch)}
+         |> assign(:product, product)
+         |> assign_form(Marketplaces.change_product(product))
+         |> maybe_patch()}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -125,6 +127,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  defp maybe_patch(%{assigns: %{variant: :inline}} = socket) do
+    send(self(), {:product_inline_saved, socket.assigns.product})
+    socket
+  end
+
+  defp maybe_patch(socket) do
+    socket
+    |> put_flash(:info, gettext("Product updated successfully"))
+    |> push_patch(to: socket.assigns.patch)
+  end
 
   defp fields_class(:inline), do: "grid grid-cols-1 gap-3 sm:grid-cols-2"
   defp fields_class(_variant), do: "mt-2 space-y-8"

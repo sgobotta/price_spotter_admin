@@ -245,7 +245,7 @@
             variant={:danger}
           />
           <a
-            href={~p"/admin/marketplaces/products/#{listing}"}
+            href={~p"/admin/marketplaces/products/#{listing}/show"}
             target="_blank"
             rel="noopener noreferrer"
             title={listing.name}
@@ -304,7 +304,7 @@
     :if={@live_action == :edit}
     id="product-modal"
     show
-    on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}")}
+    on_cancel={JS.patch(~p"/admin/marketplaces/products/#{@product}/show")}
   >
     <.live_component
       module={PriceSpotterWeb.Admin.Marketplaces.ProductLive.FormComponent}
@@ -312,7 +312,7 @@
       title={@page_title}
       action={@live_action}
       product={@product}
-      patch={~p"/admin/marketplaces/products/#{@product}"}
+      patch={~p"/admin/marketplaces/products/#{@product}/show"}
     />
   </.modal>
 </div>
