@@ -266,10 +266,6 @@
         <Flop.Phoenix.cursor_pagination
           meta={@meta}
           path={~p"/admin/marketplaces/products"}
-          opts={[
-            next_link_content: render_next_icon(@socket),
-            previous_link_content: render_previous_icon(@socket)
-          ]}
         />
       </div>
     <% end %>

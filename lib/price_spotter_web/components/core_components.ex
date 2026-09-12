@@ -42,8 +42,34 @@ defmodule PriceSpotterWeb.CoreComponents do
 
   def cursor_pagination_opts do
     [
-      wrapper_attrs: [class: "flex justify-center gap-2 w-full"]
+      wrapper_attrs: [class: "flex w-full items-center justify-center gap-3"],
+      disabled_class: "pointer-events-none opacity-30",
+      previous_link_attrs: [
+        class: "inline-flex",
+        aria: [label: gettext("Previous")]
+      ],
+      next_link_attrs: [
+        class: "inline-flex",
+        aria: [label: gettext("Next")]
+      ],
+      previous_link_content: pagination_icon(%{direction: :previous}),
+      next_link_content: pagination_icon(%{direction: :next})
     ]
+  end
+
+  defp pagination_icon(assigns) do
+    ~H"""
+    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800">
+      <.icon
+        name={
+          if @direction == :previous,
+            do: "hero-chevron-left-solid",
+            else: "hero-chevron-right-solid"
+        }
+        class="h-5 w-5"
+      />
+    </span>
+    """
   end
 
   @doc """
