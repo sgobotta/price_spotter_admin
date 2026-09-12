@@ -131,6 +131,30 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLiveTest do
 
       refute has_element?(index_live, "#suppliers-#{supplier.id}")
     end
+
+    test "keeps a supplier that still has products", %{
+      conn: conn,
+      supplier: supplier
+    } do
+      PriceSpotter.MarketplacesFixtures.product_fixture(%{
+        supplier_id: supplier.id
+      })
+
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/suppliers")
+
+      index_live
+      |> element("#suppliers-#{supplier.id}-header")
+      |> render_click()
+
+      index_live
+      |> element("#suppliers-delete-#{supplier.id}")
+      |> render_click()
+
+      assert_patch(index_live, ~p"/admin/marketplaces/suppliers")
+      html = render(index_live)
+      assert html =~ gettext("Cannot delete a supplier that still has products")
+      assert has_element?(index_live, "#suppliers-#{supplier.id}")
+    end
   end
 
   describe "Show" do

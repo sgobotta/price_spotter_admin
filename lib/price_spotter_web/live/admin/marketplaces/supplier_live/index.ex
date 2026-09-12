@@ -86,6 +86,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
 
           {:error, :unauthorized} ->
             {:noreply, unauthorized_delete(socket)}
+
+          {:error, %Ecto.Changeset{}} ->
+            {:noreply, cannot_delete_with_products(socket)}
         end
     end
   end
@@ -139,6 +142,15 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.Index do
       :error,
       gettext("You are not allowed to delete suppliers")
     )
+  end
+
+  defp cannot_delete_with_products(socket) do
+    socket
+    |> put_flash(
+      :error,
+      gettext("Cannot delete a supplier that still has products")
+    )
+    |> push_patch(to: ~p"/admin/marketplaces/suppliers")
   end
 
   defp deny_supplier_mutation(socket, message) do

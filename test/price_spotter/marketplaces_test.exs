@@ -941,6 +941,23 @@ defmodule PriceSpotter.MarketplacesTest do
       end
     end
 
+    test "delete_supplier/1 rejects a supplier that still has products" do
+      supplier = SuppliersFixtures.create()
+
+      PriceSpotter.MarketplacesFixtures.product_fixture(%{
+        supplier_id: supplier.id
+      })
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Marketplaces.delete_supplier(supplier)
+
+      assert errors_on(changeset)[:products] == [
+               "are still associated with this entry"
+             ]
+
+      assert Marketplaces.get_supplier!(supplier.id).id == supplier.id
+    end
+
     test "delete_supplier_for_user/2 deletes when the user is an admin" do
       admin = PriceSpotter.AccountsFixtures.admin_fixture()
       supplier = SuppliersFixtures.create()

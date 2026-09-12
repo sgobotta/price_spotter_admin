@@ -106,7 +106,7 @@ msgstr "Lista de productos"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/form_component.ex:25
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:24
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:160
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:172
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:19
 #, elixir-autogen, elixir-format
 msgid "Name"
@@ -730,19 +730,19 @@ msgstr "Usuario confirmado con éxito."
 msgid "User updated successfully"
 msgstr "Usuario actualizado"
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:98
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:101
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:52
 #, elixir-autogen, elixir-format
 msgid "Edit Supplier"
 msgstr "Editar proveedor"
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:123
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:126
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:2
 #, elixir-autogen, elixir-format
 msgid "Listing Suppliers"
 msgstr "Proveedores"
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:111
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:114
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.html.heex:8
 #, elixir-autogen, elixir-format
 msgid "New Supplier"
@@ -867,7 +867,7 @@ msgstr "Todos los roles"
 msgid "Filter by email"
 msgstr "Filtro por email"
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:162
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:174
 #, elixir-autogen, elixir-format
 msgid "Filter by name"
 msgstr "Filtro por nombre"
@@ -877,12 +877,12 @@ msgstr "Filtro por nombre"
 msgid "No results found."
 msgstr "No se encontraron resultados."
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:152
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:164
 #, elixir-autogen, elixir-format
 msgid "No suppliers found."
 msgstr "No se encontraron proveedores."
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:155
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:167
 #, elixir-autogen, elixir-format
 msgid "You don't have access to any suppliers."
 msgstr "No tenés acceso a ningún proveedor."
@@ -1489,7 +1489,7 @@ msgstr "Sí"
 msgid "You are not allowed to delete products"
 msgstr "No tenés permiso para eliminar productos"
 
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:140
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:143
 #, elixir-autogen, elixir-format
 msgid "You are not allowed to delete suppliers"
 msgstr "No tenés permiso para eliminar proveedores"
@@ -1500,14 +1500,19 @@ msgid "View %{supplier} details"
 msgstr "Ver detalles de %{supplier}"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:108
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:116
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:119
 #, elixir-autogen, elixir-format
 msgid "You are not allowed to create suppliers"
 msgstr "No tenés permiso para crear proveedores"
 
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/form_component.ex:102
-#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:103
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:106
 #: lib/price_spotter_web/live/admin/marketplaces/supplier_live/show.ex:44
 #, elixir-autogen, elixir-format
 msgid "You are not allowed to edit suppliers"
 msgstr "No tenés permiso para editar proveedores"
+
+#: lib/price_spotter_web/live/admin/marketplaces/supplier_live/index.ex:151
+#, elixir-autogen, elixir-format
+msgid "Cannot delete a supplier that still has products"
+msgstr "No se puede eliminar un proveedor que todavía tiene productos"

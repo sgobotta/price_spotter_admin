@@ -1350,7 +1350,10 @@ defmodule PriceSpotter.Marketplaces do
 
   """
   def delete_supplier(%Supplier{} = supplier) do
-    Repo.delete(supplier)
+    supplier
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.no_assoc_constraint(:products)
+    |> Repo.delete()
   end
 
   @doc """
