@@ -606,22 +606,57 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert listing =~ "$#{other.price}"
       assert listing =~ "−$32.0 (−26.6%)"
       assert listing =~ TimeAgo.time_ago(other.price_updated_at)
-      assert listing =~ "hero-shopping-cart-solid"
+      assert listing =~ "hero-chevron-right-solid"
 
       assert listing =~
-               gettext("Open %{supplier} listing", supplier: "other supplier")
+               gettext("View %{supplier} details", supplier: "other supplier")
 
       refute listing =~ ">#{other.name}<"
       refute listing =~ "77 90070 41816 1"
       refute has_element?(show_live, "#ean-listings-hidden-count")
 
-      assert has_element?(
+      assert has_element?(show_live, "#ean-listing-#{other.id}-show")
+
+      refute has_element?(
                show_live,
                "#ean-listing-#{other.id} a[target=_blank]"
              )
 
       assert listing =~ ~p"/admin/marketplaces/products/#{other}/show"
       assert has_element?(show_live, "#ean-listing-#{other.id} img")
+    end
+
+    test "navigates from a recommendation to that product's details", %{
+      conn: conn,
+      product: product
+    } do
+      ean = "7790070418161"
+
+      {:ok, current} = Marketplaces.update_product(product, %{ean: ean})
+
+      other =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "nav-#{System.unique_integer([:positive])}",
+          name: "Other supplier listing",
+          supplier_name: "other-supplier"
+        })
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{current}/show")
+
+      {:error, {:live_redirect, %{to: to}}} =
+        show_live
+        |> element("#ean-listing-#{other.id}-show")
+        |> render_click()
+
+      assert to == ~p"/admin/marketplaces/products/#{other}/show"
+
+      {:ok, other_live, html} = live(conn, to)
+
+      assert html =~ gettext("Show Product")
+      assert has_element?(other_live, "#product-detail-supplier")
+      assert html =~ "other supplier"
     end
 
     test "pushes chart series labeled with supplier names only", %{
@@ -753,6 +788,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert listing =~ "−$43.4 (−36.0%)"
       refute listing =~ ">#{visible.name}<"
       refute html =~ hidden.name
+
+      assert has_element?(show_live, "#ean-listing-#{visible.id}-show")
 
       assert has_element?(show_live, "#ean-listings-hidden-count")
 
