@@ -354,6 +354,19 @@ defmodule PriceSpotter.MarketplacesTest do
       end
     end
 
+    test "get_product_for_user/2 returns nil when the customer cannot access the product" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      other_supplier = SuppliersFixtures.create()
+
+      product =
+        product_fixture(%{
+          internal_id: "other-#{System.unique_integer()}",
+          supplier_id: other_supplier.id
+        })
+
+      assert Marketplaces.get_product_for_user(product.id, user) == nil
+    end
+
     test "list_product_categories_by_user/1 returns every category for an admin" do
       admin = PriceSpotter.AccountsFixtures.admin_fixture()
       product_fixture(%{category: "some category"})

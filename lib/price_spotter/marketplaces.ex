@@ -282,13 +282,13 @@ defmodule PriceSpotter.Marketplaces do
   Gets a single product the user is allowed to see.
 
   Admins can load any product. Customers can only load products from
-  suppliers they have been granted. Raises `Ecto.NoResultsError` if the
-  product does not exist or the user cannot access it.
+  suppliers they have been granted. Returns `nil` if the product does not
+  exist or the user cannot access it.
   """
-  @spec get_product_for_user!(term(), User.t()) :: Product.t()
-  def get_product_for_user!(id, %User{role: :admin}), do: get_product!(id)
+  @spec get_product_for_user(term(), User.t()) :: Product.t() | nil
+  def get_product_for_user(id, %User{role: :admin}), do: Repo.get(Product, id)
 
-  def get_product_for_user!(id, %User{} = user) do
+  def get_product_for_user(id, %User{} = user) do
     from(
       p in Product,
       join: us in Relations.UserSupplier,
@@ -296,7 +296,21 @@ defmodule PriceSpotter.Marketplaces do
       where: p.id == ^id,
       select: p
     )
-    |> Repo.one!()
+    |> Repo.one()
+  end
+
+  @doc """
+  Gets a single product the user is allowed to see.
+
+  Raises `Ecto.NoResultsError` if the product does not exist or the user
+  cannot access it.
+  """
+  @spec get_product_for_user!(term(), User.t()) :: Product.t()
+  def get_product_for_user!(id, %User{} = user) do
+    case get_product_for_user(id, user) do
+      %Product{} = product -> product
+      nil -> raise Ecto.NoResultsError, queryable: Product
+    end
   end
 
   @doc """

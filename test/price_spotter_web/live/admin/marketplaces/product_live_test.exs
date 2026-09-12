@@ -253,6 +253,48 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
              )
     end
 
+    test "shows saved values when an expanded product is outside the current filters",
+         %{
+           conn: conn,
+           user: user,
+           product: product
+         } do
+      {:ok, {_products, meta}} =
+        Marketplaces.list_products_by_user(
+          %{
+            "filters" => %{
+              "0" => %{
+                "field" => "name",
+                "op" => "ilike",
+                "value" => "no-such-product-xyz"
+              }
+            }
+          },
+          user
+        )
+
+      path =
+        Flop.Phoenix.build_path(
+          ~p"/admin/marketplaces/products/#{product}/edit",
+          meta.flop,
+          backend: meta.backend
+        )
+
+      {:ok, index_live, _html} = live(conn, path)
+
+      assert index_live
+             |> form("#product-form-#{product.id}", product: @update_attrs)
+             |> render_submit()
+
+      html =
+        index_live
+        |> element("#products-#{product.id}")
+        |> render()
+
+      assert html =~ @update_attrs[:name]
+      refute html =~ product.name
+    end
+
     test "replaces delete with a trash icon", %{conn: conn, product: product} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
 
@@ -343,6 +385,23 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert Marketplaces.get_product!(product.id).id == product.id
       assert html =~ gettext("You are not allowed to delete products")
     end
+
+    test "does not crash when a customer pushes delete for an ungranted product",
+         %{
+           conn: conn
+         } do
+      other =
+        product_fixture(%{
+          internal_id: "foreign-#{System.unique_integer([:positive])}"
+        })
+
+      {:ok, index_live, _html} = live(conn, ~p"/admin/marketplaces/products")
+
+      html = render_click(index_live, "delete", %{"id" => other.id})
+
+      assert Marketplaces.get_product!(other.id).id == other.id
+      assert html =~ gettext("You are not allowed to delete products")
+    end
   end
 
   describe "Show" do
@@ -363,10 +422,14 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       edit_html = show_live |> element("#edit-button") |> render()
       assert edit_html =~ "hero-pencil-solid"
       assert edit_html =~ "sr-only"
+      assert has_element?(show_live, "a#edit-button")
+      refute has_element?(show_live, "a#edit-button button")
 
       delete_html = show_live |> element("#delete-button") |> render()
       assert delete_html =~ "hero-trash-solid"
       assert delete_html =~ "sr-only"
+      assert has_element?(show_live, "button#delete-button")
+      refute has_element?(show_live, "a#delete-button")
     end
 
     test "fills the selected price-history interval button", %{
@@ -544,6 +607,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert listing =~ "−$32.0 (−26.6%)"
       assert listing =~ TimeAgo.time_ago(other.price_updated_at)
       assert listing =~ "hero-shopping-cart-solid"
+
+      assert listing =~
+               gettext("Open %{supplier} listing", supplier: "other supplier")
+
       refute listing =~ ">#{other.name}<"
       refute listing =~ "77 90070 41816 1"
       refute has_element?(show_live, "#ean-listings-hidden-count")

@@ -16,18 +16,19 @@
             id="edit-button"
             patch={~p"/admin/marketplaces/products/#{@product}/show/edit"}
             phx-click={JS.push_focus()}
+            class="inline-flex items-center justify-center rounded-lg py-2 px-3 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
           >
-            <.button class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600">
-              <.icon name="hero-pencil-solid" class="h-4 w-4" />
-              <span class="sr-only"><%= gettext("Edit Product") %></span>
-            </.button>
+            <.icon name="hero-pencil-solid" class="h-4 w-4" />
+            <span class="sr-only"><%= gettext("Edit Product") %></span>
           </.link>
         <% end %>
       </:actions>
       <:actions>
-        <%= if Accounts.can_edit_products?(@current_user) do %>
-          <.link
+        <%= if Accounts.can_delete_products?(@current_user) do %>
+          <.button
             id="delete-button"
+            type="button"
+            class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
             phx-click={
               JS.push("delete", value: %{id: @product.id})
               |> hide("##{@product.id}")
@@ -36,11 +37,9 @@
               gettext("Delete product \"%{name}\"?", name: @product.name)
             }
           >
-            <.button class="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70">
-              <.icon name="hero-trash-solid" class="h-4 w-4" />
-              <span class="sr-only"><%= gettext("Delete product") %></span>
-            </.button>
-          </.link>
+            <.icon name="hero-trash-solid" class="h-4 w-4" />
+            <span class="sr-only"><%= gettext("Delete product") %></span>
+          </.button>
         <% end %>
       </:actions>
     </.header>
@@ -272,7 +271,11 @@
             class="inline-flex items-center justify-center rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-sky-600 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-sky-300"
           >
             <.icon name="hero-shopping-cart-solid" class="h-4 w-4" />
-            <span class="sr-only"><%= gettext("Open listing") %></span>
+            <span class="sr-only">
+              <%= gettext("Open %{supplier} listing",
+                supplier: String.replace(listing.supplier_name, "-", " ")
+              ) %>
+            </span>
           </a>
         </div>
 

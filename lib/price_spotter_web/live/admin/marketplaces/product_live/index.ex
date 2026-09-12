@@ -78,14 +78,18 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   def handle_event("delete", %{"id" => id}, socket) do
     user = socket.assigns.current_user
 
-    product = Marketplaces.get_product_for_user!(id, user)
-
-    case Marketplaces.delete_product_for_user(product, user) do
-      {:ok, _} ->
-        {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
-
-      {:error, :unauthorized} ->
+    case Marketplaces.get_product_for_user(id, user) do
+      nil ->
         {:noreply, unauthorized_delete(socket)}
+
+      product ->
+        case Marketplaces.delete_product_for_user(product, user) do
+          {:ok, _} ->
+            {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
+
+          {:error, :unauthorized} ->
+            {:noreply, unauthorized_delete(socket)}
+        end
     end
   end
 
@@ -142,6 +146,16 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   defp maybe_include_selected_product(socket), do: socket
 
+  defp assign_saved_product(
+         %{assigns: %{product: %Product{id: id}}} = socket,
+         product
+       )
+       when id == product.id do
+    assign(socket, :product, product)
+  end
+
+  defp assign_saved_product(socket, _product), do: socket
+
   defp unauthorized_delete(socket) do
     put_flash(
       socket,
@@ -166,6 +180,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   defp refresh_products(socket, product) do
+    socket = assign_saved_product(socket, product)
     list_params = Map.get(socket.assigns, :list_params, %{})
 
     case Marketplaces.list_products_by_user(
