@@ -455,4 +455,16 @@ defmodule PriceSpotter.Extractor.Exploration do
     |> min(1.0)
     |> :erlang.float()
   end
+
+  # A threshold coming from env/config/params may arrive as a string. Parse a
+  # leading numeric value and clamp it; anything unparseable falls back to the
+  # default rather than raising a FunctionClauseError on the exploration path.
+  defp normalize_threshold(value) when is_binary(value) do
+    case Float.parse(String.trim(value)) do
+      {number, _rest} -> normalize_threshold(number)
+      :error -> normalize_threshold(@default_similarity)
+    end
+  end
+
+  defp normalize_threshold(_value), do: normalize_threshold(@default_similarity)
 end

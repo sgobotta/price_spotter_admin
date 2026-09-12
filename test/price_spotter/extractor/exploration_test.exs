@@ -141,6 +141,32 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
       assert {:error, :llm_unreachable} = Exploration.explore_product(target)
       assert Extractor.list_pending_candidate_sets() == []
     end
+
+    test "accepts a numeric-string :similarity without crashing" do
+      target = no_ean_product("Fideos Tirabuzon Marca X 200g")
+      product_with_ean("Fideos Tirabuzon Marca X 200g", @ean_match, "Coto")
+
+      FakeLlmClient.stub(:endorse_all)
+
+      # A threshold arriving as a string (env/config/params) must be parsed and
+      # clamped, not raise a FunctionClauseError before the transaction.
+      assert {:ok, result} =
+               Exploration.explore_product(target, similarity: "0.1")
+
+      assert result.candidate_count == 1
+    end
+
+    test "falls back to the default when :similarity is unparseable" do
+      target = no_ean_product("Fideos Tirabuzon Marca X 200g")
+      product_with_ean("Fideos Tirabuzon Marca X 200g", @ean_match, "Coto")
+
+      FakeLlmClient.stub(:endorse_all)
+
+      assert {:ok, result} =
+               Exploration.explore_product(target, similarity: "garbage")
+
+      assert result.candidate_count == 1
+    end
   end
 
   describe "explore_product/2 fetch_prices supplier routing" do
