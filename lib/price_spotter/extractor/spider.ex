@@ -16,7 +16,8 @@ defmodule PriceSpotter.Extractor.Spider do
           next_run_time: String.t() | nil,
           supports_dry_run: boolean(),
           supports_ean_override: boolean(),
-          input_config: map()
+          input_config: map(),
+          runtime_params: map()
         }
 
   defstruct [
@@ -28,7 +29,8 @@ defmodule PriceSpotter.Extractor.Spider do
     :next_run_time,
     :supports_dry_run,
     :supports_ean_override,
-    input_config: %{}
+    input_config: %{},
+    runtime_params: %{}
   ]
 
   @doc """
@@ -46,7 +48,8 @@ defmodule PriceSpotter.Extractor.Spider do
       next_run_time: json["next_run_time"],
       supports_dry_run: json["supports_dry_run"],
       supports_ean_override: json["supports_ean_override"],
-      input_config: json["input_config"] || %{}
+      input_config: json["input_config"] || %{},
+      runtime_params: json["runtime_params"] || %{}
     }
   end
 
@@ -58,6 +61,17 @@ defmodule PriceSpotter.Extractor.Spider do
   def ean_configurable?(%__MODULE__{supports_ean_override: true}), do: true
   def ean_configurable?(%__MODULE__{type: "by_ean"}), do: true
   def ean_configurable?(_spider), do: false
+
+  @doc """
+  True when the extractor advertises wait knobs this spider consumes.
+  Legacy spiders return an empty `runtime_params` object.
+  """
+  @spec runtime_configurable?(t()) :: boolean()
+  def runtime_configurable?(%__MODULE__{runtime_params: params})
+      when is_map(params) and map_size(params) > 0,
+      do: true
+
+  def runtime_configurable?(_spider), do: false
 
   defp inferred_type(true), do: "by_ean"
   defp inferred_type(_supports_ean_override), do: nil

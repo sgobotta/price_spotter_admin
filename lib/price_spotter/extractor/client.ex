@@ -2,7 +2,7 @@ defmodule PriceSpotter.Extractor.Client do
   @moduledoc """
   HTTP client for the extractor service's admin API (see
   `price_spotter_extractor`'s `docs/admin_api.md`): listing spiders, editing
-  their schedule, and triggering one-off runs.
+  their schedule and runtime params, and triggering one-off runs.
   """
 
   require Logger
@@ -39,11 +39,24 @@ defmodule PriceSpotter.Extractor.Client do
   end
 
   @doc """
+  Merges a runtime-params overlay onto the spider's class defaults.
+  Pass `nil` to clear the overlay (all keys back to class defaults).
+  """
+  @spec update_params(String.t(), map() | nil) ::
+          {:ok, Spider.t()} | {:error, error()}
+  def update_params(key, params) do
+    :patch
+    |> request("/admin/spiders/#{key}/params", %{params: params})
+    |> handle_response(&Spider.from_json/1)
+  end
+
+  @doc """
   Triggers a single, immediate run of the given spider. Pass `dry_run:
   true` to run without persisting anything, and/or `eans: [...]` to run
   against that exact list instead of the spider's configured source -
   both only valid when the spider supports them
-  (`Spider.supports_dry_run`/`supports_ean_override`).
+  (`Spider.supports_dry_run`/`supports_ean_override`). `params` is a
+  per-run overlay on stored runtime params; omit when empty.
   """
   @spec trigger_run(String.t(), keyword()) ::
           {:ok,
@@ -57,6 +70,7 @@ defmodule PriceSpotter.Extractor.Client do
     body =
       %{dry_run: Keyword.get(opts, :dry_run, false)}
       |> maybe_put_eans(Keyword.get(opts, :eans))
+      |> maybe_put_params(Keyword.get(opts, :params))
 
     :post
     |> request("/admin/spiders/#{key}/run", body)
@@ -81,6 +95,9 @@ defmodule PriceSpotter.Extractor.Client do
 
   defp maybe_put_eans(body, eans) when eans in [nil, []], do: body
   defp maybe_put_eans(body, eans), do: Map.put(body, :eans, eans)
+
+  defp maybe_put_params(body, params) when params in [nil, %{}], do: body
+  defp maybe_put_params(body, params), do: Map.put(body, :params, params)
 
   defp request(method, path), do: do_request(method, path, nil)
 

@@ -39,6 +39,34 @@ defmodule PriceSpotter.Extractor.ClientTest do
                Client.list_spiders()
     end
 
+    test "parses runtime_params from the JSON response" do
+      FakeHttpAdapter.stub(fn :get, _url, _headers, nil ->
+        {:ok, 200,
+         [
+           %{
+             "id" => "1",
+             "name" => "coto-by-ean",
+             "cron" => "*/5 * * * *",
+             "active" => true,
+             "supports_dry_run" => true,
+             "supports_ean_override" => true,
+             "runtime_params" => %{
+               "match_timeout_ms" => %{
+                 "type" => "int",
+                 "default" => 2000,
+                 "value" => 12_000,
+                 "description" => "Wait for a product tile."
+               }
+             }
+           }
+         ]}
+      end)
+
+      assert {:ok, [%Spider{runtime_params: params}]} = Client.list_spiders()
+
+      assert params["match_timeout_ms"]["value"] == 12_000
+    end
+
     test "maps a non-2xx response to an error" do
       FakeHttpAdapter.stub(fn :get, _url, _headers, nil ->
         {:ok, 401, %{"error" => "unauthorized"}}
@@ -86,6 +114,79 @@ defmodule PriceSpotter.Extractor.ClientTest do
 
       assert {:error, %{status: 400, message: "cron does not parse"}} =
                Client.update_schedule("coto-by-ean", %{cron: "bad"})
+    end
+  end
+
+  describe "update_params/2" do
+    test "sends the overlay and returns the updated spider" do
+      FakeHttpAdapter.stub(fn :patch, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/coto-by-ean/params")
+
+        assert Jason.decode!(body) == %{
+                 "params" => %{"match_timeout_ms" => 12_000}
+               }
+
+        {:ok, 200,
+         %{
+           "id" => "1",
+           "name" => "coto-by-ean",
+           "cron" => "*/5 * * * *",
+           "active" => true,
+           "supports_dry_run" => true,
+           "supports_ean_override" => true,
+           "runtime_params" => %{
+             "match_timeout_ms" => %{
+               "type" => "int",
+               "default" => 2000,
+               "value" => 12_000,
+               "description" => "Wait for a product tile."
+             }
+           }
+         }}
+      end)
+
+      assert {:ok, %Spider{runtime_params: params}} =
+               Client.update_params("coto-by-ean", %{
+                 "match_timeout_ms" => 12_000
+               })
+
+      assert params["match_timeout_ms"]["value"] == 12_000
+    end
+
+    test "sends null params to clear the overlay" do
+      FakeHttpAdapter.stub(fn :patch, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/coto-by-ean/params")
+        assert Jason.decode!(body) == %{"params" => nil}
+
+        {:ok, 200,
+         %{
+           "id" => "1",
+           "name" => "coto-by-ean",
+           "cron" => "*/5 * * * *",
+           "active" => true,
+           "supports_dry_run" => true,
+           "supports_ean_override" => true,
+           "runtime_params" => %{
+             "match_timeout_ms" => %{
+               "type" => "int",
+               "default" => 2000,
+               "value" => 2000,
+               "description" => "Wait for a product tile."
+             }
+           }
+         }}
+      end)
+
+      assert {:ok, %Spider{}} = Client.update_params("coto-by-ean", nil)
+    end
+
+    test "maps a 400 response to an error" do
+      FakeHttpAdapter.stub(fn :patch, _url, _headers, _body ->
+        {:ok, 400, %{"error" => "unknown runtime param(s)"}}
+      end)
+
+      assert {:error, %{status: 400, message: "unknown runtime param(s)"}} =
+               Client.update_params("coto-by-ean", %{"nope" => 1})
     end
   end
 
@@ -161,6 +262,44 @@ defmodule PriceSpotter.Extractor.ClientTest do
 
       assert {:error, %{status: 400, message: "spider does not support eans"}} =
                Client.trigger_run("yaguar", eans: ["123"])
+    end
+
+    test "sends params when given" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{
+                 "dry_run" => true,
+                 "params" => %{"match_timeout_ms" => 12_000}
+               }
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      assert {:ok, %{run_id: "run-1"}} =
+               Client.trigger_run("coto-by-ean",
+                 dry_run: true,
+                 params: %{"match_timeout_ms" => 12_000}
+               )
+    end
+
+    test "omits params from the body when the overlay is empty" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, body ->
+        assert Jason.decode!(body) == %{"dry_run" => false}
+
+        {:ok, 202,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      assert {:ok, _} =
+               Client.trigger_run("coto-by-ean", dry_run: false, params: %{})
     end
   end
 

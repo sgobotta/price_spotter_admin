@@ -93,6 +93,71 @@ defmodule PriceSpotter.ExtractorTest do
     end
   end
 
+  describe "validate_runtime_params/2" do
+    @schema %{
+      "match_timeout_ms" => %{
+        "type" => "int",
+        "default" => 2000,
+        "value" => 2000
+      },
+      "debounce_ms" => %{
+        "type" => "int",
+        "default" => 1000,
+        "value" => 1000
+      }
+    }
+
+    test "parses integer drafts against the schema" do
+      assert {:ok, parsed} =
+               Extractor.validate_runtime_params(@schema, %{
+                 "match_timeout_ms" => "12000",
+                 "debounce_ms" => "0"
+               })
+
+      assert parsed == %{
+               "match_timeout_ms" => 12_000,
+               "debounce_ms" => 0
+             }
+    end
+
+    test "rejects non-integers and timeout values below 1" do
+      assert {:error, %{reason: :invalid_format, details: details}} =
+               Extractor.validate_runtime_params(@schema, %{
+                 "match_timeout_ms" => "abc",
+                 "debounce_ms" => "-1"
+               })
+
+      assert details.invalid_params == [
+               %{name: "debounce_ms", reason: :out_of_range},
+               %{name: "match_timeout_ms", reason: :invalid_format}
+             ]
+    end
+
+    test "rejects unknown keys" do
+      assert {:error, %{reason: :unknown_key, details: details}} =
+               Extractor.validate_runtime_params(@schema, %{"nope" => "1"})
+
+      assert details.invalid_params == [
+               %{name: "nope", reason: :unknown_key}
+             ]
+    end
+  end
+
+  describe "runtime_param_diffs/2" do
+    test "keeps only values that differ from the stored schema value" do
+      schema = %{
+        "match_timeout_ms" => %{"value" => 2000},
+        "debounce_ms" => %{"value" => 1000}
+      }
+
+      parsed = %{"match_timeout_ms" => 12_000, "debounce_ms" => 1000}
+
+      assert Extractor.runtime_param_diffs(schema, parsed) == %{
+               "match_timeout_ms" => 12_000
+             }
+    end
+  end
+
   describe "parse_eans/1" do
     test "supports comma and newline separators" do
       assert Extractor.parse_eans("7790070418161,7790742307279\n7790070418161") ==

@@ -1,8 +1,8 @@
 defmodule PriceSpotter.Extractor do
   @moduledoc """
   Context for managing the extractor service's spiders from the admin UI:
-  listing them, editing their schedule, and triggering one-off runs with
-  live progress.
+  listing them, editing their schedule and runtime params, and triggering
+  one-off runs with live progress.
   """
 
   import Ecto.Query, warn: false
@@ -32,6 +32,12 @@ defmodule PriceSpotter.Extractor do
           details: map()
         }
 
+  @type runtime_params_error :: %{
+          reason: :invalid_format | :unknown_key,
+          message: String.t(),
+          details: map()
+        }
+
   @spec list_spiders() :: {:ok, [Spider.t()]} | {:error, Client.error()}
   def list_spiders do
     with {:ok, spiders} <- Client.list_spiders() do
@@ -40,6 +46,7 @@ defmodule PriceSpotter.Extractor do
   end
 
   defdelegate update_schedule(key, attrs), to: Client
+  defdelegate update_params(key, params), to: Client
   defdelegate trigger_run(key, opts \\ []), to: Client
   defdelegate stop_run(run_id), to: Client
 
@@ -74,6 +81,55 @@ defmodule PriceSpotter.Extractor do
     |> Enum.map(&String.trim/1)
     |> Enum.reject(&(&1 == ""))
     |> dedupe_preserving_order()
+  end
+
+  @doc """
+  Parses draft runtime-param strings against a spider's advertised schema.
+
+  Timeout keys (name contains `"timeout"`) must be integers `>= 1`.
+  Other keys must be integers `>= 0`. Unknown keys vs the schema are
+  rejected. Returns parsed ints keyed by param name.
+  """
+  @spec validate_runtime_params(map(), map()) ::
+          {:ok, %{optional(String.t()) => integer()}}
+          | {:error, runtime_params_error()}
+  def validate_runtime_params(schema, drafts) when is_map(schema) do
+    allowed = Map.keys(schema)
+
+    drafts
+    |> Enum.reduce({%{}, []}, fn {name, raw}, {parsed, errors} ->
+      name = to_string(name)
+
+      if name in allowed do
+        case parse_runtime_param(name, raw) do
+          {:ok, value} -> {Map.put(parsed, name, value), errors}
+          {:error, reason} -> {parsed, [{reason, name} | errors]}
+        end
+      else
+        {parsed, [{:unknown_key, name} | errors]}
+      end
+    end)
+    |> case do
+      {parsed, []} ->
+        {:ok, parsed}
+
+      {_parsed, errors} ->
+        {:error, runtime_params_error(Enum.reverse(errors))}
+    end
+  end
+
+  @doc """
+  Keys whose parsed value differs from the schema's stored `value`.
+  """
+  @spec runtime_param_diffs(map(), %{optional(String.t()) => integer()}) ::
+          %{optional(String.t()) => integer()}
+  def runtime_param_diffs(schema, parsed) when is_map(schema) do
+    parsed
+    |> Enum.filter(fn {name, value} ->
+      stored = schema |> Map.get(name, %{}) |> Map.get("value")
+      stored != value
+    end)
+    |> Map.new()
   end
 
   @doc """
@@ -355,6 +411,53 @@ defmodule PriceSpotter.Extractor do
       ],
       conflict_target: :spider_name
     )
+  end
+
+  defp parse_runtime_param(name, value) when is_integer(value) do
+    validate_runtime_param_range(name, value)
+  end
+
+  defp parse_runtime_param(name, raw) when is_binary(raw) do
+    case Integer.parse(String.trim(raw)) do
+      {int, ""} -> validate_runtime_param_range(name, int)
+      _other -> {:error, :invalid_format}
+    end
+  end
+
+  defp parse_runtime_param(_name, _raw), do: {:error, :invalid_format}
+
+  defp validate_runtime_param_range(name, value) do
+    min = if String.contains?(name, "timeout"), do: 1, else: 0
+
+    if value >= min do
+      {:ok, value}
+    else
+      {:error, :out_of_range}
+    end
+  end
+
+  defp runtime_params_error(errors) do
+    details =
+      errors
+      |> Enum.map(fn {reason, name} ->
+        %{name: name, reason: reason}
+      end)
+      |> Enum.sort_by(& &1.name)
+
+    reason =
+      if Enum.any?(errors, fn {error_reason, _name} ->
+           error_reason == :unknown_key
+         end) do
+        :unknown_key
+      else
+        :invalid_format
+      end
+
+    %{
+      reason: reason,
+      message: "Some runtime params have an invalid format",
+      details: %{invalid_params: details}
+    }
   end
 
   @spec validate_ean_formats([String.t()]) :: [ean_format_error()]
