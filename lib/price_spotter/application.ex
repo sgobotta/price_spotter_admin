@@ -29,6 +29,10 @@ defmodule PriceSpotter.Application do
       PriceSpotter.Marketplaces.ProductProducer.child_spec(
         supplier: "carrefour-by-ean",
         module_name: "CarrefourByEanProducer"
+      ),
+      PriceSpotter.Marketplaces.ProductProducer.child_spec(
+        supplier: "nestle-by-ean",
+        module_name: "NestleByEanProducer"
       )
     ]
 
