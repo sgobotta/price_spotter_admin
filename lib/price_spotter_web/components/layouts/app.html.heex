@@ -1,9 +1,9 @@
-<div class="flex h-screen min-h-0">
+<div class="flex h-screen min-h-0 overflow-hidden overscroll-none">
   <PriceSpotterWeb.SidebarComponent.sidebar
     current_user={assigns[:current_user]}
     current_path={assigns[:current_path]}
   />
-  <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
     <header class="z-50 shrink-0 header-bg">
       <div>
         <div class="
@@ -35,7 +35,7 @@
       </div>
     </header>
     <main class={[
-      "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-clip px-4 pb-2 sm:px-6 lg:px-8",
+      "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-clip overscroll-none px-4 pb-2 sm:px-6 lg:px-8",
       assigns[:flush_main_top] != true && "pt-2"
     ]}>
       <div class="min-w-0 max-w-full">
