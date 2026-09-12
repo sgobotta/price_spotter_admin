@@ -37,7 +37,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
 
       html =
         index_live
-        |> element("#users-#{user.id}-toggle-expand")
+        |> element("#users-#{user.id}-header")
         |> render_click()
 
       assert html =~ "users-#{user.id}-expand"
@@ -49,7 +49,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
 
       html =
         index_live
-        |> element("#users-#{user.id}-toggle-expand")
+        |> element("#users-#{user.id}-header")
         |> render_click()
 
       assert html =~ "users-#{user.id}-expand"
@@ -87,7 +87,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
       index_live
-      |> element("#users-#{user.id}-toggle-expand")
+      |> element("#users-#{user.id}-header")
       |> render_click()
 
       assert index_live
@@ -112,7 +112,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
       index_live
-      |> element("#users-#{user.id}-toggle-expand")
+      |> element("#users-#{user.id}-header")
       |> render_click()
 
       refute has_element?(index_live, "a#users-edit-#{user.id}")
@@ -135,7 +135,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
 
       html =
         index_live
-        |> element("#users-#{user.id}-toggle-expand")
+        |> element("#users-#{user.id}-header")
         |> render_click()
 
       ref = extract_row_ref(html)
@@ -166,7 +166,7 @@ defmodule PriceSpotterWeb.Admin.Accounts.UserLiveTest do
       {:ok, index_live, _html} = live(conn, ~p"/admin/accounts/users")
 
       index_live
-      |> element("#users-#{user.id}-toggle-expand")
+      |> element("#users-#{user.id}-header")
       |> render_click()
 
       html =

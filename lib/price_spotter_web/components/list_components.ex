@@ -7,6 +7,7 @@ defmodule PriceSpotterWeb.ListComponents do
 
   use Phoenix.Component
 
+  alias Phoenix.LiveView.JS
   alias PriceSpotterWeb.CoreComponents
   import PriceSpotterWeb.Gettext
 
@@ -136,10 +137,20 @@ defmodule PriceSpotterWeb.ListComponents do
   slot :content, required: true
 
   def expandable_list_row(assigns) do
+    assigns = assign(assigns, :header_click, header_click(assigns))
+
     ~H"""
     <div id={@id} class="flex min-w-0 flex-col px-4 py-3">
       <div class="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div class="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
+        <button
+          id={"#{@id}-header"}
+          type="button"
+          phx-click={@header_click}
+          phx-value-key={if @toggle_patch, do: nil, else: @toggle_key}
+          aria-expanded={@expanded}
+          aria-controls={"#{@id}-expand"}
+          class="flex min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden border-0 bg-transparent p-0 text-left appearance-none"
+        >
           <div :if={@leading != []} class="shrink-0">
             <%= render_slot(@leading) %>
           </div>
@@ -155,9 +166,7 @@ defmodule PriceSpotterWeb.ListComponents do
               <%= render_slot(@subtitle) %>
             </div>
           </div>
-        </div>
 
-        <div class="flex shrink-0 items-center gap-3 self-end sm:self-auto">
           <div
             :if={@meta != []}
             class="hidden shrink-0 flex-wrap items-center justify-end gap-1 sm:flex"
@@ -172,17 +181,9 @@ defmodule PriceSpotterWeb.ListComponents do
             <%= render_slot(@trailing) %>
           </div>
 
-          <div :if={@actions != []} class="flex shrink-0 items-center gap-2">
-            <%= render_slot(@actions) %>
-          </div>
-
-          <.link
-            :if={@toggle_patch}
-            id={"#{@id}-toggle-expand"}
-            patch={@toggle_patch}
-            aria-expanded={@expanded}
-            aria-controls={"#{@id}-expand"}
-            class="inline-flex items-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          <span
+            class="inline-flex shrink-0 text-zinc-400 dark:text-zinc-500"
+            aria-hidden="true"
           >
             <CoreComponents.icon
               name={
@@ -192,31 +193,17 @@ defmodule PriceSpotterWeb.ListComponents do
               }
               class="h-4 w-4"
             />
-            <%= if @expanded, do: gettext("Collapse"), else: gettext("Details") %>
-          </.link>
+          </span>
+          <span class="sr-only">
+            <%= if @expanded, do: gettext("Collapse"), else: gettext("Expand") %>
+          </span>
+        </button>
 
-          <CoreComponents.button
-            :if={!@toggle_patch}
-            id={"#{@id}-toggle-expand"}
-            type="button"
-            phx-click={@toggle_event}
-            phx-value-key={@toggle_key}
-            aria-expanded={@expanded}
-            aria-controls={"#{@id}-expand"}
-            class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-          >
-            <CoreComponents.icon
-              name={
-                if @expanded,
-                  do: "hero-chevron-up-solid",
-                  else: "hero-chevron-down-solid"
-              }
-              class="h-4 w-4"
-            />
-            <span class="sr-only">
-              <%= if @expanded, do: gettext("Collapse"), else: gettext("Expand") %>
-            </span>
-          </CoreComponents.button>
+        <div
+          :if={@actions != []}
+          class="flex shrink-0 items-center gap-2 self-end sm:self-auto"
+        >
+          <%= render_slot(@actions) %>
         </div>
       </div>
 
@@ -225,7 +212,7 @@ defmodule PriceSpotterWeb.ListComponents do
         role="region"
         aria-hidden={if @expanded, do: "false", else: "true"}
         class={[
-          "grid transition-all duration-300 ease-in-out",
+          "grid overflow-hidden transition-all duration-300 ease-in-out",
           if(@expanded,
             do: "grid-rows-[1fr] opacity-100",
             else: "grid-rows-[0fr] opacity-0"
@@ -233,7 +220,11 @@ defmodule PriceSpotterWeb.ListComponents do
         ]}
       >
         <%= if @expanded do %>
-          <div class="overflow-hidden">
+          <div
+            id={"#{@id}-expand-inner"}
+            class="min-h-0 overflow-hidden"
+            phx-remove={keep_panel_during_collapse()}
+          >
             <div class={[
               "mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40",
               @content_class
@@ -245,6 +236,21 @@ defmodule PriceSpotterWeb.ListComponents do
       </div>
     </div>
     """
+  end
+
+  defp header_click(%{toggle_patch: patch}) when not is_nil(patch),
+    do: JS.patch(patch)
+
+  defp header_click(%{toggle_event: event}), do: event
+
+  # Delay unmount so the grid-rows collapse can animate.
+  defp keep_panel_during_collapse do
+    JS.hide(
+      time: 300,
+      transition:
+        {"transition-all duration-300 ease-in-out", "opacity-100",
+         "opacity-100"}
+    )
   end
 
   @doc """

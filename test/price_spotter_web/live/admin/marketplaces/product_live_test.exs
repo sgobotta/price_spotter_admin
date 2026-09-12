@@ -118,11 +118,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert row_html =~ long_name
       assert row_html =~ "$#{product.price}"
 
-      assert has_element?(
-               index_live,
-               "#products-#{product.id}-toggle-expand",
-               gettext("Details")
-             )
+      refute row_html =~ gettext("Details")
+      assert has_element?(index_live, "#products-#{product.id}-header")
+      refute has_element?(index_live, "#products-#{product.id}-toggle-expand")
     end
 
     test "saves new product", %{conn: conn} do
@@ -155,7 +153,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       html =
         index_live
-        |> element("#products-#{product.id}-toggle-expand")
+        |> element("#products-#{product.id}-header")
         |> render_click()
 
       assert_patch_path(
