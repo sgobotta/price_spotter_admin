@@ -308,7 +308,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ product.category
       assert html =~ "sticky top-0"
       assert html =~ "overflow-x-clip overscroll-none px-4 pb-2"
-      refute html =~ "overflow-x-clip overscroll-none px-4 pb-2 sm:px-6 lg:px-8 pt-2"
+
+      refute html =~
+               "overflow-x-clip overscroll-none px-4 pb-2 sm:px-6 lg:px-8 pt-2"
 
       edit_html = show_live |> element("#edit-button") |> render()
       assert edit_html =~ "hero-pencil-solid"
