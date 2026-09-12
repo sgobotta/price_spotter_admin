@@ -244,12 +244,12 @@ msgstr "Todos los proveedores"
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:208
 #, elixir-autogen, elixir-format
 msgid "Last Price"
-msgstr "Ultimo Precio"
+msgstr "Último Precio"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:186
 #, elixir-autogen, elixir-format
 msgid "Last Update"
-msgstr "Ultima Actualización"
+msgstr "Última Actualización"
 
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.ex:197
 #, elixir-autogen, elixir-format
@@ -1419,7 +1419,7 @@ msgstr "+ Agregar otro"
 #: lib/price_spotter_web/live/admin/marketplaces/product_live/index.html.heex:214
 #, elixir-autogen, elixir-format
 msgid "Last updated"
-msgstr "Ultima actualización"
+msgstr "Última actualización"
 
 #: lib/price_spotter_web/components/core_components.ex:53
 #, elixir-autogen, elixir-format

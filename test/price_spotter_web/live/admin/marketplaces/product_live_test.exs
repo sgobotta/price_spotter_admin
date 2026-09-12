@@ -508,6 +508,68 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert listing =~ ~p"/admin/marketplaces/products/#{other}/show"
       assert has_element?(show_live, "#ean-listing-#{other.id} img")
     end
+
+    test "pushes chart series labeled with supplier names only", %{
+      conn: conn,
+      product: product
+    } do
+      ean = "7790070418161"
+
+      {:ok, current} = Marketplaces.update_product(product, %{ean: ean})
+
+      other =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "chart-#{System.unique_integer([:positive])}",
+          name: "Other supplier listing",
+          supplier_name: "other-supplier"
+        })
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{current}/show")
+
+      %{proxy: {ref, _topic, _}} = show_live
+
+      assert_receive {^ref,
+                      {:push_event, "set-chart-data", %{datasets: datasets}}},
+                     1000
+
+      labels = Enum.map(datasets, & &1.label)
+
+      assert String.replace(current.supplier_name, "-", " ") in labels
+      assert String.replace(other.supplier_name, "-", " ") in labels
+      refute other.name in labels
+    end
+
+    test "shows a green signed delta when another supplier is more expensive",
+         %{
+           conn: conn,
+           product: product
+         } do
+      ean = "7790070418161"
+
+      {:ok, current} = Marketplaces.update_product(product, %{ean: ean})
+
+      other =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "expensive-#{System.unique_integer([:positive])}",
+          name: "Expensive supplier listing",
+          supplier_name: "expensive-supplier",
+          price: "241.0"
+        })
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{current}/show")
+
+      listing =
+        show_live
+        |> element("#ean-listing-#{other.id}")
+        |> render()
+
+      assert listing =~ "+$120.5 (+100.0%)"
+      assert listing =~ "text-emerald-600"
+    end
   end
 
   describe "Show EAN listings for a customer" do
@@ -586,6 +648,38 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
                  1,
                  count: 1
                )
+    end
+
+    test "returns 404 when the product belongs to a supplier the customer cannot access",
+         %{
+           conn: conn,
+           user: user
+         } do
+      granted_supplier = SuppliersFixtures.create()
+      other_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      _granted =
+        product_fixture(%{
+          internal_id: "granted-#{System.unique_integer([:positive])}",
+          supplier_id: granted_supplier.id,
+          supplier_name: granted_supplier.name
+        })
+
+      other =
+        product_fixture(%{
+          internal_id: "foreign-#{System.unique_integer([:positive])}",
+          supplier_id: other_supplier.id,
+          supplier_name: other_supplier.name
+        })
+
+      assert_error_sent 404, fn ->
+        live(conn, ~p"/admin/marketplaces/products/#{other}/show")
+      end
     end
   end
 end

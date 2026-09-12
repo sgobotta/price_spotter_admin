@@ -290,6 +290,48 @@ defmodule PriceSpotter.MarketplacesTest do
       assert result.id == granted_product.id
     end
 
+    test "get_product_for_user!/2 returns any product for an admin" do
+      admin = PriceSpotter.AccountsFixtures.admin_fixture()
+      product = product_fixture()
+
+      assert Marketplaces.get_product_for_user!(product.id, admin).id ==
+               product.id
+    end
+
+    test "get_product_for_user!/2 returns a product from a granted supplier" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      granted_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: granted_supplier.id
+      })
+
+      product =
+        product_fixture(%{
+          internal_id: "granted-#{System.unique_integer()}",
+          supplier_id: granted_supplier.id
+        })
+
+      assert Marketplaces.get_product_for_user!(product.id, user).id ==
+               product.id
+    end
+
+    test "get_product_for_user!/2 raises when the customer cannot access the product" do
+      user = PriceSpotter.AccountsFixtures.user_fixture()
+      other_supplier = SuppliersFixtures.create()
+
+      product =
+        product_fixture(%{
+          internal_id: "other-#{System.unique_integer()}",
+          supplier_id: other_supplier.id
+        })
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketplaces.get_product_for_user!(product.id, user)
+      end
+    end
+
     test "list_product_categories_by_user/1 returns every category for an admin" do
       admin = PriceSpotter.AccountsFixtures.admin_fixture()
       product_fixture(%{category: "some category"})

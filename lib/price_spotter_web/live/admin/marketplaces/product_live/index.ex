@@ -30,7 +30,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
       {:ok, {products, meta}} ->
         {:noreply,
          socket
-         |> assign(%{products: products, meta: meta})
+         |> assign(%{products: products, meta: meta, list_params: list_params})
          |> assign_selection_options()
          |> assign_filter_fields()
          |> assign(filter_fields_form: to_form(meta))
@@ -75,14 +75,17 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    product = Marketplaces.get_product!(id)
+    product =
+      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
+
     {:ok, _} = Marketplaces.delete_product(product)
 
     {:noreply, push_patch(socket, to: ~p"/admin/marketplaces/products")}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    product = Marketplaces.get_product!(id)
+    product =
+      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
 
     socket
     |> assign(:page_title, gettext("Edit Product"))
@@ -91,7 +94,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   end
 
   defp apply_action(socket, :show, %{"id" => id}) do
-    product = Marketplaces.get_product!(id)
+    product =
+      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
 
     socket
     |> assign(:page_title, gettext("Listing Products"))
@@ -102,6 +106,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, gettext("New Product"))
+    |> assign(:expanded, ExpandableList.new())
     |> assign(:product, %Product{})
   end
 
@@ -118,18 +123,36 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Index do
          {:saved, product}},
         socket
       ) do
-    products =
-      Enum.map(socket.assigns.products, fn existing ->
-        if existing.id == product.id, do: product, else: existing
-      end)
-
-    {:noreply, assign(socket, :products, products)}
+    {:noreply, refresh_products(socket, product)}
   end
 
   @impl true
   def handle_info({:product_inline_saved, _product}, socket) do
     {:noreply,
      put_flash(socket, :info, gettext("Product updated successfully"))}
+  end
+
+  defp refresh_products(socket, product) do
+    list_params = Map.get(socket.assigns, :list_params, %{})
+
+    case Marketplaces.list_products_by_user(
+           list_params,
+           socket.assigns.current_user
+         ) do
+      {:ok, {products, meta}} ->
+        socket
+        |> assign(:products, products)
+        |> assign(:meta, meta)
+        |> assign(filter_fields_form: to_form(meta))
+
+      _error ->
+        products =
+          Enum.map(socket.assigns.products, fn existing ->
+            if existing.id == product.id, do: product, else: existing
+          end)
+
+        assign(socket, :products, products)
+    end
   end
 
   @spec maybe_render_category(String.t() | nil) :: String.t()

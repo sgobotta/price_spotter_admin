@@ -48,7 +48,9 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   def handle_params(%{"id" => id}, _uri, socket) do
     %Marketplaces.Product{
       name: product_name
-    } = product = Marketplaces.get_product!(id)
+    } =
+      product =
+      Marketplaces.get_product_for_user!(id, socket.assigns.current_user)
 
     {:noreply,
      socket
@@ -272,7 +274,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
   defp price_delta(listing_price, current_price) do
     with %Decimal{} = listing <- to_decimal(listing_price),
          %Decimal{} = current <- to_decimal(current_price),
-         true <- not Decimal.eq?(current, 0) do
+         true <- not Decimal.eq?(current, Decimal.new(0)) do
       amount = Decimal.sub(listing, current)
 
       percent =
@@ -282,7 +284,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
         |> Decimal.round(1)
 
       %{
-        cmp: Decimal.compare(amount, 0),
+        cmp: Decimal.compare(amount, Decimal.new(0)),
         label: "#{signed_money(amount)} (#{signed_percent(percent)})"
       }
     else
@@ -311,7 +313,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLive.Show do
     do: "#{signed_prefix(percent)}#{Decimal.abs(percent)}%"
 
   defp signed_prefix(%Decimal{} = value) do
-    case Decimal.compare(value, 0) do
+    case Decimal.compare(value, Decimal.new(0)) do
       :lt -> "−"
       _other -> "+"
     end

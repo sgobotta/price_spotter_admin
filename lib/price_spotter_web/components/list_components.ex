@@ -147,6 +147,7 @@ defmodule PriceSpotterWeb.ListComponents do
           phx-click={@header_click}
           phx-keydown={JS.dispatch("click")}
           phx-key="Enter"
+          onkeydown="if (event.key === ' ') { event.preventDefault(); event.currentTarget.click() }"
           phx-value-key={if @toggle_patch, do: nil, else: @toggle_key}
           aria-expanded={@expanded}
           aria-controls={"#{@id}-expand"}
