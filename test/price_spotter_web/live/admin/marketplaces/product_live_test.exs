@@ -63,7 +63,22 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       {:ok, _index_live, html} = live(conn, ~p"/admin/marketplaces/products")
 
       assert html =~ gettext("Listing Products")
+      assert html =~ gettext("Last updated")
       assert html =~ product.category
+
+      header_html =
+        html
+        |> String.split("tracking-wide")
+        |> Enum.at(1)
+        |> String.split("id=\"products\"")
+        |> List.first()
+
+      supplier_idx = :binary.match(header_html, gettext("Supplier")) |> elem(0)
+
+      last_updated_idx =
+        :binary.match(header_html, gettext("Last updated")) |> elem(0)
+
+      assert supplier_idx < last_updated_idx
     end
 
     test "does not render unassigned category chip and shows dash for missing price",
@@ -117,6 +132,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
 
       assert row_html =~ long_name
       assert row_html =~ "$#{product.price}"
+      assert row_html =~ TimeAgo.time_ago(product.price_updated_at)
+      assert row_html =~ "min-w-0 truncate"
 
       refute row_html =~ gettext("Details")
       assert has_element?(index_live, "#products-#{product.id}-header")

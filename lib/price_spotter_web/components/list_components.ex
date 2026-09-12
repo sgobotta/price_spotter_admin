@@ -157,12 +157,12 @@ defmodule PriceSpotterWeb.ListComponents do
           </div>
 
           <div class="min-w-0 flex-1 overflow-hidden">
-            <div class="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+            <div class="min-w-0 truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
               <%= render_slot(@title) %>
             </div>
             <div
               :if={@subtitle != []}
-              class="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
+              class="mt-1 min-w-0 overflow-hidden text-xs text-zinc-500 dark:text-zinc-400"
             >
               <%= render_slot(@subtitle) %>
             </div>
@@ -170,7 +170,7 @@ defmodule PriceSpotterWeb.ListComponents do
 
           <div
             :if={@meta != []}
-            class="hidden shrink-0 flex-wrap items-center justify-end gap-1 sm:flex"
+            class="hidden shrink-0 items-center justify-end gap-3 sm:flex"
           >
             <%= render_slot(@meta) %>
           </div>
