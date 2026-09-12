@@ -57,14 +57,19 @@ defmodule PriceSpotterWeb.Router do
         end
 
         scope "/suppliers" do
-          pipe_through [:admin]
+          scope "/new" do
+            pipe_through [:admin]
+            live "/", SupplierLive.Index, :new
+          end
+
+          scope "/:id" do
+            pipe_through [:admin]
+            live "/edit", SupplierLive.Index, :edit
+            live "/show/edit", SupplierLive.Show, :edit
+          end
 
           live "/", SupplierLive.Index, :index
-          live "/new", SupplierLive.Index, :new
-          live "/:id/edit", SupplierLive.Index, :edit
-
           live "/:id", SupplierLive.Show, :show
-          live "/:id/show/edit", SupplierLive.Show, :edit
         end
       end
 

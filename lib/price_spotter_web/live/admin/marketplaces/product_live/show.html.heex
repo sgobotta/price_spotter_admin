@@ -88,7 +88,7 @@
                 :if={@product.ean != nil}
                 tabindex="0"
                 id="copy-ean-code"
-                data-to="#ean_code"
+                data-to="ean_code"
                 phx-hook="Copy"
                 phx-click="copy_ean"
                 phx-window-keydown="copy_ean"
@@ -330,6 +330,22 @@
           count: @ean_listings.hidden_supplier_count
         ) %>
       <% end %>
+      <span id="ean-listings-hidden-suppliers">
+        <%= for {supplier, index} <- Enum.with_index(@ean_listings.hidden_suppliers) do %>
+          <%= if index == 0, do: ": ", else: ", " %>
+          <.link
+            :if={is_binary(supplier.id)}
+            id={"ean-listings-hidden-supplier-#{supplier.id}"}
+            navigate={~p"/admin/marketplaces/suppliers/#{supplier.id}"}
+            class="font-medium text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-500 dark:text-sky-300 dark:hover:text-sky-200"
+          >
+            <%= supplier_display_name(supplier.name) %>
+          </.link>
+          <span :if={supplier.id == nil} class="font-medium">
+            <%= supplier_display_name(supplier.name) %>
+          </span>
+        <% end %>
+      </span>
     </p>
   </section>
 

@@ -79,6 +79,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
         :binary.match(header_html, gettext("Last updated")) |> elem(0)
 
       assert supplier_idx < last_updated_idx
+      assert header_html =~ "w-52 shrink-0 justify-center"
+      assert header_html =~ "w-36 shrink-0 justify-center"
     end
 
     test "does not render unassigned category chip and shows dash for missing price",
@@ -134,6 +136,8 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert row_html =~ "$#{product.price}"
       assert row_html =~ TimeAgo.time_ago(product.price_updated_at)
       assert row_html =~ "min-w-0 truncate"
+      assert row_html =~ "w-52 shrink-0 items-center justify-center"
+      assert row_html =~ "w-36 shrink-0 items-center justify-center"
 
       refute row_html =~ gettext("Details")
       assert has_element?(index_live, "#products-#{product.id}-header")
@@ -492,6 +496,27 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert html =~ "some updated category"
     end
 
+    test "wires the copy EAN button to the hidden EAN input", %{
+      conn: conn,
+      product: product
+    } do
+      ean = "7790070418161"
+
+      {:ok, product} = Marketplaces.update_product(product, %{ean: ean})
+
+      {:ok, show_live, _html} =
+        live(conn, ~p"/admin/marketplaces/products/#{product}/show")
+
+      assert has_element?(show_live, ~s(input#ean_code[value="#{ean}"]))
+
+      copy_html = show_live |> element("#copy-ean-code") |> render()
+      assert copy_html =~ ~s(data-to="ean_code")
+      refute copy_html =~ ~s(data-to="#ean_code")
+
+      html = show_live |> element("#copy-ean-code") |> render_click()
+      assert html =~ "hero-clipboard-document-check"
+    end
+
     test "shows supplier, category, and price in the details card", %{
       conn: conn,
       product: product
@@ -771,6 +796,7 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
           ean: ean,
           internal_id: "hidden-#{System.unique_integer([:positive])}",
           name: "Hidden other listing",
+          price: "888.8",
           supplier_id: hidden_supplier.id,
           supplier_name: hidden_supplier.name
         })
@@ -788,10 +814,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
       assert listing =~ "−$43.4 (−36.0%)"
       refute listing =~ ">#{visible.name}<"
       refute html =~ hidden.name
+      refute html =~ "$888.8"
 
       assert has_element?(show_live, "#ean-listing-#{visible.id}-show")
 
       assert has_element?(show_live, "#ean-listings-hidden-count")
+
+      assert has_element?(
+               show_live,
+               "#ean-listings-hidden-supplier-#{hidden_supplier.id}"
+             )
+
+      assert html =~ String.replace(hidden_supplier.name, "-", " ")
+      assert html =~ ~p"/admin/marketplaces/suppliers/#{hidden_supplier.id}"
 
       assert html =~
                ngettext(
@@ -800,6 +835,74 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.ProductLiveTest do
                  1,
                  count: 1
                )
+    end
+
+    test "names hidden suppliers without prices when none are granted", %{
+      conn: conn,
+      user: user
+    } do
+      ean = "7790070418161"
+      hidden_supplier_a = SuppliersFixtures.create()
+      hidden_supplier_b = SuppliersFixtures.create()
+      current_supplier = SuppliersFixtures.create()
+
+      UsersSuppliersFixtures.create(%{
+        user_id: user.id,
+        supplier_id: current_supplier.id
+      })
+
+      current =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "current-#{System.unique_integer([:positive])}",
+          name: "Current listing",
+          supplier_id: current_supplier.id,
+          supplier_name: current_supplier.name
+        })
+
+      hidden_a =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "hidden-a-#{System.unique_integer([:positive])}",
+          name: "Hidden listing A",
+          price: "777.7",
+          supplier_id: hidden_supplier_a.id,
+          supplier_name: hidden_supplier_a.name
+        })
+
+      hidden_b =
+        product_fixture(%{
+          ean: ean,
+          internal_id: "hidden-b-#{System.unique_integer([:positive])}",
+          name: "Hidden listing B",
+          price: "666.6",
+          supplier_id: hidden_supplier_b.id,
+          supplier_name: hidden_supplier_b.name
+        })
+
+      {:ok, show_live, html} =
+        live(conn, ~p"/admin/marketplaces/products/#{current}/show")
+
+      refute has_element?(show_live, "#ean-listings-visible")
+      assert has_element?(show_live, "#ean-listings-hidden-count")
+
+      assert html =~
+               ngettext(
+                 "%{count} other supplier sells this product",
+                 "%{count} other suppliers sell this product",
+                 2,
+                 count: 2
+               )
+
+      assert html =~ String.replace(hidden_supplier_a.name, "-", " ")
+      assert html =~ String.replace(hidden_supplier_b.name, "-", " ")
+      assert html =~ ~p"/admin/marketplaces/suppliers/#{hidden_supplier_a.id}"
+      assert html =~ ~p"/admin/marketplaces/suppliers/#{hidden_supplier_b.id}"
+
+      refute html =~ hidden_a.name
+      refute html =~ hidden_b.name
+      refute html =~ "$777.7"
+      refute html =~ "$666.6"
     end
 
     test "returns 404 when the product belongs to a supplier the customer cannot access",

@@ -55,9 +55,10 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent do
   end
 
   defp save_supplier(socket, :edit, supplier_params) do
-    case Marketplaces.update_supplier(
+    case Marketplaces.update_supplier_for_user(
            socket.assigns.supplier,
-           supplier_params
+           supplier_params,
+           socket.assigns.current_user
          ) do
       {:ok, supplier} ->
         notify_parent({:saved, supplier})
@@ -67,13 +68,19 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent do
          |> put_flash(:info, gettext("Supplier updated successfully"))
          |> push_patch(to: socket.assigns.patch)}
 
+      {:error, :unauthorized} ->
+        {:noreply, unauthorized_save(socket, :edit)}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
   end
 
   defp save_supplier(socket, :new, supplier_params) do
-    case Marketplaces.create_supplier(supplier_params) do
+    case Marketplaces.create_supplier_for_user(
+           supplier_params,
+           socket.assigns.current_user
+         ) do
       {:ok, supplier} ->
         notify_parent({:saved, supplier})
 
@@ -82,9 +89,24 @@ defmodule PriceSpotterWeb.Admin.Marketplaces.SupplierLive.FormComponent do
          |> put_flash(:info, gettext("Supplier created successfully"))
          |> push_patch(to: socket.assigns.patch)}
 
+      {:error, :unauthorized} ->
+        {:noreply, unauthorized_save(socket, :new)}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
+  end
+
+  defp unauthorized_save(socket, :edit) do
+    socket
+    |> put_flash(:error, gettext("You are not allowed to edit suppliers"))
+    |> push_patch(to: socket.assigns.patch)
+  end
+
+  defp unauthorized_save(socket, :new) do
+    socket
+    |> put_flash(:error, gettext("You are not allowed to create suppliers"))
+    |> push_patch(to: socket.assigns.patch)
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
