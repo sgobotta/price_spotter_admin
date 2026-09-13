@@ -23,14 +23,34 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
                PackageSize.parse("Gaseosa 1,5 L")
     end
 
-    test "parses a simple multipack" do
-      assert %{dimension: :volume, base: 3000.0} =
+    test "parses a simple multipack without collapsing pack into volume" do
+      assert %{dimension: :volume, base: 500.0, pack: 6.0} =
                PackageSize.parse("Agua Mineral 6x500ml")
     end
 
     test "parses a multipack with an uppercase X" do
-      assert %{dimension: :volume, base: 3000.0} =
+      assert %{dimension: :volume, base: 500.0, pack: 6.0} =
                PackageSize.parse("Agua Mineral 6X500ml")
+    end
+
+    test "parses a hyphenated 6-pack as a count" do
+      assert %{dimension: :count, base: 6.0, pack: 1.0} =
+               PackageSize.parse("Producto 6-pack")
+    end
+
+    test "parses pack x N as a count" do
+      assert %{dimension: :count, base: 6.0, pack: 1.0} =
+               PackageSize.parse("Cerveza pack x 6")
+    end
+
+    test "parses pack de N as a count" do
+      assert %{dimension: :count, base: 6.0, pack: 1.0} =
+               PackageSize.parse("Cerveza pack de 6")
+    end
+
+    test "combines a 6-pack spelling with a unit size" do
+      assert %{dimension: :volume, base: 330.0, pack: 6.0} =
+               PackageSize.parse("Cerveza 6-pack 330ml")
     end
 
     test "uses the last size token when several are present" do
@@ -40,6 +60,10 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
 
     test "returns nil when no size is present" do
       assert PackageSize.parse("Producto sin tamaño") == nil
+    end
+
+    test "returns :unparsed_pack when a pack marker has no count" do
+      assert PackageSize.parse("Producto pack familiar") == :unparsed_pack
     end
   end
 
@@ -70,6 +94,33 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
 
     test "a size on only one side is NOT compatible" do
       refute PackageSize.compatible?("Producto", "Producto 500 g")
+    end
+
+    test "a 6-pack is NOT compatible with an unquantified single" do
+      refute PackageSize.compatible?("Producto 6-pack", "Producto")
+    end
+
+    test "matching 6-pack spellings are compatible" do
+      assert PackageSize.compatible?("Producto 6-pack", "Producto pack x 6")
+    end
+
+    test "a 6-pack is compatible with 6 unidades" do
+      assert PackageSize.compatible?("Producto 6-pack", "Producto 6 unidades")
+    end
+
+    test "a 6x500ml multipack is NOT compatible with a single 3000ml" do
+      refute PackageSize.compatible?(
+               "Agua Mineral 6x500ml",
+               "Agua Mineral 3000ml"
+             )
+    end
+
+    test "matching multipacks are compatible" do
+      assert PackageSize.compatible?("Agua Mineral 6x500ml", "Agua 6x500 ml")
+    end
+
+    test "an unparsed pack marker is NOT compatible with a single" do
+      refute PackageSize.compatible?("Producto pack familiar", "Producto")
     end
   end
 end

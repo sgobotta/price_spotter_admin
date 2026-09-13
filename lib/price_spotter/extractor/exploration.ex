@@ -56,17 +56,29 @@ defmodule PriceSpotter.Extractor.Exploration do
 
   @doc """
   Manual per-product entrypoint used by the admin controls.
+
+  Reloads the product and requires that it still has no EAN (same predicate
+  as `run_monthly/1`). Exploring a product that already has a barcode would
+  let a later approval overwrite it with an exploration proposal.
   """
   @spec run_for_product(Product.t() | Ecto.UUID.t(), run_opts()) ::
-          {:ok, ExplorationRun.t()} | {:error, :product_not_found | term()}
-  def run_for_product(%Product{} = product, opts) do
-    do_run("manual", product, [product], opts)
+          {:ok, ExplorationRun.t()}
+          | {:error, :product_not_found | :product_has_ean | term()}
+  def run_for_product(%Product{id: id}, opts) do
+    run_for_product(id, opts)
   end
 
   def run_for_product(product_id, opts) when is_binary(product_id) do
     case Repo.get(Product, product_id) do
-      nil -> {:error, :product_not_found}
-      %Product{} = product -> run_for_product(product, opts)
+      nil ->
+        {:error, :product_not_found}
+
+      %Product{} = product ->
+        if missing_ean?(product) do
+          do_run("manual", product, [product], opts)
+        else
+          {:error, :product_has_ean}
+        end
     end
   end
 
@@ -440,6 +452,9 @@ defmodule PriceSpotter.Extractor.Exploration do
   end
 
   defp now, do: DateTime.utc_now() |> DateTime.truncate(:second)
+
+  defp missing_ean?(%Product{ean: ean}) when ean in [nil, ""], do: true
+  defp missing_ean?(%Product{}), do: false
 
   defp maybe_limit(query, nil), do: query
 

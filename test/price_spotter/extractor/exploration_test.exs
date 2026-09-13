@@ -282,6 +282,53 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
     end
   end
 
+  describe "run_for_product/2 no-EAN precondition" do
+    test "explores a product that still has no EAN" do
+      target = no_ean_product("Aceite Girasol Marca A 900ml")
+      product_with_ean("Aceite Girasol Marca A 900ml", @ean_match, "Coto")
+
+      FakeLlmClient.stub(:endorse_all)
+
+      assert {:ok, run} = Exploration.run_for_product(target, [])
+      assert run.status == "completed"
+      assert run.trigger == "manual"
+
+      assert {:ok, run_by_id} = Exploration.run_for_product(target.id, [])
+      assert run_by_id.status == "completed"
+    end
+
+    test "refuses a product that already has an EAN" do
+      product =
+        product_with_ean("Fideos Tirabuzon Marca X 200g", @ean_match, "Coto")
+
+      FakeLlmClient.stub(:endorse_all)
+
+      assert {:error, :product_has_ean} =
+               Exploration.run_for_product(product, [])
+
+      assert {:error, :product_has_ean} =
+               Exploration.run_for_product(product.id, [])
+
+      assert Extractor.list_pending_candidate_sets() == []
+    end
+
+    test "reloads a stale struct so a newly assigned EAN cannot be overwritten" do
+      product = no_ean_product("Yerba Mate Marca Q 1kg")
+      product_with_ean("Yerba Mate Marca Q 1kg", @ean_match, "Coto")
+
+      product
+      |> Ecto.Changeset.change(%{ean: @ean_other})
+      |> Repo.update!()
+
+      FakeLlmClient.stub(:endorse_all)
+
+      assert {:error, :product_has_ean} =
+               Exploration.run_for_product(product, [])
+
+      assert Extractor.list_pending_candidate_sets() == []
+    end
+  end
+
   describe "run_monthly/1 scheduler execution path" do
     test "records a completed run with logs and upserts candidate sets" do
       no_ean_product("Aceite Girasol Marca A 900ml")
