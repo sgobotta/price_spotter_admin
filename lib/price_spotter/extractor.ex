@@ -13,6 +13,7 @@ defmodule PriceSpotter.Extractor do
   alias PriceSpotter.Extractor.EanMatchCandidate
   alias PriceSpotter.Extractor.EanMatchCandidateSet
   alias PriceSpotter.Extractor.EanMatchDecision
+  alias PriceSpotter.Extractor.Run
   alias PriceSpotter.Extractor.RunWatcher
   alias PriceSpotter.Extractor.Spider
   alias PriceSpotter.Extractor.SpiderConfig
@@ -49,6 +50,34 @@ defmodule PriceSpotter.Extractor do
   defdelegate update_params(key, params), to: Client
   defdelegate trigger_run(key, opts \\ []), to: Client
   defdelegate stop_run(run_id), to: Client
+
+  @doc """
+  Lists tracked runs over the extractor HTTP API. See `Client.list_runs/1`
+  for the supported filters (`:status`, `:spider`, `:limit`).
+  """
+  @spec list_runs(Client.run_filters()) ::
+          {:ok, [Run.t()]} | {:error, Client.error()}
+  defdelegate list_runs(filters \\ []), to: Client
+
+  @doc """
+  Fetches a single run's metadata and outcome by `run_id`.
+  """
+  @spec get_run(String.t()) :: {:ok, Run.t()} | {:error, Client.error()}
+  defdelegate get_run(run_id), to: Client
+
+  @doc """
+  Fetches a run's full buffered structured progress log (list of frame maps).
+  """
+  @spec get_run_logs(String.t()) :: {:ok, [map()]} | {:error, Client.error()}
+  defdelegate get_run_logs(run_id), to: Client
+
+  @doc """
+  Mints a stream token for any `run_id` so the browser can attach to a run it
+  did not start.
+  """
+  @spec create_stream_token(String.t()) ::
+          {:ok, Client.stream_ref()} | {:error, Client.error()}
+  defdelegate create_stream_token(run_id), to: Client
 
   @doc """
   Persists normalized `input_config.eans` for by_ean spiders only.
@@ -176,6 +205,47 @@ defmodule PriceSpotter.Extractor do
           {:ok, pid()} | {:error, term()}
   def watch_run(run_id, stream_url, stream_token, parent_pid \\ self()) do
     watcher().start_link(run_id, stream_url, stream_token, parent_pid)
+  end
+
+  @typedoc """
+  What `watch_run_by_id/2` hands back: the run's buffered historical log plus
+  the live watcher and the stream identifiers used to open it.
+  """
+  @type run_attachment :: %{
+          run_id: String.t(),
+          logs: [map()],
+          stream_token: String.t(),
+          stream_url: String.t(),
+          watcher: pid()
+        }
+
+  @doc """
+  Attaches to a run identified by `run_id`, whether or not this session
+  started it (e.g. a scheduled/cron run, or one begun elsewhere).
+
+  Mints a fresh stream token via `create_stream_token/1`, loads the buffered
+  historical log via `get_run_logs/1`, then starts a `RunWatcher` (linked to
+  `parent_pid`) so live frames arrive as `{:extractor_run_event, run_id,
+  message}` - the same shape `watch_run/4` uses. On any failed step the error
+  is propagated unchanged and no watcher is started.
+  """
+  @spec watch_run_by_id(String.t(), pid()) ::
+          {:ok, run_attachment()} | {:error, Client.error() | term()}
+  def watch_run_by_id(run_id, parent_pid \\ self()) do
+    with {:ok, %{stream_token: stream_token, stream_url: stream_url}} <-
+           Client.create_stream_token(run_id),
+         {:ok, logs} <- Client.get_run_logs(run_id),
+         {:ok, watcher} <-
+           watcher().start_link(run_id, stream_url, stream_token, parent_pid) do
+      {:ok,
+       %{
+         run_id: run_id,
+         logs: logs,
+         stream_token: stream_token,
+         stream_url: stream_url,
+         watcher: watcher
+       }}
+    end
   end
 
   ## EAN match candidates — pending/submitted lifecycle

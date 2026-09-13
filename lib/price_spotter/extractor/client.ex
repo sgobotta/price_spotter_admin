@@ -7,9 +7,29 @@ defmodule PriceSpotter.Extractor.Client do
 
   require Logger
 
+  alias PriceSpotter.Extractor.Run
   alias PriceSpotter.Extractor.Spider
 
   @type error :: %{status: pos_integer() | nil, message: String.t()}
+
+  @typedoc """
+  Identifiers needed to open the run-stream WebSocket for a run.
+  """
+  @type stream_ref :: %{
+          run_id: String.t(),
+          stream_token: String.t(),
+          stream_url: String.t()
+        }
+
+  @typedoc """
+  Filters for `list_runs/1`. Any subset may be supplied; omitted keys are
+  not sent, letting the extractor apply its defaults.
+  """
+  @type run_filters :: [
+          status: :running | :finished | String.t(),
+          spider: String.t(),
+          limit: pos_integer()
+        ]
 
   @doc """
   Lists every spider registered in the extractor service.
@@ -91,6 +111,72 @@ defmodule PriceSpotter.Extractor.Client do
     :post
     |> request("/admin/spiders/runs/#{run_id}/stop", %{})
     |> handle_response(fn body -> body || %{} end)
+  end
+
+  @doc """
+  Lists tracked runs, most-recent first, over the extractor HTTP API (the
+  source of truth). Optional filters: `:status` (`:running` | `:finished`),
+  `:spider` (a spider key) and `:limit`. Omitted filters are not sent, so the
+  extractor applies its own defaults (both running and finished, limit 50).
+  """
+  @spec list_runs(run_filters()) :: {:ok, [Run.t()]} | {:error, error()}
+  def list_runs(filters \\ []) do
+    :get
+    |> request("/admin/spiders/runs" <> runs_query(filters))
+    |> handle_response(fn body -> Enum.map(body, &Run.from_json/1) end)
+  end
+
+  @doc """
+  Fetches a single run's metadata and outcome by `run_id`.
+  """
+  @spec get_run(String.t()) :: {:ok, Run.t()} | {:error, error()}
+  def get_run(run_id) do
+    :get
+    |> request("/admin/spiders/runs/#{run_id}")
+    |> handle_response(&Run.from_json/1)
+  end
+
+  @doc """
+  Fetches a run's full buffered structured progress log as a list of frame
+  maps, oldest first - the same frames delivered live over the WebSocket.
+  Returns `{:ok, []}` once the extractor's log retention has expired. Frames
+  are kept as decoded maps; the UI renders them.
+  """
+  @spec get_run_logs(String.t()) :: {:ok, [map()]} | {:error, error()}
+  def get_run_logs(run_id) do
+    :get
+    |> request("/admin/spiders/runs/#{run_id}/logs")
+    |> handle_response(fn body -> body || [] end)
+  end
+
+  @doc """
+  Mints a fresh stream token for any `run_id`, so the browser can open the
+  run-stream WebSocket for a run this session did not start (a scheduled/cron
+  run, or one started elsewhere). Returns the identifiers needed to open the
+  stream.
+  """
+  @spec create_stream_token(String.t()) ::
+          {:ok, stream_ref()} | {:error, error()}
+  def create_stream_token(run_id) do
+    :post
+    |> request("/admin/spiders/runs/#{run_id}/stream-token", %{})
+    |> handle_response(fn body ->
+      %{
+        run_id: body["run_id"],
+        stream_token: body["stream_token"],
+        stream_url: body["stream_url"]
+      }
+    end)
+  end
+
+  defp runs_query(filters) do
+    case filters
+         |> Keyword.take([:status, :spider, :limit])
+         |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+         |> Enum.map(fn {key, value} -> {key, to_string(value)} end) do
+      [] -> ""
+      params -> "?" <> URI.encode_query(params)
+    end
   end
 
   defp maybe_put_eans(body, eans) when eans in [nil, []], do: body

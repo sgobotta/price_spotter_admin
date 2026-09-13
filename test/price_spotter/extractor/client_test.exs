@@ -3,6 +3,7 @@ defmodule PriceSpotter.Extractor.ClientTest do
 
   alias PriceSpotter.Extractor.Client
   alias PriceSpotter.Extractor.FakeHttpAdapter
+  alias PriceSpotter.Extractor.Run
   alias PriceSpotter.Extractor.Spider
 
   setup do
@@ -321,6 +322,193 @@ defmodule PriceSpotter.Extractor.ClientTest do
 
       assert {:error, %{status: 404, message: "run not found"}} =
                Client.stop_run("missing-run")
+    end
+  end
+
+  describe "list_runs/1" do
+    test "returns runs built from the JSON response" do
+      FakeHttpAdapter.stub(fn :get, url, _headers, nil ->
+        assert String.ends_with?(url, "/admin/spiders/runs")
+
+        {:ok, 200,
+         [
+           %{
+             "id" => "run-1",
+             "spider_key" => "coto-by-ean",
+             "trigger" => "manual",
+             "dry_run" => false,
+             "status" => "success",
+             "stats" => %{"total" => 12, "success" => 10},
+             "error" => nil,
+             "started_at" => "2026-09-10T10:00:00+00:00",
+             "finished_at" => "2026-09-10T10:01:00+00:00"
+           }
+         ]}
+      end)
+
+      assert {:ok,
+              [
+                %Run{
+                  id: "run-1",
+                  spider_key: "coto-by-ean",
+                  trigger: "manual",
+                  status: "success",
+                  stats: %{"total" => 12}
+                }
+              ]} = Client.list_runs()
+    end
+
+    test "sends only the given filters as query params" do
+      FakeHttpAdapter.stub(fn :get, url, _headers, nil ->
+        assert %URI{path: "/admin/spiders/runs", query: query} = URI.parse(url)
+
+        assert URI.decode_query(query) == %{
+                 "status" => "running",
+                 "spider" => "coto-by-ean",
+                 "limit" => "20"
+               }
+
+        {:ok, 200, []}
+      end)
+
+      assert {:ok, []} =
+               Client.list_runs(
+                 status: :running,
+                 spider: "coto-by-ean",
+                 limit: 20
+               )
+    end
+
+    test "omits filters that are nil" do
+      FakeHttpAdapter.stub(fn :get, url, _headers, nil ->
+        assert %URI{path: "/admin/spiders/runs", query: "spider=coto-by-ean"} =
+                 URI.parse(url)
+
+        {:ok, 200, []}
+      end)
+
+      assert {:ok, []} =
+               Client.list_runs(status: nil, spider: "coto-by-ean", limit: nil)
+    end
+
+    test "maps a non-2xx response to an error" do
+      FakeHttpAdapter.stub(fn :get, _url, _headers, nil ->
+        {:ok, 400, %{"error" => "bad status filter"}}
+      end)
+
+      assert {:error, %{status: 400, message: "bad status filter"}} =
+               Client.list_runs(status: "nope")
+    end
+  end
+
+  describe "get_run/1" do
+    test "returns a single run" do
+      FakeHttpAdapter.stub(fn :get, url, _headers, nil ->
+        assert String.ends_with?(url, "/admin/spiders/runs/run-1")
+
+        {:ok, 200,
+         %{
+           "id" => "run-1",
+           "spider_key" => "coto-by-ean",
+           "trigger" => "scheduled",
+           "dry_run" => false,
+           "status" => "running",
+           "stats" => nil,
+           "error" => nil,
+           "started_at" => "2026-09-10T10:00:00+00:00",
+           "finished_at" => nil
+         }}
+      end)
+
+      assert {:ok, %Run{id: "run-1", status: "running", trigger: "scheduled"}} =
+               Client.get_run("run-1")
+    end
+
+    test "maps a 404 response to an error" do
+      FakeHttpAdapter.stub(fn :get, _url, _headers, nil ->
+        {:ok, 404, %{"error" => "run not found"}}
+      end)
+
+      assert {:error, %{status: 404, message: "run not found"}} =
+               Client.get_run("missing")
+    end
+  end
+
+  describe "get_run_logs/1" do
+    test "returns the buffered frames as decoded maps" do
+      FakeHttpAdapter.stub(fn :get, url, _headers, nil ->
+        assert String.ends_with?(url, "/admin/spiders/runs/run-1/logs")
+
+        {:ok, 200,
+         [
+           %{
+             "status" => "progress",
+             "item" => "7790070418161",
+             "stats" => %{"total" => 1},
+             "error" => 0,
+             "ts" => "2026-09-10T10:00:01+00:00"
+           },
+           %{
+             "status" => "finished",
+             "item" => nil,
+             "stats" => %{"total" => 12},
+             "error" => 0,
+             "ts" => "2026-09-10T10:01:00+00:00"
+           }
+         ]}
+      end)
+
+      assert {:ok, [%{"status" => "progress"}, %{"status" => "finished"}]} =
+               Client.get_run_logs("run-1")
+    end
+
+    test "returns an empty list when the log has expired" do
+      FakeHttpAdapter.stub(fn :get, _url, _headers, nil ->
+        {:ok, 200, []}
+      end)
+
+      assert {:ok, []} = Client.get_run_logs("run-1")
+    end
+
+    test "maps a 404 response to an error" do
+      FakeHttpAdapter.stub(fn :get, _url, _headers, nil ->
+        {:ok, 404, %{"error" => "run not found"}}
+      end)
+
+      assert {:error, %{status: 404, message: "run not found"}} =
+               Client.get_run_logs("missing")
+    end
+  end
+
+  describe "create_stream_token/1" do
+    test "mints a stream token for the given run" do
+      FakeHttpAdapter.stub(fn :post, url, _headers, body ->
+        assert String.ends_with?(url, "/admin/spiders/runs/run-1/stream-token")
+        assert Jason.decode!(body) == %{}
+
+        {:ok, 200,
+         %{
+           "run_id" => "run-1",
+           "stream_token" => "token-1",
+           "stream_url" => "/admin/spiders/runs/run-1/stream"
+         }}
+      end)
+
+      assert {:ok,
+              %{
+                run_id: "run-1",
+                stream_token: "token-1",
+                stream_url: "/admin/spiders/runs/run-1/stream"
+              }} = Client.create_stream_token("run-1")
+    end
+
+    test "maps a 404 response to an error" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 404, %{"error" => "run not found"}}
+      end)
+
+      assert {:error, %{status: 404, message: "run not found"}} =
+               Client.create_stream_token("missing")
     end
   end
 end

@@ -5,6 +5,7 @@ defmodule PriceSpotter.ExtractorTest do
 
   alias PriceSpotter.Extractor
   alias PriceSpotter.Extractor.EanMatchDecision
+  alias PriceSpotter.Extractor.FakeHttpAdapter
   alias PriceSpotter.Extractor.Spider
   alias PriceSpotter.Marketplaces
   alias PriceSpotter.Repo
@@ -165,6 +166,58 @@ defmodule PriceSpotter.ExtractorTest do
                  "7790070418161",
                  "7790742307279"
                ]
+    end
+  end
+
+  describe "watch_run_by_id/2" do
+    setup do
+      on_exit(fn ->
+        Application.delete_env(:price_spotter, :extractor_test_stub)
+      end)
+
+      :ok
+    end
+
+    test "mints a token, loads historical logs and starts a watcher" do
+      FakeHttpAdapter.stub(fn
+        :post, url, _headers, _body ->
+          assert String.ends_with?(
+                   url,
+                   "/admin/spiders/runs/run-1/stream-token"
+                 )
+
+          {:ok, 200,
+           %{
+             "run_id" => "run-1",
+             "stream_token" => "token-1",
+             "stream_url" => "/admin/spiders/runs/run-1/stream"
+           }}
+
+        :get, url, _headers, nil ->
+          assert String.ends_with?(url, "/admin/spiders/runs/run-1/logs")
+
+          {:ok, 200, [%{"status" => "progress", "item" => "7790070418161"}]}
+      end)
+
+      assert {:ok,
+              %{
+                run_id: "run-1",
+                stream_token: "token-1",
+                stream_url: "/admin/spiders/runs/run-1/stream",
+                logs: [%{"status" => "progress"}],
+                watcher: watcher
+              }} = Extractor.watch_run_by_id("run-1", self())
+
+      assert is_pid(watcher)
+    end
+
+    test "propagates the error and starts no watcher when the token fails" do
+      FakeHttpAdapter.stub(fn :post, _url, _headers, _body ->
+        {:ok, 404, %{"error" => "run not found"}}
+      end)
+
+      assert {:error, %{status: 404, message: "run not found"}} =
+               Extractor.watch_run_by_id("missing", self())
     end
   end
 
