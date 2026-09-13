@@ -131,6 +131,48 @@ defmodule PriceSpotterWeb.Admin.Extractor.CandidateLiveTest do
       assert Extractor.list_pending_candidate_sets() == []
       refute Marketplaces.get_product!(product.id).ean == "7790070418161"
     end
+
+    test "does not render a non-http scheme as a source link or image", %{
+      conn: conn,
+      set: safe_set
+    } do
+      unsafe =
+        product_fixture(%{
+          name: "Unsafe Source Product",
+          category: "yerbas",
+          internal_id: "unsafe-source"
+        })
+
+      {:ok, unsafe_set} =
+        Extractor.upsert_candidate_set(
+          candidate_attrs(unsafe, [
+            {"ean_candidate", "7891000389300"},
+            {"name", "Unsafe Source Product"},
+            {"url", "javascript:alert(document.cookie)"},
+            {"image_url", "javascript:alert(1)"}
+          ])
+        )
+
+      {:ok, live, _html} = live(conn, ~p"/admin/extractor/candidates")
+
+      # Expanding the unsafe set reveals its evidence, but the javascript:
+      # url/image must be dropped rather than rendered as an href/src.
+      unsafe_html =
+        live
+        |> element("#candidate-sets-#{unsafe_set.id}-header")
+        |> render_click()
+
+      assert unsafe_html =~ "Unsafe Source Product"
+      refute unsafe_html =~ "javascript:"
+
+      # The safe https fixture link still renders once its row is expanded.
+      safe_html =
+        live
+        |> element("#candidate-sets-#{safe_set.id}-header")
+        |> render_click()
+
+      assert safe_html =~ "https://coto.example/p/1"
+    end
   end
 
   describe "Index (admin, empty)" do

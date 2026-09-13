@@ -203,5 +203,21 @@ defmodule PriceSpotterWeb.Admin.Extractor.CandidateLive.Index do
   defp format_fetched_at(nil), do: gettext("Never fetched")
 
   defp format_fetched_at(datetime),
-    do: PriceSpotterWeb.Utils.DatetimeUtils.human_readable_datetime(datetime)
+    do:
+      PriceSpotterWeb.Utils.DatetimeUtils.human_readable_datetime(
+        datetime,
+        :shift_timezone
+      )
+
+  # Only render externally sourced URLs (scraper input) when they carry an
+  # http/https scheme, so a persisted `javascript:`/`data:` value can't be
+  # turned into an executable href or image src in the admin origin.
+  defp safe_url(url) when is_binary(url) do
+    case URI.new(url) do
+      {:ok, %URI{scheme: scheme}} when scheme in ["http", "https"] -> url
+      _other -> nil
+    end
+  end
+
+  defp safe_url(_url), do: nil
 end

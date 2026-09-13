@@ -13,6 +13,7 @@
 >
   <.input
     type="search"
+    id="candidate-filter-name"
     name="name"
     value={@filters["name"]}
     label={gettext("Product name")}
@@ -21,6 +22,7 @@
   />
   <.input
     type="search"
+    id="candidate-filter-ean_candidate"
     name="ean_candidate"
     value={@filters["ean_candidate"]}
     label={gettext("EAN candidate")}
@@ -29,6 +31,7 @@
   />
   <.input
     type="search"
+    id="candidate-filter-supplier"
     name="supplier"
     value={@filters["supplier"]}
     label={gettext("Supplier")}
@@ -37,6 +40,7 @@
   />
   <.input
     type="search"
+    id="candidate-filter-category"
     name="category"
     value={@filters["category"]}
     label={gettext("Category")}
@@ -92,8 +96,8 @@
           <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex min-w-0 items-start gap-3">
               <img
-                :if={candidate.image_url}
-                src={candidate.image_url}
+                :if={safe_url(candidate.image_url)}
+                src={safe_url(candidate.image_url)}
                 alt={candidate.name}
                 class="h-12 w-12 shrink-0 rounded-md object-cover"
                 loading="lazy"
@@ -113,8 +117,8 @@
                   </span>
                 </div>
                 <a
-                  :if={candidate.url}
-                  href={candidate.url}
+                  :if={safe_url(candidate.url)}
+                  href={safe_url(candidate.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="mt-1 inline-flex items-center gap-1 text-xs text-brand hover:underline"
