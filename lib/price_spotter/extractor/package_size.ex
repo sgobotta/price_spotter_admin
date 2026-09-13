@@ -89,8 +89,9 @@ defmodule PriceSpotter.Extractor.PackageSize do
   conventionally written at the end of the name.
 
   Returns `:unparsed_pack` when the name contains a pack marker that cannot
-  be quantified, so it is never treated as compatible with a single or with
-  another unparsed pack.
+  be quantified — including when a size token is also present, as in
+  "pack familiar 500ml" — so it is never treated as a plain single unit.
+  A size that is already a multipack (`6x500ml`) keeps its parsed shape.
   """
   @spec parse(String.t() | nil) :: parse_result()
   def parse(nil), do: nil
@@ -100,8 +101,14 @@ defmodule PriceSpotter.Extractor.PackageSize do
     pack_count = last_pack_count(name)
 
     cond do
-      is_map(size) ->
+      is_map(size) and is_number(pack_count) ->
         merge_pack(size, pack_count)
+
+      is_map(size) and unquantified_pack_marker?(name, size) ->
+        :unparsed_pack
+
+      is_map(size) ->
+        size
 
       is_number(pack_count) ->
         %{dimension: :count, base: pack_count, pack: 1.0}
@@ -184,6 +191,15 @@ defmodule PriceSpotter.Extractor.PackageSize do
   defp pack_count_from_scan(_other), do: nil
 
   defp pack_marker?(name), do: Regex.match?(@pack_marker_regex, name)
+
+  # "pack familiar 500ml": a pack word with no count, and the size is a
+  # single unit — treat as unparsed rather than a plain 500ml. A size that
+  # is already a multipack (6x500ml) keeps its parsed shape.
+  defp unquantified_pack_marker?(name, size) do
+    pack_marker?(name) and not multipack?(size)
+  end
+
+  defp multipack?(%{pack: pack}), do: pack > 1.0
 
   defp merge_pack(size, nil), do: size
 

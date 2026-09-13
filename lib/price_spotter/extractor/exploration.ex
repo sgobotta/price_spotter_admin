@@ -213,12 +213,32 @@ defmodule PriceSpotter.Extractor.Exploration do
   end
 
   defp upsert(product, candidates) do
-    Extractor.upsert_candidate_set(%{
-      product_id: product.id,
-      product_name: product.name,
-      category: product.category,
-      candidates: Enum.map(candidates, &candidate_attrs/1)
-    })
+    Repo.transaction(fn ->
+      current =
+        Product
+        |> where([p], p.id == ^product.id)
+        |> lock("FOR UPDATE")
+        |> Repo.one()
+
+      cond do
+        is_nil(current) ->
+          Repo.rollback(:product_not_found)
+
+        missing_ean?(current) ->
+          case Extractor.upsert_candidate_set(%{
+                 product_id: product.id,
+                 product_name: product.name,
+                 category: product.category,
+                 candidates: Enum.map(candidates, &candidate_attrs/1)
+               }) do
+            {:ok, set} -> set
+            {:error, reason} -> Repo.rollback(reason)
+          end
+
+        true ->
+          Repo.rollback(:product_has_ean)
+      end
+    end)
   end
 
   defp candidate_attrs(%Product{} = ref) do

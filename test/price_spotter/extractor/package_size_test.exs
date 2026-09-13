@@ -65,6 +65,16 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
     test "returns :unparsed_pack when a pack marker has no count" do
       assert PackageSize.parse("Producto pack familiar") == :unparsed_pack
     end
+
+    test "returns :unparsed_pack when an unquantified pack marker precedes a size" do
+      assert PackageSize.parse("Producto pack familiar 500ml") ==
+               :unparsed_pack
+    end
+
+    test "keeps a multipack size even when the name also says pack" do
+      assert %{dimension: :volume, base: 500.0, pack: 6.0} =
+               PackageSize.parse("Producto pack familiar 6x500ml")
+    end
   end
 
   describe "compatible?/2" do
@@ -121,6 +131,13 @@ defmodule PriceSpotter.Extractor.PackageSizeTest do
 
     test "an unparsed pack marker is NOT compatible with a single" do
       refute PackageSize.compatible?("Producto pack familiar", "Producto")
+    end
+
+    test "an unquantified pack marker plus size is NOT a plain 500ml" do
+      refute PackageSize.compatible?(
+               "Producto pack familiar 500ml",
+               "Producto 500ml"
+             )
     end
   end
 end

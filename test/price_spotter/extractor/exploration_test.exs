@@ -327,6 +327,32 @@ defmodule PriceSpotter.Extractor.ExplorationTest do
 
       assert Extractor.list_pending_candidate_sets() == []
     end
+
+    test "does not upsert if an EAN is assigned during the LLM call" do
+      target = no_ean_product("Leche Entera Marca Z 1L")
+      product_with_ean("Leche Entera Marca Z 1L", @ean_match, "Coto")
+
+      FakeLlmClient.stub(fn _target, _refs, _opts ->
+        target
+        |> Ecto.Changeset.change(%{ean: @ean_other})
+        |> Repo.update!()
+
+        {:ok,
+         [
+           %{
+             ean_candidate: @ean_match,
+             confidence: 1.0,
+             reason: "assigned mid-call"
+           }
+         ]}
+      end)
+
+      assert {:error, :product_has_ean} = Exploration.explore_product(target)
+      assert Extractor.list_pending_candidate_sets() == []
+
+      assert Repo.get!(PriceSpotter.Marketplaces.Product, target.id).ean ==
+               @ean_other
+    end
   end
 
   describe "run_monthly/1 scheduler execution path" do
