@@ -252,10 +252,14 @@ defmodule PriceSpotter.Extractor do
 
   In a single transaction this records an `approved` decision, applies the
   approved EAN to the related product, and removes the pending set.
+
+  The product row is locked and must still have no EAN; otherwise returns
+  `{:error, :product_has_ean}` so a barcode assigned after the set was
+  created cannot be overwritten.
   """
   @spec approve_candidate(EanMatchCandidateSet.t(), String.t()) ::
           {:ok, %{decision: EanMatchDecision.t(), product: Product.t()}}
-          | {:error, :candidate_not_found | term()}
+          | {:error, :candidate_not_found | :product_has_ean | term()}
   def approve_candidate(%EanMatchCandidateSet{} = set, ean_candidate) do
     with %EanMatchCandidate{} = candidate <-
            find_candidate(set, ean_candidate) ||
@@ -359,15 +363,20 @@ defmodule PriceSpotter.Extractor do
 
   defp apply_ean_to_product(product_id, ean_candidate) do
     Product
-    |> Repo.get(product_id)
+    |> where([p], p.id == ^product_id)
+    |> lock("FOR UPDATE")
+    |> Repo.one()
     |> case do
       nil ->
         {:error, :product_not_found}
 
-      %Product{} = product ->
+      %Product{ean: ean} = product when ean in [nil, ""] ->
         product
         |> Product.changeset(%{ean: ean_candidate})
         |> Repo.update()
+
+      %Product{} ->
+        {:error, :product_has_ean}
     end
   end
 

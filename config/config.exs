@@ -11,6 +11,26 @@ config :price_spotter,
   ecto_repos: [PriceSpotter.Repo],
   generators: [binary_id: true]
 
+# LLM used by the EAN match-candidate exploration flow. The API key is
+# supplied at runtime (see config/runtime.exs); tests swap the client.
+config :price_spotter, :llm,
+  client: PriceSpotter.Extractor.LlmClient.Anthropic,
+  model: "claude-opus-5"
+
+# Maps a product's `supplier_name` (as emitted by the extractor spiders and
+# stored on the product) to the extractor spider key used for the optional
+# EAN price fetch in the exploration flow. Only spiders that accept an EAN
+# override belong here, and the mapping is re-validated at run time against
+# the extractor's live `supports_ean_override` list (the extractor is the
+# source of truth). A supplier absent from this map is skipped rather than
+# routed to the wrong spider. Note the supplier name and spider key are not
+# always the same string (e.g. supplier "maxiconsumo" -> "maxiconsumo-by-ean-v2").
+config :price_spotter, :extractor,
+  ean_override_spider_by_supplier: %{
+    "coto-by-ean" => "coto-by-ean",
+    "maxiconsumo" => "maxiconsumo-by-ean-v2"
+  }
+
 config :flop, repo: PriceSpotter.Repo
 
 config :flop_phoenix,

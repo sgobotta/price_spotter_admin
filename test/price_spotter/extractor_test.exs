@@ -291,6 +291,23 @@ defmodule PriceSpotter.ExtractorTest do
       assert Repo.aggregate(EanMatchDecision, :count) == 0
     end
 
+    test "approval does not overwrite a barcode assigned after the set was created" do
+      product = product_fixture(%{name: "Yerba Mate 1kg"})
+      {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))
+
+      product
+      |> Ecto.Changeset.change(%{ean: "7790000000031"})
+      |> Repo.update!()
+
+      assert {:error, :product_has_ean} =
+               Extractor.approve_candidate(set, "7790070418161")
+
+      assert Marketplaces.get_product!(product.id).ean == "7790000000031"
+      assert [only_set] = Extractor.list_pending_candidate_sets()
+      assert only_set.id == set.id
+      assert Repo.aggregate(EanMatchDecision, :count) == 0
+    end
+
     test "disapproval of an EAN not in the set is rejected without side effects" do
       product = product_fixture(%{name: "Yerba Mate 1kg"})
       {:ok, set} = Extractor.upsert_candidate_set(set_attrs(product))

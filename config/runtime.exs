@@ -36,6 +36,10 @@ config :price_spotter, :extractor,
   ws_base_url: System.fetch_env!("EXTRACTOR_WS_BASE_URL"),
   api_token: System.fetch_env!("EXTRACTOR_API_TOKEN")
 
+# EAN exploration LLM key (optional): when unset the exploration flow
+# returns {:error, :missing_llm_api_key} instead of crashing the app.
+config :price_spotter, :llm, api_key: System.get_env("ANTHROPIC_API_KEY")
+
 if config_env() == :prod do
   maybe_ipv6 =
     if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
