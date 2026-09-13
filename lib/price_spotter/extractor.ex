@@ -269,10 +269,13 @@ defmodule PriceSpotter.Extractor do
         apply_ean_to_product(set.product_id, candidate.ean_candidate)
       end)
       |> Multi.delete(:pending, set)
-      |> Repo.transaction()
+      |> transact_decision()
       |> case do
         {:ok, %{decision: decision, product: product}} ->
           {:ok, %{decision: decision, product: product}}
+
+        {:error, :candidate_not_found} = error ->
+          error
 
         {:error, _step, reason, _changes} ->
           {:error, reason}
@@ -299,12 +302,22 @@ defmodule PriceSpotter.Extractor do
         decision_changeset(set, candidate, "disapproved")
       )
       |> Multi.delete(:pending, set)
-      |> Repo.transaction()
+      |> transact_decision()
       |> case do
         {:ok, %{decision: decision}} -> {:ok, %{decision: decision}}
+        {:error, :candidate_not_found} = error -> error
         {:error, _step, reason, _changes} -> {:error, reason}
       end
     end
+  end
+
+  # Runs the decision transaction, translating a concurrent delete of the
+  # pending set (another admin already resolved it) from a raised
+  # `Ecto.StaleEntryError` into the same not-found result the callers handle.
+  defp transact_decision(multi) do
+    Repo.transaction(multi)
+  rescue
+    Ecto.StaleEntryError -> {:error, :candidate_not_found}
   end
 
   defp get_candidate_set_by_product(nil), do: nil

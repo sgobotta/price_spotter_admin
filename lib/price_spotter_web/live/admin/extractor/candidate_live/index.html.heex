@@ -1,0 +1,207 @@
+<.header>
+  <%= gettext("Match candidates") %>
+  <:subtitle>
+    <%= gettext("Review pending EAN matches and approve or dismiss them.") %>
+  </:subtitle>
+</.header>
+
+<form
+  id="candidate-filters"
+  phx-change="filter"
+  phx-submit="filter"
+  class="my-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+>
+  <.input
+    type="search"
+    id="candidate-filter-name"
+    name="name"
+    value={@filters["name"]}
+    label={gettext("Product name")}
+    phx-debounce="300"
+    autocomplete="off"
+  />
+  <.input
+    type="search"
+    id="candidate-filter-ean_candidate"
+    name="ean_candidate"
+    value={@filters["ean_candidate"]}
+    label={gettext("EAN candidate")}
+    phx-debounce="300"
+    autocomplete="off"
+  />
+  <.input
+    type="search"
+    id="candidate-filter-supplier"
+    name="supplier"
+    value={@filters["supplier"]}
+    label={gettext("Supplier")}
+    phx-debounce="300"
+    autocomplete="off"
+  />
+  <.input
+    type="search"
+    id="candidate-filter-category"
+    name="category"
+    value={@filters["category"]}
+    label={gettext("Category")}
+    phx-debounce="300"
+    autocomplete="off"
+  />
+</form>
+
+<div :if={any_filters?(@filters)} class="mb-4 flex justify-end">
+  <.button
+    id="clear-filters"
+    type="button"
+    phx-click="clear_filters"
+    class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+  >
+    <%= gettext("Clear filters") %>
+  </.button>
+</div>
+
+<.list_group id="candidate-sets" items={@candidate_sets} class="my-4">
+  <:empty_state>
+    <.no_results_found label={gettext("No pending match candidates.")} />
+  </:empty_state>
+  <:row :let={set}>
+    <.expandable_list_row
+      id={"candidate-sets-#{set.id}"}
+      expanded={ExpandableList.expanded?(@expanded, set.id)}
+      toggle_key={set.id}
+      content_class="flex flex-col gap-3"
+    >
+      <:leading>
+        <.entity_avatar label={set.product_name} />
+      </:leading>
+      <:title><%= set.product_name %></:title>
+      <:subtitle>
+        <%= set.category || gettext("Uncategorized") %>
+      </:subtitle>
+      <:meta>
+        <span class="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+          <%= ngettext(
+            "%{count} candidate",
+            "%{count} candidates",
+            length(set.candidates)
+          ) %>
+        </span>
+      </:meta>
+      <:content>
+        <div
+          :for={candidate <- set.candidates}
+          id={"candidate-#{candidate.id}"}
+          class="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex min-w-0 items-start gap-3">
+              <img
+                :if={safe_url(candidate.image_url)}
+                src={safe_url(candidate.image_url)}
+                alt={candidate.name}
+                class="h-12 w-12 shrink-0 rounded-md object-cover"
+                loading="lazy"
+              />
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                  <%= candidate.name %>
+                </p>
+                <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                  <.render_ean has_code={true} ean={candidate.ean_candidate} />
+                  <span class="font-medium text-zinc-700 dark:text-zinc-300">
+                    <%= candidate.supplier %>
+                  </span>
+                  <span><%= format_price(candidate.price) %></span>
+                  <span>
+                    <%= format_fetched_at(candidate.last_fetched_at) %>
+                  </span>
+                </div>
+                <a
+                  :if={safe_url(candidate.url)}
+                  href={safe_url(candidate.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-1 inline-flex items-center gap-1 text-xs text-brand hover:underline"
+                >
+                  <.icon name="hero-arrow-top-right-on-square" class="h-3 w-3" />
+                  <%= gettext("View source") %>
+                </a>
+              </div>
+            </div>
+
+            <div class="flex shrink-0 items-center gap-2 self-end sm:self-start">
+              <.button
+                id={"approve-#{candidate.id}"}
+                type="button"
+                phx-click="prompt_decision"
+                phx-value-set_id={set.id}
+                phx-value-ean={candidate.ean_candidate}
+                phx-value-decision="approved"
+                class="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/70"
+              >
+                <%= gettext("Approve") %>
+              </.button>
+              <.button
+                id={"disapprove-#{candidate.id}"}
+                type="button"
+                phx-click="prompt_decision"
+                phx-value-set_id={set.id}
+                phx-value-ean={candidate.ean_candidate}
+                phx-value-decision="disapproved"
+                class="bg-rose-100 text-rose-800 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/70"
+              >
+                <%= gettext("Disapprove") %>
+              </.button>
+            </div>
+          </div>
+        </div>
+      </:content>
+    </.expandable_list_row>
+  </:row>
+</.list_group>
+
+<.modal
+  :if={@decision_confirm}
+  id="decision-confirm-modal"
+  show
+  on_cancel={JS.push("cancel_decision")}
+>
+  <div class="space-y-6">
+    <.header>
+      <%= if @decision_confirm.decision == "approved" do %>
+        <%= gettext("Approve candidate") %>
+      <% else %>
+        <%= gettext("Disapprove candidate") %>
+      <% end %>
+    </.header>
+
+    <div class="text-center">
+      <p class="text-sm text-zinc-600 dark:text-zinc-400">
+        <%= if @decision_confirm.decision == "approved" do %>
+          <%= gettext(
+            "EAN %{ean} will be applied to \"%{product}\" and this review will be removed.",
+            ean: @decision_confirm.ean,
+            product: @decision_confirm.product_name
+          ) %>
+        <% else %>
+          <%= gettext(
+            "EAN %{ean} from %{supplier} will be dismissed and this review will be removed.",
+            ean: @decision_confirm.ean,
+            supplier: @decision_confirm.supplier
+          ) %>
+        <% end %>
+      </p>
+    </div>
+
+    <div class="flex items-center justify-end">
+      <.button
+        id="confirm-decision"
+        type="button"
+        phx-click="confirm_decision"
+        class="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+      >
+        <%= gettext("Confirm") %>
+      </.button>
+    </div>
+  </div>
+</.modal>
